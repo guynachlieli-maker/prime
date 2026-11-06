@@ -34,13 +34,12 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
   );
   const last = path.length - 1;
   const marks = useMemo(() => {
-    const m = [
-      { w: 4, label: 'חודש' },
-      { w: 13, label: '3 חודשים' },
-      { w: 26, label: 'חצי שנה' },
-      { w: 52, label: 'שנה' },
-    ].filter((x) => x.w < last - 1);
-    m.push({ w: last, label: path[last]?.reached ? 'ביעד' : `${Math.round(last / 4.3)} חודשים` });
+    const label = (w: number) => (w === 1 ? 'שבוע' : w === 4 ? 'חודש' : w < 8 ? `${w} שבועות` : w === 13 ? '3 חודשים' : w === 26 ? 'חצי שנה' : w === 52 ? 'שנה' : `${Math.round(w / 4.3)} חודשים`);
+    let steps = [4, 13, 26, 52].filter((w) => w < last - 1);
+    // always show at least two different points on the way to the goal
+    if (steps.length < 2 && last >= 3) steps = [...new Set([Math.max(1, Math.round(last / 3)), Math.max(2, Math.round((last * 2) / 3))])].filter((w) => w < last);
+    const m = steps.map((w) => ({ w, label: label(w) }));
+    m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(last) });
     return m;
   }, [last, path]);
 

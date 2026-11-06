@@ -103,6 +103,7 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
           options={[
             { value: 'fat_loss', label: 'ירידה בשומן' },
             { value: 'muscle_gain', label: 'בניית שריר' },
+            { value: 'bulk', label: 'מסה' },
             { value: 'recomp', label: 'ריקומפוזיציה' },
             { value: 'performance', label: 'ביצועי ספורט' },
             { value: 'health', label: 'בריאות כללית' },

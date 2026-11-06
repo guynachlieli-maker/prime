@@ -9,7 +9,7 @@ import { SLOT_LABEL, alternativesFor, describeAmount, shoppingList } from '../en
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
-export function Menu() {
+export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
   const s = useStore((x) => x);
   const dates = useMemo(
     () =>
@@ -37,9 +37,16 @@ export function Menu() {
     <div className="screen">
       <div className="row between">
         <h1>תפריט</h1>
-        <Button kind="secondary" onClick={() => setShop(true)}>
-          רשימת קניות
-        </Button>
+        <div className="row">
+          {go && (
+            <Button kind="ghost" onClick={() => go('programs')}>
+              תוכניות ומאמרים
+            </Button>
+          )}
+          <Button kind="secondary" onClick={() => setShop(true)}>
+            רשימת קניות
+          </Button>
+        </div>
       </div>
       <div className="days" role="tablist" aria-label="בחירת יום">
         {dates.map((d) => (

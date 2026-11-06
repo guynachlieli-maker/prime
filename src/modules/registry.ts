@@ -2,7 +2,7 @@ import type { ReminderKind } from '../engine/reminders';
 
 /**
  * Feature modules. PRIME ships the nutrition module; the training module is defined here so it can
- * be switched on later without changing the store shape, the reminders engine or navigation.
+ * be switched on and off without changing the store shape. Training lives in src/training.
  *
  * To launch training:
  *  1. Fill src/modules/training (plans data + screens) using the types in ./training/types.ts.
@@ -20,7 +20,7 @@ export interface AppModule {
 
 export const MODULES: AppModule[] = [
   { id: 'nutrition', title: 'תזונה', available: true, reminderKinds: ['meal', 'weigh', 'water', 'motivation', 'custom'] },
-  { id: 'training', title: 'אימונים', available: false, reminderKinds: ['training'] },
+  { id: 'training', title: 'אימונים', available: true, reminderKinds: ['training'] },
 ];
 
 export const isAvailable = (id: AppModule['id']) => MODULES.find((m) => m.id === id)?.available ?? false;

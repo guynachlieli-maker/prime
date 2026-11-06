@@ -1,5 +1,5 @@
 export type Sex = 'male' | 'female';
-export type Goal = 'fat_loss' | 'muscle_gain' | 'recomp' | 'performance' | 'health';
+export type Goal = 'fat_loss' | 'muscle_gain' | 'bulk' | 'recomp' | 'performance' | 'health';
 export type Pace = 'gentle' | 'balanced' | 'fast';
 export type ActivityLevel = 'sedentary' | 'light' | 'moderate' | 'very' | 'extra';
 export type BodyFatSource = 'unknown' | 'estimate' | 'navy' | 'bia' | 'dexa';

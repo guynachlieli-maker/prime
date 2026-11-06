@@ -11,7 +11,8 @@ export const MAIN_TOUR: TourStep[] = [
   { selector: '[data-tour="macros"]', title: 'שלושה פסים', text: 'חלבון, פחמימה ושומן. ליד כל אחד יש כפתור "למה?" שמסביר מאיפה הגיע המספר.' },
   { selector: '.tab-camera', title: 'כפתור המצלמה', text: 'מכל מסך: צילום, ברקוד, חיפוש או הקלדה במילים.' },
   { selector: '[data-tour="habits"]', title: 'מים ושקילה', text: 'לחיצה אחת. שקילה אחת בבוקר מספיקה.' },
-  { selector: '.tab-progress', title: 'התקדמות', text: 'הגוף התלת־ממדי, מגמת המשקל והדוח השבועי.' },
+  { selector: '.tab-training', title: 'אימון', text: 'תוכנית אימונים אישית לחדר הכושר ולאירובי, מאגר תרגילים עם הסבר ומפת שרירים.' },
+  { selector: '.tab-progress', title: 'התקדמות', text: 'הגוף שלך לאורך הזמן, מגמת המשקל והדוח השבועי.' },
 ];
 
 export function Tour({ steps, onDone, onFinishAction }: { steps: TourStep[]; onDone: () => void; onFinishAction?: () => void }) {

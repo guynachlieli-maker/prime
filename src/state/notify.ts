@@ -31,6 +31,15 @@ export async function askNotifyPermission(): Promise<NotifyStatus> {
 
 export function remindersOf(s: State): Reminder[] {
   const list = s.reminders ?? defaultReminders(s.profile?.mealsPerDay ?? 4, s.learning);
+  const plan = s.training?.plan;
+  const withTraining =
+    plan && !list.some((r) => r.kind === 'training')
+      ? [...list, { id: 'training', kind: 'training' as const, title: 'הגיע הזמן לאימון', body: 'התוכנית של היום מחכה לך באפליקציה.', time: plan.prefs.time, days: plan.days.map((d) => d.weekday), enabled: true, module: 'training' as const }]
+      : list;
+  return withSupps(s, withTraining);
+}
+
+function withSupps(s: State, list: Reminder[]): Reminder[] {
   const supps = s.profile?.supplements ?? [];
   if (!supps.length || list.some((r) => r.id.startsWith('supp-'))) return list;
   // one reminder per time of day for the supplements the user takes

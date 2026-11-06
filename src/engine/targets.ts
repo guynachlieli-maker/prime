@@ -23,6 +23,7 @@ export function katchMcArdle(weightKg: number, bodyFatPct: number): number {
 
 const PACE_LOSS_PCT: Record<Pace, number> = { gentle: 0.25, balanced: 0.5, fast: 0.75 };
 const PACE_GAIN_KCAL: Record<Pace, number> = { gentle: 150, balanced: 250, fast: 350 };
+const PACE_BULK_KCAL: Record<Pace, number> = { gentle: 300, balanced: 400, fast: 500 };
 
 export function computeBmr(p: Profile): { value: number; formula: 'mifflin' | 'katch' } {
   const reliableBf = p.bodyFatPct !== undefined && (p.bodyFatSource === 'dexa' || p.bodyFatSource === 'bia');
@@ -45,7 +46,7 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
   if (goal === 'health') goal = b >= 25 ? 'fat_loss' : 'performance';
   const pace = p.pace;
   const plan = planPace(p, opts.now);
-  if (plan && p.goal !== 'performance') goal = plan.weeklyKg < 0 ? 'fat_loss' : 'muscle_gain';
+  if (plan && p.goal !== 'performance') goal = plan.weeklyKg < 0 ? 'fat_loss' : p.goal === 'bulk' ? 'bulk' : 'muscle_gain';
 
   let weeklyChange = 0; // kg / week (negative = loss)
   let kcal = tdeeV;
@@ -57,7 +58,7 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
     weeklyChange = plan.weeklyKg;
     kcal = tdeeV + (weeklyChange * KCAL_PER_KG_TISSUE) / 7;
     goalWhy = plan.insight;
-  } else if (plan && goal === 'muscle_gain') {
+  } else if (plan && (goal === 'muscle_gain' || goal === 'bulk')) {
     weeklyChange = plan.weeklyKg;
     kcal = tdeeV + (weeklyChange * KCAL_PER_KG_TISSUE) / 7;
     goalWhy = plan.insight;
@@ -72,6 +73,11 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
     kcal = tdeeV + surplus;
     weeklyChange = (surplus * 7) / KCAL_PER_KG_TISSUE;
     goalWhy = `עודף קטן של כ-${surplus} קק"ל ביום. עודף גדול יותר בדרך כלל מוסיף בעיקר שומן ולא שריר.`;
+  } else if (goal === 'bulk') {
+    const surplus = PACE_BULK_KCAL[pace];
+    kcal = tdeeV + surplus;
+    weeklyChange = (surplus * 7) / KCAL_PER_KG_TISSUE;
+    goalWhy = `מסה: עודף של כ-${surplus} קק"ל ביום. מספיק כדי לבנות שריר בקצב טוב, ועדיין לא מוסיף שומן מיותר. בסוף תקופת המסה מתוכנן חיטוב קצר.`;
   } else if (goal === 'recomp') {
     kcal = tdeeV * 0.95;
     weeklyChange = ((kcal - tdeeV) * 7) / KCAL_PER_KG_TISSUE;
@@ -92,7 +98,7 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
 
   // Protein (ISSN 1.4-2.0 g/kg; higher in a deficit with resistance training)
   let gPerKg =
-    goal === 'fat_loss' ? (p.strengthTraining ? 2.0 : 1.6) : goal === 'muscle_gain' ? 1.8 : goal === 'recomp' ? 2.0 : 1.6;
+    goal === 'fat_loss' ? (p.strengthTraining ? 2.0 : 1.6) : goal === 'muscle_gain' || goal === 'bulk' ? 1.8 : goal === 'recomp' ? 2.0 : 1.6;
   if (p.goal === 'health') gPerKg = 1.4;
   // For high BMI, scale protein to the weight at BMI 25 (reference weight), a common clinical convention.
   const refWeight = b > 30 ? 25 * (p.heightCm / 100) ** 2 : p.weightKg;

@@ -1,4 +1,5 @@
 import { SUPP_BY_ID } from '../data/supplements';
+import { CARDIO } from '../training/plan';
 import { useEffect, useState } from 'react';
 import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt } from '../ui/kit';
 import { WEEK_TIPS } from '../ui/Tour';
@@ -151,6 +152,48 @@ export function Today({ go }: { go: (t: Tab) => void }) {
               }}
             >
               אכלתי בדיוק את זה
+            </Button>
+          </div>
+        </Card>
+      )}
+
+      {s.training?.plan ? (
+        (() => {
+          const plan = s.training!.plan!;
+          const wd = new Date().getDay();
+          const d = plan.days.find((x) => x.weekday === wd);
+          const c = plan.cardioDays.find((x) => x.weekday === wd);
+          const done = s.training!.sessions.some((x) => x.date === date);
+          return (
+            <Card className="workout-today" title="האימון היום" action={<button className="link" onClick={() => go('training')}>לתוכנית</button>}>
+              {done ? (
+                <p className="muted">✓ האימון של היום נשמר. כל הכבוד.</p>
+              ) : d ? (
+                <div className="next-meal">
+                  <div>
+                    <strong>{d.title}</strong>
+                    <div className="muted">
+                      {d.exercises.length} תרגילים · כ-{d.estMinutes} דק׳
+                    </div>
+                  </div>
+                  <Button onClick={() => go('training')}>להתחיל</Button>
+                </div>
+              ) : c ? (
+                <p className="muted">
+                  יום אירובי: {c.block.minutes} דק׳ {CARDIO[c.block.type].name}.
+                </p>
+              ) : (
+                <p className="muted">יום מנוחה. הליכה קלה ומתיחות יעזרו להתאושש.</p>
+              )}
+            </Card>
+          );
+        })()
+      ) : (
+        <Card className="workout-today" title="מאמן אישי">
+          <div className="next-meal">
+            <p className="muted">תוכנית אימונים לחדר הכושר ולאירובי, לפי המטרה והזמן שלך.</p>
+            <Button kind="secondary" onClick={() => go('training')}>
+              לבנות תוכנית
             </Button>
           </div>
         </Card>

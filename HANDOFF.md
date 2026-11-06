@@ -122,3 +122,15 @@ tests/e2e/    בדיקות דפדפן
 - **Photo recognition**: the model returns the specific Hebrew name it saw plus look-alike alternatives; `resolveByName` (vision.ts) replaces a wrong closest match by looking that name up in the full national table. Each recognized item has a "לא זה?" button with alternatives and a search.
 - **Menus**: per-user variety seed (`startedAt`), recipes planned in the previous 3 days are avoided, wider candidate pool; falls back to tighter selection when a varied day can't hit the targets (accuracy test unchanged).
 - **Supplements** (`src/data/supplements.ts`): asked in onboarding (preferences) and editable in Profile. Protein powder / plant protein / gainer / protein bar / collagen are subtracted from the menu targets and logged from the Today checklist; all supplements get time-of-day reminders.
+
+## Update 6 — training half, premium gold design
+
+- **Design**: gold tokens (ivory/deep gold light, black/gold dark), Frank Ruhl Libre display headings with gold gradient and engraved depth, glass top bar and tab bar, gold primary buttons, screen enter + staggered card motion (respects reduced motion).
+- **Training** (`src/training/*`, `src/screens/Training.tsx`, tab "אימון"):
+  - Exercise library: free-exercise-db (public domain, 876 exercises, photos hot-linked from GitHub). All names hand-translated to Hebrew (`scripts/exercise-names-he-*.json`, built by `scripts/build-exercises.py` into `public/exercises.json`). 77 curated core exercises (`exercises.ts`) have full Hebrew steps, cues and common mistakes; the rest show the database's English instructions, labelled as such.
+  - Muscle map (`MuscleMap.tsx`): front/back SVG, primary gold, secondary light gold.
+  - Generator (`plan.ts`): goal (cut / muscle / bulk / strength / recomp / endurance / health), 2-6 days, 30-90 min, cardio share and type, equipment (gym / dumbbells / bands / bodyweight), level, limitations (knee / back / shoulder). Split by days, sets/reps/RIR/rest by goal, time budget fitting, cardio finishers + separate cardio days to meet the weekly target (WHO), deload every 5 weeks (8 for beginners), double progression (`suggestNext`), Epley e1RM.
+  - Long-term phases (`phasePlan`): bulk/lean gain → mini-cut → maintenance; high body fat cuts first. Plan screen offers to sync the nutrition goal with the current phase. New nutrition goal `bulk`.
+  - Session logging with rest timer, set check, swaps, exercise info; training progress (weekly sets per muscle, PRs, cardio minutes); 8 training articles with strong sources.
+- **Evidence**: only strong-evidence sources are shown/linked; moderate ones were removed from the UI.
+- **Journey**: always at least two distinct steps before the goal.

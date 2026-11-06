@@ -1,13 +1,14 @@
 import { useEffect, useState } from 'react';
 import { WhyProvider } from './ui/kit';
 import { Tour, MAIN_TOUR } from './ui/Tour';
-import { setState, useStore } from './state/store';
+import { recomputeTargets, setState, useStore } from './state/store';
 import { Onboarding } from './screens/Onboarding';
 import { Today } from './screens/Today';
 import { Menu } from './screens/Menu';
 import { Capture } from './screens/Capture';
 import { Progress } from './screens/Progress';
 import { Programs } from './screens/Programs';
+import { Training } from './screens/Training';
 import { Profile } from './screens/Profile';
 import { Devices } from './screens/Devices';
 import { Reminders } from './screens/Reminders';
@@ -16,14 +17,14 @@ import { restoreMyProducts } from './engine/barcode';
 
 restoreMyProducts();
 
-export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'devices' | 'reminders';
+export type Tab = 'today' | 'menu' | 'camera' | 'training' | 'progress' | 'programs' | 'profile' | 'devices' | 'reminders';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'today', label: 'היום', icon: 'M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z' },
   { id: 'menu', label: 'תפריט', icon: 'M4 6h16M4 12h16M4 18h10' },
   { id: 'camera', label: 'מצלמה', icon: 'M4 8h3l2-3h6l2 3h3v11H4zM12 17a4 4 0 100-8 4 4 0 000 8z' },
+  { id: 'training', label: 'אימון', icon: 'M3 10v4M6 7v10M18 7v10M21 10v4M6 12h12' },
   { id: 'progress', label: 'התקדמות', icon: 'M4 19l5-6 4 3 7-9' },
-  { id: 'programs', label: 'תכניות', icon: 'M5 4h11l3 3v13H5zM9 10h6M9 14h6' },
 ];
 
 function Icon({ d }: { d: string }) {
@@ -43,6 +44,11 @@ export function App() {
   const [tab, setTab] = useState<Tab>('today');
   const [tour, setTour] = useState(false);
   const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+
+  const missingTargets = useStore((s) => !!s.profile && !s.targets);
+  useEffect(() => {
+    if (missingTargets) recomputeTargets(); // repairs saved data that has a profile but no targets
+  }, [missingTargets]);
 
   useEffect(() => {
     if (!done) return;
@@ -92,12 +98,13 @@ export function App() {
             {photo ? <img src={photo} alt="" /> : name ? <span>{name.trim()[0]}</span> : <Icon d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0" />}
           </button>
         </header>
-        <main>
+        <main key={tab} className="view">
           {tab === 'today' && <Today go={go} />}
-          {tab === 'menu' && <Menu />}
+          {tab === 'menu' && <Menu go={go} />}
           {tab === 'camera' && <Capture go={go} />}
           {tab === 'progress' && <Progress />}
           {tab === 'programs' && <Programs />}
+          {tab === 'training' && <Training />}
           {tab === 'profile' && (
             <Profile
               go={go}

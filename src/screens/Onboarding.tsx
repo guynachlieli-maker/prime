@@ -171,7 +171,8 @@ export function Onboarding() {
             onChange={(goal) => up({ goal })}
             options={[
               { value: 'fat_loss', label: 'ירידה בשומן', desc: 'להוריד שומן ולשמור על השריר', icon: '↓' },
-              { value: 'muscle_gain', label: 'בניית שריר', desc: 'להוסיף מסה בעודף קטן', icon: '↑' },
+              { value: 'muscle_gain', label: 'בניית שריר', desc: 'מסה נקייה בעודף קטן', icon: '↑' },
+              { value: 'bulk', label: 'מסה', desc: 'עודף גדול יותר, ואחריו חיטוב קצר', icon: '⇈' },
               { value: 'recomp', label: 'ריקומפוזיציה', desc: 'פחות שומן ויותר שריר במקביל', icon: '⇅' },
               { value: 'performance', label: 'ביצועי ספורט', desc: 'דלק נכון לאימונים ולתחרויות', icon: '⚡' },
               { value: 'health', label: 'בריאות כללית', desc: 'אכילה מאוזנת ומשקל תקין', icon: '♥' },

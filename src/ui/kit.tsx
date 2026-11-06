@@ -50,7 +50,7 @@ export function WhyProvider({ children }: { children: ReactNode }) {
 }
 
 export function WhyContent({ why, sources }: { why: string; sources: string[] }) {
-  const list = getSources(sources);
+  const list = getSources(sources).filter((x) => x.level === 'strong'); // only strong evidence is shown and linked
   return (
     <>
       {why && <p className="why-text">{why}</p>}
@@ -60,7 +60,7 @@ export function WhyContent({ why, sources }: { why: string; sources: string[] })
           <ul className="sources">
             {list.map((s) => (
               <li key={s.id}>
-                <span className={`evidence ${s.level}`}>{s.level === 'strong' ? 'ראיות חזקות' : 'ראיות בינוניות'}</span>
+                <span className="evidence strong">ראיות חזקות</span>
                 <strong>{s.title}</strong>
                 <span className="cite" dir="ltr">
                   {s.url ? (

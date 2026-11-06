@@ -60,11 +60,11 @@ export function Programs() {
 
       <h2 className="section">ספריית ידע</h2>
       <div className="articles">
-        {ARTICLES.map((a) => (
+        {ARTICLES.filter((a) => a.level === 'strong').map((a) => (
           <button key={a.id} className="article" onClick={() => setArticle(a)}>
             <strong>{a.title}</strong>
             <span className="muted">
-              {a.minutes} דק׳ קריאה · <span className={`evidence ${a.level}`}>{a.level === 'strong' ? 'ראיות חזקות' : 'ראיות בינוניות'}</span>
+              {a.minutes} דק׳ קריאה · <span className="evidence strong">ראיות חזקות</span>
             </span>
           </button>
         ))}

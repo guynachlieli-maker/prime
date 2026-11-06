@@ -1,5 +1,5 @@
 import type { Reminder } from '../engine/reminders';
-import type { TrainingState } from '../modules/training/types';
+import type { TrainingState } from '../training/state';
 import { useSyncExternalStore } from 'react';
 import { computeTargets } from '../engine/targets';
 import type { Nutrients, Profile, Targets } from '../engine/types';
