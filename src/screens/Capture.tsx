@@ -1,18 +1,20 @@
-import { useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Banner, Button, Card, Empty, Segmented, fmt } from '../ui/kit';
-import { FOOD_BY_ID, nutrientsFor, searchFoods, sumNutrients, type Food } from '../data/foods';
-import { addLog, markHint, nowTime, setState, todayISO, useStore, uid, type LogItem, type LogMethod } from '../state/store';
+import { FOOD_BY_ID, loadFullDb, nutrientsFor, searchAll, sumNutrients, type Food } from '../data/foods';
+import { addLog, learn, markHint, nowTime, setState, todayISO, useStore, uid, type LogItem, type LogMethod } from '../state/store';
 import type { Recognition } from '../engine/vision';
 import { parseFoodText } from '../engine/textparse';
 import { SLOT_LABEL } from '../engine/menu';
+import { likelySlot, photoFactor, recordPhotoCorrection } from '../engine/learning';
 import type { Slot } from '../data/recipes';
 import type { Tab } from '../App';
 
-type Mode = 'photo' | 'search' | 'barcode' | 'text' | 'favorites';
+type Mode = 'photo' | 'barcode' | 'search' | 'text' | 'favorites';
+type BasketItem = LogItem & { conf?: 'high' | 'medium' | 'low' };
 
 const CONF_RANGE = { high: 0.1, medium: 0.2, low: 0.35 } as const;
 
-function defaultSlot(): Slot {
+function hourSlot(): Slot {
   const h = new Date().getHours();
   if (h < 11) return 'breakfast';
   if (h < 16) return 'lunch';
@@ -20,94 +22,170 @@ function defaultSlot(): Slot {
   return 'dinner';
 }
 
-/**
- * Verified barcode table. Empty by design: per the spec, barcodes come only from a verified
- * retailer/manufacturer partnership, never from crowd-sourced databases.
- */
-const VERIFIED_BARCODES: Record<string, { foodId: string; grams: number }> = {};
-
 type Speech = { lang: string; interimResults: boolean; start: () => void; onresult: (e: { results: { 0: { transcript: string } }[] }) => void; onerror: () => void; onend: () => void };
 
 export function Capture({ go }: { go: (t: Tab) => void }) {
   const s = useStore((x) => x);
   const [mode, setMode] = useState<Mode>('photo');
-  const [slot, setSlot] = useState<Slot>(defaultSlot);
-  const [basket, setBasket] = useState<(LogItem & { conf?: keyof typeof CONF_RANGE })[]>([]);
+  const [slot, setSlot] = useState<Slot>(() => likelySlot(s.learning) ?? hourSlot());
+  const [basket, setBasket] = useState<BasketItem[]>([]);
   const [method, setMethod] = useState<LogMethod>('search');
   const [photo, setPhoto] = useState<string | undefined>();
-  const [aiEstimate, setAiEstimate] = useState<ReturnType<typeof sumNutrients> | undefined>();
-  const [busy, setBusy] = useState(false);
+  const [estimateKcal, setEstimateKcal] = useState<number | null>(null);
+  const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
+  const [info, setInfo] = useState<string | null>(null);
   const [rec, setRec] = useState<Recognition | null>(null);
   const [q, setQ] = useState('');
+  const [fullReady, setFullReady] = useState(false);
   const [text, setText] = useState('');
   const [listening, setListening] = useState(false);
   const [code, setCode] = useState('');
+  const [missingCode, setMissingCode] = useState<string | null>(null);
+  const [scanning, setScanning] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
+  const labelRef = useRef<HTMLInputElement>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const stopScan = useRef<(() => void) | null>(null);
 
   const total = useMemo(() => sumNutrients(basket.map((i) => nutrientsFor(i.foodId, i.grams))), [basket]);
   const worstConf = basket.reduce<number>((m, i) => Math.max(m, i.conf ? CONF_RANGE[i.conf] : 0), 0);
+  const factor = photoFactor(s.learning);
 
-  const addFood = (f: Food, grams: number, conf?: keyof typeof CONF_RANGE) => setBasket((b) => [...b, { foodId: f.id, name: f.name, grams, conf }]);
+  useEffect(() => () => stopScan.current?.(), []);
+  useEffect(() => {
+    if (mode !== 'search' || fullReady) return;
+    loadFullDb()
+      .then(() => setFullReady(true))
+      .catch(() => setInfo('מאגר המזון המלא לא נטען. החיפוש כולל את 150 המזונות הנפוצים.'));
+  }, [mode, fullReady]);
 
+  const addFood = (f: Food, grams: number, conf?: BasketItem['conf']) => setBasket((b) => [...b, { foodId: f.id, name: f.name, grams: Math.round(grams), conf }]);
+  const reset = () => {
+    setErr(null);
+    setInfo(null);
+  };
+
+  /* ---------- photo ---------- */
   const onPhoto = async (file: File | undefined) => {
     if (!file) return;
-    setErr(null);
+    reset();
     setRec(null);
     setMethod('photo');
-    setBusy(true);
-    const { describeApiError, prepareImage, recognizeFood } = await import('../engine/vision');
+    setBusy('מכין את התמונה…');
     try {
+      const { prepareImage, recognizeFood, describeApiError, availableProvider } = await import('../engine/vision');
       const img = await prepareImage(file);
       setPhoto(img.thumb);
-      if (!s.settings.apiKey) {
-        setErr('זיהוי אוטומטי דורש חיבור לשירות הזיהוי (מפתח API בהגדרות). התמונה נשמרה, ואפשר לבחור את המנות מהרשימה.');
+      const provider = await availableProvider(s.settings.apiKey);
+      if (!provider) {
+        setErr('זיהוי אוטומטי לא זמין כאן. באפליקציה ב-claude.ai הזיהוי עובד אחרי אישור חד־פעמי. אפשר גם לחבר מפתח API בהגדרות. בינתיים, בחרו את המנות מהרשימה.');
         setMode('search');
         return;
       }
-      const r = await recognizeFood({ apiKey: s.settings.apiKey, imageBase64: img.base64, mediaType: img.mediaType });
-      setRec(r);
-      const items = r.items.map((i) => ({ foodId: i.foodId, name: FOOD_BY_ID[i.foodId].name, grams: Math.round(i.grams), conf: i.confidence }));
-      setBasket(items);
-      setAiEstimate(sumNutrients(items.map((i) => nutrientsFor(i.foodId, i.grams))));
-      if (!items.length) setErr(r.notes || 'לא זיהינו אוכל בתמונה. נסו שוב או חפשו ידנית.');
-    } catch (e) {
-      setErr(describeApiError(e));
+      setBusy(provider === 'claude-app' ? 'Claude מזהה את הצלחת… (בפעם הראשונה תתבקשו לאשר)' : 'מזהה את הצלחת…');
+      try {
+        const r = await recognizeFood({ file: img.blob, apiKey: s.settings.apiKey });
+        setRec(r);
+        const items = r.items.map((i) => ({ foodId: i.foodId, name: FOOD_BY_ID[i.foodId].name, grams: Math.round(i.grams * factor), conf: i.confidence }));
+        setBasket(items);
+        setEstimateKcal(sumNutrients(items.map((i) => nutrientsFor(i.foodId, i.grams))).kcal);
+        if (!items.length) setErr(r.notes || 'לא זיהינו אוכל בתמונה. נסו שוב או חפשו ידנית.');
+      } catch (e) {
+        setErr(describeApiError(e));
+      }
+    } catch {
+      setErr('לא הצלחנו לפתוח את התמונה. נסו קובץ JPG או PNG.');
     } finally {
-      setBusy(false);
+      setBusy(null);
+    }
+  };
+
+  /* ---------- barcode ---------- */
+  const handleCode = async (c: string) => {
+    reset();
+    setCode(c);
+    setMissingCode(null);
+    setBusy('מחפש את המוצר…');
+    try {
+      const { lookupBarcode } = await import('../engine/barcode');
+      const f = await lookupBarcode(c);
+      if (f) {
+        setMethod('barcode');
+        const serving = f.units.find((u) => u.label === 'מנה לפי האריזה');
+        addFood(f, serving?.grams ?? 100);
+        setInfo(`נמצא: ${f.name}. הערכים מ-Open Food Facts (מאגר קהילתי). בדקו אותם מול התווית.`);
+      } else {
+        setMissingCode(c);
+      }
+    } catch {
+      setErr('טבלת המוצרים לא נטענה. אפשר לצלם את התווית התזונתית.');
+      setMissingCode(c);
+    } finally {
+      setBusy(null);
+    }
+  };
+
+  const startLive = async () => {
+    reset();
+    if (!videoRef.current) return;
+    setScanning(true);
+    try {
+      const { startLiveScan } = await import('../engine/barcode');
+      stopScan.current = await startLiveScan(videoRef.current, (c) => {
+        stopScan.current?.();
+        stopScan.current = null;
+        setScanning(false);
+        navigator.vibrate?.(60);
+        handleCode(c);
+      });
+    } catch {
+      setScanning(false);
+      setErr('אין גישה למצלמה כאן. אפשר לצלם את הברקוד כתמונה או להקליד את המספר.');
     }
   };
 
   const onBarcodeImage = async (file: File | undefined) => {
     if (!file) return;
-    setErr(null);
-    const BD = (window as unknown as { BarcodeDetector?: new (o: { formats: string[] }) => { detect: (i: ImageBitmap) => Promise<{ rawValue: string }[]> } }).BarcodeDetector;
-    if (!BD) {
-      setErr('הדפדפן הזה לא יודע לקרוא ברקוד מתמונה. אפשר להקליד את המספר.');
-      return;
-    }
+    reset();
+    setBusy('קורא את הברקוד…');
+    const { scanImage } = await import('../engine/barcode');
+    const c = await scanImage(file);
+    setBusy(null);
+    if (c) handleCode(c);
+    else setErr('לא נמצא ברקוד בתמונה. נסו צילום קרוב וחד יותר, או הקלידו את המספר.');
+  };
+
+  const onLabel = async (file: File | undefined) => {
+    if (!file) return;
+    reset();
+    setBusy('קורא את התווית התזונתית…');
     try {
-      const codes = await new BD({ formats: ['ean_13', 'ean_8', 'upc_a', 'upc_e'] }).detect(await createImageBitmap(file));
-      if (!codes.length) setErr('לא נמצא ברקוד בתמונה. נסו צילום קרוב וחד יותר.');
-      else lookupBarcode(codes[0].rawValue);
-    } catch {
-      setErr('קריאת הברקוד נכשלה. אפשר להקליד את המספר.');
+      const { prepareImage, readNutritionLabel, labelLooksConsistent, describeApiError } = await import('../engine/vision');
+      const { foodFromLabel } = await import('../engine/barcode');
+      const img = await prepareImage(file);
+      try {
+        const r = await readNutritionLabel({ file: img.blob, apiKey: s.settings.apiKey });
+        const f = foodFromLabel(missingCode, r);
+        setMethod('barcode');
+        addFood(f, r.servingGrams ?? 100);
+        setMissingCode(null);
+        setInfo(labelLooksConsistent(r) ? `נקרא מהתווית: ${f.name}. בדקו שהמספרים נכונים.` : 'נקרא מהתווית, אבל הקלוריות לא מתיישבות עם החלבון, הפחמימה והשומן. בדקו את המספרים מול התווית.');
+      } catch (e) {
+        const msg = describeApiError(e);
+        setErr(msg === 'NO_PROVIDER' ? 'קריאת תווית דורשת את חיבור Claude (באפליקציה ב-claude.ai) או מפתח API בהגדרות.' : msg);
+      }
+    } finally {
+      setBusy(null);
     }
   };
 
-  const lookupBarcode = (c: string) => {
-    setCode(c);
-    const hit = VERIFIED_BARCODES[c];
-    if (hit) {
-      setMethod('barcode');
-      addFood(FOOD_BY_ID[hit.foodId], hit.grams);
-    } else setErr(`ברקוד ${c} עדיין לא במאגר המוצרים המאומת. המאגר יגיע משותפות עם רשתות ויצרנים. בינתיים, חפשו את המוצר ברשימה.`);
-  };
-
+  /* ---------- voice ---------- */
   const listen = () => {
-    const SR = (window as unknown as { SpeechRecognition?: new () => Speech; webkitSpeechRecognition?: new () => Speech }).SpeechRecognition ?? (window as unknown as { webkitSpeechRecognition?: new () => Speech }).webkitSpeechRecognition;
+    const w = window as unknown as { SpeechRecognition?: new () => Speech; webkitSpeechRecognition?: new () => Speech };
+    const SR = w.SpeechRecognition ?? w.webkitSpeechRecognition;
     if (!SR) {
       setErr('הדפדפן הזה לא תומך בהקלטה קולית. אפשר להקליד.');
       return;
@@ -123,17 +201,19 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   };
 
   const confirm = () => {
-    addLog({ date: todayISO(), time: nowTime(), slot, items: basket.map(({ foodId, name, grams }) => ({ foodId, name, grams })), method, nutrients: total, photo, aiEstimate });
+    addLog({ date: todayISO(), time: nowTime(), slot, items: basket.map(({ foodId, name, grams }) => ({ foodId, name, grams })), method, nutrients: total, photo, aiEstimate: estimateKcal ? { ...total, kcal: estimateKcal } : undefined });
+    if (method === 'photo' && estimateKcal) learn((l) => recordPhotoCorrection(l, estimateKcal / factor, total.kcal));
     markHint('first-log');
     setBasket([]);
     setPhoto(undefined);
-    setAiEstimate(undefined);
+    setEstimateKcal(null);
     setRec(null);
+    setInfo(null);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
 
-  const results = mode === 'search' ? searchFoods(q) : [];
+  const results = mode === 'search' ? searchAll(q, 20) : [];
 
   return (
     <div className="screen">
@@ -142,13 +222,15 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         label="דרך רישום"
         value={mode}
         onChange={(m) => {
+          stopScan.current?.();
+          setScanning(false);
           setMode(m);
-          setErr(null);
+          reset();
         }}
         options={[
           { value: 'photo', label: 'צילום' },
-          { value: 'search', label: 'חיפוש' },
           { value: 'barcode', label: 'ברקוד' },
+          { value: 'search', label: 'חיפוש' },
           { value: 'text', label: 'מילים' },
           { value: 'favorites', label: 'קבועות' },
         ]}
@@ -165,33 +247,41 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       </label>
 
       {saved && <Banner kind="info">נרשם. הטבעת במסך "היום" כבר מעודכנת.</Banner>}
+      {busy && (
+        <Banner kind="info">
+          <span className="spinner" aria-hidden="true" /> {busy}
+        </Banner>
+      )}
       {err && <Banner kind="warn">{err}</Banner>}
+      {info && <Banner kind="info">{info}</Banner>}
 
       {mode === 'photo' && (
         <Card>
           <div className="camera-box">
             {photo ? <img src={photo} alt="התמונה שצילמת" className="preview" /> : <div className="frame-guide">צלחת שלמה בתוך המסגרת · מלמעלה · באור טוב</div>}
             <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
-            <Button full onClick={() => fileRef.current?.click()} disabled={busy}>
-              {busy ? 'מזהה…' : photo ? 'לצלם שוב' : 'לצלם ארוחה'}
+            <Button full onClick={() => fileRef.current?.click()} disabled={!!busy}>
+              {photo ? 'לצלם שוב' : 'לצלם ארוחה'}
             </Button>
-            {!s.settings.apiKey && (
-              <p className="fineprint">
-                הזיהוי האוטומטי לא מחובר.{' '}
-                <button className="link" onClick={() => go('profile')}>
-                  לחיבור בהגדרות
-                </button>
-              </p>
-            )}
+            {factor !== 1 && <p className="fineprint">ההערכה מכוילת לפי התיקונים שלך ({factor > 1 ? '+' : ''}{Math.round((factor - 1) * 100)}%).</p>}
           </div>
           {rec?.notes && <p className="muted">{rec.notes}</p>}
           {rec?.clarifyingQuestion && (
             <Banner kind="info">
               <strong>שאלה אחת:</strong> {rec.clarifyingQuestion}
               <div className="row wrap" style={{ marginTop: 8 }}>
-                <Button kind="secondary" onClick={() => addFood(FOOD_BY_ID.olive_oil, 10, 'medium')}>
-                  כן, נוסף שמן (כף)
-                </Button>
+                {rec.clarifyingFoodId && (
+                  <Button
+                    kind="secondary"
+                    onClick={() => {
+                      const f = FOOD_BY_ID[rec.clarifyingFoodId!];
+                      addFood(f, f.per100g.kcal > 500 ? 10 : 50, 'medium');
+                      setRec({ ...rec, clarifyingQuestion: null });
+                    }}
+                  >
+                    כן, להוסיף {FOOD_BY_ID[rec.clarifyingFoodId]?.name}
+                  </Button>
+                )}
                 <Button kind="ghost" onClick={() => setRec({ ...rec, clarifyingQuestion: null })}>
                   לא
                 </Button>
@@ -201,30 +291,65 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         </Card>
       )}
 
+      {mode === 'barcode' && (
+        <Card>
+          <div className={`scanner ${scanning ? 'on' : ''}`}>
+            <video ref={videoRef} muted playsInline aria-label="תצוגת מצלמה לסריקת ברקוד" />
+            {scanning && <div className="scan-line" aria-hidden="true" />}
+            {!scanning && <div className="scan-idle">כוונו את המצלמה לברקוד שעל האריזה</div>}
+          </div>
+          <div className="row wrap" style={{ marginTop: 10 }}>
+            {!scanning ? (
+              <Button onClick={startLive} disabled={!!busy}>
+                סריקה במצלמה
+              </Button>
+            ) : (
+              <Button
+                kind="secondary"
+                onClick={() => {
+                  stopScan.current?.();
+                  setScanning(false);
+                }}
+              >
+                עצירה
+              </Button>
+            )}
+            <input ref={barcodeRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onBarcodeImage(e.target.files?.[0])} />
+            <Button kind="secondary" onClick={() => barcodeRef.current?.click()} disabled={!!busy}>
+              תמונה של ברקוד
+            </Button>
+          </div>
+          <div className="row" style={{ marginTop: 12 }}>
+            <input className="search" dir="ltr" inputMode="numeric" placeholder="או הקלידו את מספר הברקוד" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} aria-label="מספר ברקוד" />
+            <Button kind="secondary" disabled={code.length < 8} onClick={() => handleCode(code)}>
+              חיפוש
+            </Button>
+          </div>
+          {missingCode && (
+            <Banner kind="warn">
+              <strong>המוצר {missingCode} לא נמצא בטבלת המוצרים.</strong> צלמו את התווית התזונתית שעל האריזה, ונקרא ממנה את הערכים.
+              <input ref={labelRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onLabel(e.target.files?.[0])} />
+              <div className="row wrap" style={{ marginTop: 8 }}>
+                <Button onClick={() => labelRef.current?.click()}>צילום התווית</Button>
+                <Button kind="ghost" onClick={() => setMode('search')}>
+                  חיפוש ידני
+                </Button>
+              </div>
+            </Banner>
+          )}
+        </Card>
+      )}
+
       {mode === 'search' && (
         <Card>
-          <input className="search" placeholder="חפשו מאכל: חומוס, שניצל, יוגורט…" value={q} onChange={(e) => setQ(e.target.value)} autoFocus aria-label="חיפוש מאכל" />
+          <input className="search" placeholder="חפשו מאכל או מוצר: חומוס, קוטג׳, במבה…" value={q} onChange={(e) => setQ(e.target.value)} autoFocus aria-label="חיפוש מאכל" />
+          <p className="fineprint">{fullReady ? 'חיפוש בכל 4,500 המזונות של מאגר משרד הבריאות.' : 'טוען את מאגר משרד הבריאות…'}</p>
           <ul className="results">
             {results.map((f) => (
               <FoodRow key={f.id} food={f} onAdd={(g) => addFood(f, g)} />
             ))}
           </ul>
-        </Card>
-      )}
-
-      {mode === 'barcode' && (
-        <Card>
-          <p className="muted">ברקוד הוא הדרך המדויקת ביותר לרשום מוצר ארוז.</p>
-          <input ref={barcodeRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onBarcodeImage(e.target.files?.[0])} />
-          <Button full onClick={() => barcodeRef.current?.click()}>
-            לצלם ברקוד
-          </Button>
-          <div className="row" style={{ marginTop: 12 }}>
-            <input className="search" dir="ltr" inputMode="numeric" placeholder="או הקלידו מספר ברקוד" value={code} onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))} aria-label="מספר ברקוד" />
-            <Button kind="secondary" disabled={code.length < 8} onClick={() => lookupBarcode(code)}>
-              חיפוש
-            </Button>
-          </div>
+          {q && results.length === 0 && <Empty title="לא נמצא" text="נסו מילה אחרת, או סרקו את הברקוד של המוצר." />}
         </Card>
       )}
 
@@ -240,7 +365,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                 const items = parseFoodText(text);
                 if (!items.length) setErr('לא זיהינו מאכלים בטקסט. נסו לכתוב שם מאכל פשוט, או חפשו ברשימה.');
                 else {
-                  setErr(null);
+                  reset();
                   setMethod('voice');
                   items.forEach((i) => addFood(i.food, Math.round(i.grams), 'medium'));
                 }
@@ -274,7 +399,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                     >
                       להוסיף
                     </Button>
-                    <button className="icon-btn" aria-label="מחיקת ארוחה קבועה" onClick={() => setState((x) => ({ favorites: x.favorites.filter((y) => y.id !== f.id) }))}>
+                    <button className="icon-btn" aria-label={`מחיקת ${f.name}`} onClick={() => setState((x) => ({ favorites: x.favorites.filter((y) => y.id !== f.id) }))}>
                       ✕
                     </button>
                   </div>
@@ -290,6 +415,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           <ul className="basket-list">
             {basket.map((i, idx) => {
               const f = FOOD_BY_ID[i.foodId];
+              if (!f) return null;
               const n = nutrientsFor(i.foodId, i.grams);
               return (
                 <li key={idx}>
@@ -302,11 +428,12 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                   </div>
                   <div className="b-amount">
                     <input type="range" min={5} max={Math.max(600, i.grams * 2)} step={5} value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Number(e.target.value) } : x)))} aria-label={`כמות ${f.name} בגרמים`} />
-                    <span className="num">{i.grams} ג׳</span>
+                    <input className="qty" inputMode="numeric" dir="ltr" value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Math.max(0, Number(e.target.value) || 0) } : x)))} aria-label={`גרמים של ${f.name}`} />
+                    <span className="unit">ג׳</span>
                   </div>
                   <div className="muted">
                     {fmt(n.kcal)} קק"ל · {fmt(n.protein)} חלבון · {fmt(n.carbs)} פחמימה · {fmt(n.fat)} שומן
-                    {!f.verified && <span className="unverified"> · ערך לבדיקה</span>}
+                    <SourceTag food={f} />
                   </div>
                 </li>
               );
@@ -324,9 +451,11 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
               {fmt(total.protein)} ג׳ חלבון · {fmt(total.carbs)} ג׳ פחמימה · {fmt(total.fat)} ג׳ שומן
             </span>
           </div>
-          {worstConf > 0 && <p className="fineprint">הטווח מבטא את אי־הוודאות של הזיהוי מתמונה. כשמתקנים את הכמויות, ההערכה משתפרת.</p>}
-          <div className="row">
-            <Button onClick={confirm}>אישור ורישום</Button>
+          {worstConf > 0 && <p className="fineprint">הטווח מבטא את אי־הוודאות בזיהוי מתמונה. התיקונים שלך משפרים את ההערכות הבאות.</p>}
+          <div className="row wrap">
+            <Button onClick={confirm} disabled={total.kcal <= 0}>
+              אישור ורישום
+            </Button>
             <Button
               kind="ghost"
               onClick={() => {
@@ -339,9 +468,22 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           </div>
         </Card>
       )}
-      {s.settings.apiKey && s.settings.trainingConsent === false && mode === 'photo' && <p className="fineprint">התמונות לא נשמרות לשיפור המודל. אפשר לשנות בהגדרות.</p>}
+      {mode === 'photo' && !s.settings.apiKey && (
+        <p className="fineprint">
+          הזיהוי עובד באפליקציה ב-claude.ai אחרי אישור חד־פעמי.{' '}
+          <button className="link" onClick={() => go('profile')}>
+            חלופה: מפתח API בהגדרות
+          </button>
+        </p>
+      )}
     </div>
   );
+}
+
+function SourceTag({ food }: { food: Food }) {
+  if (food.source === 'moh') return <span className="src moh"> · משרד הבריאות{food.allergens.length === 0 && food.id.startsWith('moh:') ? ' · אלרגנים לא ידועים' : ''}</span>;
+  if (food.source === 'openfoodfacts') return <span className="src check"> · Open Food Facts · לבדוק מול התווית</span>;
+  return <span className="src check"> · מהתווית · לבדוק</span>;
 }
 
 function FoodRow({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }) {
@@ -351,14 +493,15 @@ function FoodRow({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }
   const n = nutrientsFor(food.id, grams);
   return (
     <li className="result">
-      <div>
+      <div className="result-main">
         <strong>{food.name}</strong>
         <div className="muted">
           {fmt(n.kcal)} קק"ל · {fmt(n.protein)} ג׳ חלבון
+          {food.officialName !== food.name && <span className="official"> · {food.officialName}</span>}
         </div>
       </div>
       <div className="row">
-        <input className="qty" inputMode="decimal" dir="ltr" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} aria-label="כמות" />
+        <input className="qty" inputMode="decimal" dir="ltr" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} aria-label={`כמות של ${food.name}`} />
         <select
           value={unit.label}
           onChange={(e) => {
@@ -371,11 +514,12 @@ function FoodRow({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }
           {food.units.map((u) => (
             <option key={u.label} value={u.label}>
               {u.label}
+              {u.grams > 1 ? ` (${u.grams} ג׳)` : ''}
             </option>
           ))}
         </select>
         <Button kind="secondary" disabled={grams <= 0} onClick={() => onAdd(Math.round(grams))}>
-          +
+          + הוספה
         </Button>
       </div>
     </li>

@@ -1,0 +1,5741 @@
+{
+"source": "מאגר התזונה הלאומי הישראלי, משרד הבריאות (data.gov.il, nutrition-database)",
+"retrieved": "2026-11-06",
+"foods": [
+{
+"id": "egg",
+"code": 1561,
+"name": "ביצה",
+"officialName": "ביצה שלמה בלי קליפה",
+"en": "Egg, whole, raw",
+"kcal": 143.0,
+"protein": 12.6,
+"fat": 9.5,
+"carbs": 0.7,
+"fiber": 0,
+"sugar": 0.4,
+"satFat": 3.13,
+"sodium": 142.0,
+"calcium": 56.0,
+"iron": 1.75,
+"b12": 0.89,
+"vitC": 0.0,
+"allergens": [
+"egg"
+],
+"diet": "vg",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+44.0
+],
+[
+"יחידה בינונית",
+49.5
+],
+[
+"יחידה גדולה",
+58.0
+],
+[
+"יחידה גדולה מאד",
+62.0
+]
+]
+},
+{
+"id": "egg_hard",
+"code": 1564,
+"name": "ביצה קשה",
+"officialName": "ביצה קשה שלמה, ללא קליפה, עם מלח",
+"en": "Egg, hard-boiled,wihout shell, added salt",
+"kcal": 154.0,
+"protein": 12.5,
+"fat": 10.6,
+"carbs": 1.1,
+"fiber": 0,
+"sugar": 1.1,
+"satFat": 3.25,
+"sodium": 278.0,
+"calcium": 50.0,
+"iron": 1.19,
+"b12": 1.11,
+"vitC": 0.0,
+"allergens": [
+"egg"
+],
+"diet": "vg",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה",
+50.0
+],
+[
+"יחידה קטנה",
+44.0
+],
+[
+"יחידה בינונית",
+49.5
+],
+[
+"יחידה גדולה",
+58.0
+],
+[
+"יחידה גדולה מאד",
+62.0
+]
+]
+},
+{
+"id": "omelette",
+"code": 1570,
+"name": "חביתה בשמן זית",
+"officialName": "ביצה או חביתה מטוגנת בשמן זית",
+"en": "Egg or omelet, fried in olive oil",
+"kcal": 194.0,
+"protein": 13.5,
+"fat": 14.8,
+"carbs": 0.8,
+"fiber": 0,
+"sugar": 0.4,
+"satFat": 3.99,
+"sodium": 518.4,
+"calcium": 60.5,
+"iron": 1.91,
+"b12": 0.96,
+"vitC": 0.0,
+"allergens": [
+"egg"
+],
+"diet": "vg",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+48.0
+],
+[
+"מנה גדולה",
+124.0
+]
+]
+},
+{
+"id": "chicken_breast",
+"code": 811,
+"name": "חזה עוף אפוי",
+"officialName": "בשר עוף, חזה אפוי בשמן זית",
+"en": "Chicken, breast, baked in olive oil",
+"kcal": 147.0,
+"protein": 24.4,
+"fat": 4.8,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 0.88,
+"sodium": 385.3,
+"calcium": 5.3,
+"iron": 0.37,
+"b12": 0.17,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+64.0
+],
+[
+"יחידה גדולה",
+164.0
+]
+]
+},
+{
+"id": "chicken_breast_grill",
+"code": 802,
+"name": "חזה עוף בגריל",
+"officialName": "בשר עוף, חזה בגריל, כולל רצועות, שישליק, מאמא עוף",
+"en": "Chicken, breast, including strips, shashlik, steaks, MamaOf",
+"kcal": 124.0,
+"protein": 23.0,
+"fat": 2.0,
+"carbs": 3.5,
+"fiber": 0,
+"sugar": 2.1,
+"satFat": 0.8,
+"sodium": 580.0,
+"calcium": 8.9,
+"iron": 1.47,
+"b12": null,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+20.0
+],
+[
+"יחידה בינונית",
+84.0
+],
+[
+"יחידה גדולה",
+120.0
+]
+]
+},
+{
+"id": "chicken_thigh",
+"code": 8186,
+"name": "ירך עוף צלויה (פרגית)",
+"officialName": "בשר עוף, ירך, בשר בלבד, מבושל, צלוי",
+"en": "Chicken, thigh, roasted, broiled, or baked, skin not eaten",
+"kcal": 173.0,
+"protein": 24.4,
+"fat": 7.9,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 2.32,
+"sodium": 449.0,
+"calcium": 9.0,
+"iron": 1.08,
+"b12": 0.4,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+44.0
+],
+[
+"יחידה בינונית",
+64.0
+],
+[
+"יחידה גדולה",
+102.0
+]
+]
+},
+{
+"id": "chicken_patties",
+"code": 9163,
+"name": "קציצות עוף אפויות",
+"officialName": "קציצות בשר עוף אפויות, ללא שמן",
+"en": "Chicken cutlets, baked, without oil",
+"kcal": 154.0,
+"protein": 17.3,
+"fat": 5.1,
+"carbs": 8.5,
+"fiber": 1.3,
+"sugar": 1.1,
+"satFat": 1.48,
+"sodium": 494.7,
+"calcium": 24.4,
+"iron": 0.97,
+"b12": 0.22,
+"vitC": 3.8,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+30.0
+],
+[
+"יחידה בינונית",
+60.0
+],
+[
+"יחידה גדולה",
+87.0
+]
+]
+},
+{
+"id": "turkey_breast",
+"code": 944,
+"name": "חזה הודו מבושל",
+"officialName": "בשר הודו, חזה, לבן, מבושל",
+"en": "Turkey, breast, stewed",
+"kcal": 108.0,
+"protein": 24.8,
+"fat": 1.0,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 0.3,
+"sodium": 264.0,
+"calcium": 7.4,
+"iron": 0.58,
+"b12": 0.32,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+79.0
+],
+[
+"מנה בינונית",
+175.0
+],
+[
+"מנה גדולה",
+239.0
+]
+]
+},
+{
+"id": "turkey_ground",
+"code": 1026,
+"name": "הודו טחון מבושל",
+"officialName": "בשר הודו, טחון, מבושל, טירת צבי, בלדי",
+"en": "Turkey, ground, cooked, Tirat Tzvi/Baladi",
+"kcal": 210.0,
+"protein": 22.0,
+"fat": 13.6,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 3.5,
+"sodium": 259.0,
+"calcium": 22.5,
+"iron": 1.22,
+"b12": 1.08,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"כף",
+25.0
+],
+[
+"כפית",
+10.0
+]
+]
+},
+{
+"id": "turkey_pastrami",
+"code": 1120,
+"name": "פסטרמה הודו 1.5%",
+"officialName": "נקניק, פסטרמה 1.5% שומן, בטעמים, עוף טוב",
+"en": "Pastrami, turkey, 1.5% fat, flavored, OfTov",
+"kcal": 90.0,
+"protein": 14.0,
+"fat": 1.5,
+"carbs": 5.0,
+"fiber": 0,
+"sugar": 5.0,
+"satFat": 0.3,
+"sodium": 720.0,
+"calcium": 10.7,
+"iron": 4.08,
+"b12": 0.23,
+"vitC": 7.9,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"פרוסה",
+20.0
+]
+]
+},
+{
+"id": "shawarma_turkey",
+"code": 998,
+"name": "שווארמה הודו",
+"officialName": "בשר הודו, שווארמה אמיתית, מאמא עוף",
+"en": "Turkey, shawarma, MamaOf",
+"kcal": 141.0,
+"protein": 24.0,
+"fat": 8.0,
+"carbs": 5.0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 2.4,
+"sodium": 800.0,
+"calcium": 6.9,
+"iron": 0.54,
+"b12": 0.3,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"כף",
+25.0
+],
+[
+"כפית",
+10.0
+],
+[
+"מנה קטנה",
+79.0
+],
+[
+"מנה בינונית",
+175.0
+],
+[
+"מנה גדולה",
+239.0
+]
+]
+},
+{
+"id": "beef_ground",
+"code": 1478,
+"name": "בקר טחון מבושל",
+"officialName": "בשר בקר, טחון, מבושל",
+"en": "Beef, ground, cooked",
+"kcal": 288.0,
+"protein": 24.0,
+"fat": 21.3,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 8.59,
+"sodium": 390.0,
+"calcium": 25.2,
+"iron": 2.71,
+"b12": 2.99,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"כף",
+25.0
+]
+]
+},
+{
+"id": "beef_steak",
+"code": 612,
+"name": "סטייק בקר",
+"officialName": "בשר בקר, סטייק, לא מבושל",
+"en": "Beef, steak, raw",
+"kcal": 134.0,
+"protein": 15.3,
+"fat": 8.1,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 2.9,
+"sodium": 382.0,
+"calcium": 12.4,
+"iron": 1.37,
+"b12": 1.33,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": []
+},
+{
+"id": "kebab_beef",
+"code": 667,
+"name": "קבב בקר",
+"officialName": "קבב, מבשר בקר ללא תוספת שמן",
+"en": "Beef, kabob, fat not added, homemade",
+"kcal": 153.0,
+"protein": 14.3,
+"fat": 9.4,
+"carbs": 2.7,
+"fiber": 0.4,
+"sugar": 0.9,
+"satFat": 3.75,
+"sodium": 404.1,
+"calcium": 12.5,
+"iron": 1.62,
+"b12": 1.23,
+"vitC": 3.9,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+54.0
+],
+[
+"יחידה גדולה",
+113.0
+]
+]
+},
+{
+"id": "chicken_liver",
+"code": 1053,
+"name": "כבד עוף מאודה",
+"officialName": "כבד עוף, מאודה",
+"en": "Chicken, liver, braised",
+"kcal": 166.0,
+"protein": 24.3,
+"fat": 6.5,
+"carbs": 0.9,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 2.04,
+"sodium": 398.0,
+"calcium": 11.0,
+"iron": 11.54,
+"b12": 16.71,
+"vitC": 27.7,
+"allergens": [],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה",
+24.0
+]
+]
+},
+{
+"id": "salmon",
+"code": 1298,
+"name": "סלמון אפוי",
+"officialName": "דג סלמון אפוי ללא תוספת שומן בבישול",
+"en": "Fish, salmon, baked, fat not added",
+"kcal": 164.0,
+"protein": 26.5,
+"fat": 5.7,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 1.05,
+"sodium": 363.9,
+"calcium": 9.2,
+"iron": 0.49,
+"b12": 4.56,
+"vitC": 0.0,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"פרוסה דקה",
+124.0
+],
+[
+"פרוסה בינונית",
+152.0
+],
+[
+"פרוסה עבה",
+242.0
+]
+]
+},
+{
+"id": "tilapia",
+"code": 1152,
+"name": "אמנון מבושל",
+"officialName": "דג אמנון-מושט, מבושל",
+"en": "Fish, tilapia, cooked",
+"kcal": 128.0,
+"protein": 26.1,
+"fat": 2.7,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 0.94,
+"sodium": 56.0,
+"calcium": 14.0,
+"iron": 0.69,
+"b12": 1.86,
+"vitC": 0.0,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+193.0
+],
+[
+"יחידה בינונית",
+351.0
+]
+]
+},
+{
+"id": "denis",
+"code": 9691,
+"name": "דניס מבושל",
+"officialName": "דג דניס-צ'יפורה, מבושל עם מלח",
+"en": "Fish, sea bream, cooked",
+"kcal": 166.0,
+"protein": 27.3,
+"fat": 6.4,
+"carbs": 0,
+"fiber": 0,
+"sugar": null,
+"satFat": 1.69,
+"sodium": 175.3,
+"calcium": 9.2,
+"iron": 0.65,
+"b12": 5.74,
+"vitC": null,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+286.0
+],
+[
+"יחידה בינונית",
+355.0
+]
+]
+},
+{
+"id": "cod",
+"code": 1206,
+"name": "בקלה מבושלת",
+"officialName": "דג בקלה מבושל ללא שמן",
+"en": "Fish, hake, cooked without oil",
+"kcal": 96.0,
+"protein": 21.1,
+"fat": 0.6,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 0.12,
+"sodium": 487.2,
+"calcium": 11.5,
+"iron": 0.18,
+"b12": 2.13,
+"vitC": 0.0,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+64.0
+],
+[
+"מנה בינונית",
+152.0
+],
+[
+"מנה גדולה",
+221.0
+]
+]
+},
+{
+"id": "tuna_water",
+"code": 1360,
+"name": "טונה במים",
+"officialName": "דג טונה, משומר במים",
+"en": "Fish, tuna, canned in water",
+"kcal": 86.0,
+"protein": 19.4,
+"fat": 1.0,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 0.21,
+"sodium": 247.0,
+"calcium": 17.0,
+"iron": 1.63,
+"b12": 2.55,
+"vitC": 0.0,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"כף",
+20.5
+],
+[
+"כפית",
+7.0
+],
+[
+"אריזה אישית",
+80.0
+],
+[
+"קופסה",
+130.0
+]
+]
+},
+{
+"id": "tofu",
+"code": 10141,
+"name": "טופו קשה",
+"officialName": "טופו במרקם קשה, משק ווילר",
+"en": "Tofu, firm texture, Weiler Farm",
+"kcal": 169.0,
+"protein": 17.1,
+"fat": 10.2,
+"carbs": 1.8,
+"fiber": 0.7,
+"sugar": 0.5,
+"satFat": 1.2,
+"sodium": 7.0,
+"calcium": 271.0,
+"iron": 2.83,
+"b12": 0.0,
+"vitC": 0.2,
+"allergens": [
+"soy"
+],
+"diet": "v",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"פרוסה דקה",
+13.0
+],
+[
+"פרוסה בינונית",
+30.0
+],
+[
+"פרוסה עבה",
+44.0
+],
+[
+"ריבוע/ קוביה",
+8.0
+]
+]
+},
+{
+"id": "edamame",
+"code": 8221,
+"name": "אדממה מבושל",
+"officialName": "פולי סויה, אדממה, קפוא, ללא תרמיל, מבושל",
+"en": "Edamame , frozen, prepared, without  pods",
+"kcal": 122.0,
+"protein": 10.9,
+"fat": 5.2,
+"carbs": 4.7,
+"fiber": 5.2,
+"sugar": 2.2,
+"satFat": 0.62,
+"sodium": 6.0,
+"calcium": 63.0,
+"iron": 2.27,
+"b12": null,
+"vitC": 6.1,
+"allergens": [
+"soy"
+],
+"diet": "v",
+"category": "legume",
+"role": "protein",
+"units": [
+[
+"כוס",
+155.0
+],
+[
+"כף",
+12.0
+]
+]
+},
+{
+"id": "protein_powder",
+"code": 8712,
+"name": "אבקת חלבון מי גבינה",
+"officialName": "תמ\"י, הדסה Whey, חלבון מי גבינה, אבקה",
+"en": "Medical food, Hadassa Whey, whey protein, powder",
+"kcal": 393.0,
+"protein": 75.0,
+"fat": 4.5,
+"carbs": 14.6,
+"fiber": 0,
+"sugar": null,
+"satFat": 2.7,
+"sodium": 255.0,
+"calcium": 412.0,
+"iron": null,
+"b12": null,
+"vitC": null,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "protein",
+"role": "protein",
+"units": [
+[
+"כף",
+13.4
+]
+]
+},
+{
+"id": "cottage5",
+"code": 494,
+"name": "קוטג' 5%",
+"officialName": "גבינת קוטג' 5%  שומן, תנובה",
+"en": "Cheese, cow milk, cottage, 5% fat, Tnuva",
+"kcal": 95.0,
+"protein": 11.0,
+"fat": 5.0,
+"carbs": 1.5,
+"fiber": 0,
+"sugar": 1.2,
+"satFat": 3.0,
+"sodium": 350.0,
+"calcium": 100.0,
+"iron": 0.06,
+"b12": 0.36,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+40.0
+],
+[
+"כפית",
+12.0
+],
+[
+"גביע",
+250.0
+]
+]
+},
+{
+"id": "white_cheese5",
+"code": 532,
+"name": "גבינה לבנה 5%",
+"officialName": "גבינה לבנה 5% שומן, תנובה",
+"en": "Cheese, cow milk, white, 5% fat, Tnuva",
+"kcal": 98.0,
+"protein": 9.0,
+"fat": 5.0,
+"carbs": 4.3,
+"fiber": 0,
+"sugar": 3.9,
+"satFat": 3.0,
+"sodium": 210.0,
+"calcium": 95.0,
+"iron": 0.07,
+"b12": 0.41,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+40.0
+],
+[
+"כפית",
+12.0
+],
+[
+"גביע",
+250.0
+],
+[
+"גביע קטן מאד",
+50.0
+]
+]
+},
+{
+"id": "bulgarian5",
+"code": 435,
+"name": "גבינה בולגרית 5%",
+"officialName": "גבינה בולגרית 5% שומן, מחלב בקר, גד",
+"en": "Cheese, cow milk, Bulgarian, 5% fat, including in brine, Gad",
+"kcal": 93.0,
+"protein": 10.0,
+"fat": 5.0,
+"carbs": 2.0,
+"fiber": 0,
+"sugar": 2.0,
+"satFat": 3.0,
+"sodium": 1200.0,
+"calcium": 220.0,
+"iron": 0.06,
+"b12": 0.36,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+16.0
+],
+[
+"גביע",
+300.0
+],
+[
+"שקית",
+250.0
+]
+]
+},
+{
+"id": "feta",
+"code": 8598,
+"name": "פטה 5%",
+"officialName": "גבינת פטה 5% שומן, מחלב כבשים, פיראוס",
+"en": "Cheese, feta  5% fat, sheep milk, Piraeus",
+"kcal": 122.0,
+"protein": 18.0,
+"fat": 5.0,
+"carbs": 1.3,
+"fiber": 0,
+"sugar": 1.0,
+"satFat": 3.0,
+"sodium": 1382.0,
+"calcium": 280.0,
+"iron": 0.09,
+"b12": 0.57,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+16.0
+],
+[
+"קופסה",
+250.0
+]
+]
+},
+{
+"id": "yellow_cheese",
+"code": 490,
+"name": "גבינה צהובה 23%",
+"officialName": "גבינה צהובה 23% שומן, טוסטי, תנובה, גד",
+"en": "Cheese, cow milk, yellow, 23% fat,Tnuva/Gad",
+"kcal": 296.0,
+"protein": 18.0,
+"fat": 23.0,
+"carbs": 4.0,
+"fiber": 0,
+"sugar": 1.9,
+"satFat": 13.8,
+"sodium": 1430.0,
+"calcium": 456.1,
+"iron": 0.4,
+"b12": 2.06,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "fat",
+"units": [
+[
+"פרוסה",
+25.0
+],
+[
+"אריזה",
+200.0
+]
+]
+},
+{
+"id": "yellow_cheese_light",
+"code": 8609,
+"name": "גבינה צהובה 15%",
+"officialName": "גבינה צהובה 15% שומן, עמק",
+"en": "Cheese, yellow, 15% fat, Emek, Tnuva",
+"kcal": 256.0,
+"protein": 30.0,
+"fat": 15.0,
+"carbs": 0.2,
+"fiber": 0,
+"sugar": 0.1,
+"satFat": 9.0,
+"sodium": 530.0,
+"calcium": 740.0,
+"iron": 0.13,
+"b12": 1.72,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"פרוסה",
+25.0
+],
+[
+"אריזה",
+200.0
+]
+]
+},
+{
+"id": "mozzarella",
+"code": 423,
+"name": "מוצרלה 22%",
+"officialName": "גבינת מוצרלה 22%  שומן, טרה",
+"en": "Cheese, cow milk, mozzarella, 22% fat, Tara",
+"kcal": 294.0,
+"protein": 24.0,
+"fat": 22.0,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 13.0,
+"sodium": 680.0,
+"calcium": 650.0,
+"iron": 0.19,
+"b12": 0.73,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "fat",
+"units": [
+[
+"כף",
+7.0
+],
+[
+"שקית",
+200.0
+]
+]
+},
+{
+"id": "ricotta",
+"code": 510,
+"name": "ריקוטה 9%",
+"officialName": "גבינת ריקוטה פרסקה 9% שומן, גד",
+"en": "Cheese, cow milk, ricotta/orda, 9% fat, Gad",
+"kcal": 129.0,
+"protein": 8.0,
+"fat": 9.0,
+"carbs": 4.0,
+"fiber": 0,
+"sugar": 0.2,
+"satFat": 6.0,
+"sodium": 50.0,
+"calcium": 500.0,
+"iron": 0.32,
+"b12": 0.21,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+30.0
+],
+[
+"קופסה",
+300.0
+]
+]
+},
+{
+"id": "yogurt3",
+"code": 62,
+"name": "יוגורט 3%",
+"officialName": "יוגורט 3% שומן תנובה",
+"en": "Yoghurt, cow milk, 3% fat, unflavored, Tnuva",
+"kcal": 65.0,
+"protein": 4.7,
+"fat": 3.0,
+"carbs": 4.7,
+"fiber": 0,
+"sugar": 4.7,
+"satFat": 1.9,
+"sodium": 28.0,
+"calcium": 145.0,
+"iron": 0.06,
+"b12": 0.43,
+"vitC": 0.6,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+20.0
+],
+[
+"כפית",
+8.0
+],
+[
+"גביע",
+150.0
+]
+]
+},
+{
+"id": "yogurt_pro",
+"code": 9707,
+"name": "יוגורט עשיר בחלבון",
+"officialName": "יוגורט, דנונה פרו, עשיר בחלבון, 2.9% שומן, שטראוס",
+"en": "Yoghurt, cow milk, protein-enriched, 2.9% fat, Danone Pro,Strauss",
+"kcal": 74.0,
+"protein": 8.0,
+"fat": 2.9,
+"carbs": 4.0,
+"fiber": 1.0,
+"sugar": 2.1,
+"satFat": 1.9,
+"sodium": 40.0,
+"calcium": 100.0,
+"iron": 0.07,
+"b12": 0.55,
+"vitC": 0.7,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"גביע",
+150.0
+]
+]
+},
+{
+"id": "yogurt0",
+"code": 56,
+"name": "יוגורט 0%",
+"officialName": "יוגורט 0% שומן, יופלה, טבעי, תנובה",
+"en": "Yoghurt, cow milk, 0% fat, unflavored, Tnuva",
+"kcal": 37.0,
+"protein": 5.5,
+"fat": 0,
+"carbs": 3.7,
+"fiber": 1.0,
+"sugar": 3.7,
+"satFat": 0.0,
+"sodium": 55.0,
+"calcium": 130.0,
+"iron": 0.06,
+"b12": 0.42,
+"vitC": 0.6,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"כף",
+20.0
+],
+[
+"כפית",
+8.0
+],
+[
+"גביע",
+200.0
+]
+]
+},
+{
+"id": "leben",
+"code": 84,
+"name": "לבן 4.5%",
+"officialName": "לבן 4.5% שומן, אשל,תנובה",
+"en": "Leben, 4.5% fat, unflavored, Eshel, Tnuva",
+"kcal": 71.0,
+"protein": 3.3,
+"fat": 4.5,
+"carbs": 4.2,
+"fiber": 0,
+"sugar": 0.1,
+"satFat": 2.9,
+"sodium": 41.0,
+"calcium": 111.6,
+"iron": 0.05,
+"b12": 0.34,
+"vitC": 0.5,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "protein",
+"units": [
+[
+"גביע",
+200.0
+]
+]
+},
+{
+"id": "milk3",
+"code": 15,
+"name": "חלב 3%",
+"officialName": "חלב 3% שומן, תנובה, טרה, הרדוף, יטבתה",
+"en": "Milk, cow, 3% fat",
+"kcal": 60.0,
+"protein": 3.3,
+"fat": 3.0,
+"carbs": 4.6,
+"fiber": 0,
+"sugar": 4.6,
+"satFat": 1.8,
+"sodium": 50.0,
+"calcium": 100.0,
+"iron": 0.03,
+"b12": 0.45,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "drink",
+"role": "protein",
+"units": [
+[
+"כוס",
+240.0
+],
+[
+"כף",
+10.0
+],
+[
+"כפית",
+2.4
+],
+[
+"שקית",
+1000.0
+],
+[
+"קרטון",
+1500.0
+]
+]
+},
+{
+"id": "milk1",
+"code": 25,
+"name": "חלב 1%",
+"officialName": "חלב 1% שומן, תנובה, טרה, הרדוף, יטבתה",
+"en": "Milk, cow, 1% fat, Tnuva/Tara/Harduf/Yotvata",
+"kcal": 43.0,
+"protein": 3.3,
+"fat": 1.0,
+"carbs": 5.1,
+"fiber": 0,
+"sugar": 5.1,
+"satFat": 0.6,
+"sodium": 50.0,
+"calcium": 100.0,
+"iron": 0.03,
+"b12": 0.47,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "drink",
+"role": "protein",
+"units": [
+[
+"כוס",
+240.0
+],
+[
+"כף",
+10.0
+],
+[
+"כפית",
+2.4
+],
+[
+"שקית",
+1000.0
+],
+[
+"קרטון",
+1000.0
+]
+]
+},
+{
+"id": "soy_milk",
+"code": 1755,
+"name": "משקה סויה",
+"officialName": "משקה סויה מועשר Soya, תנובה",
+"en": "Soy drink, fortified,Tnuva",
+"kcal": 46.0,
+"protein": 3.3,
+"fat": 1.6,
+"carbs": 4.0,
+"fiber": 1.0,
+"sugar": 3.8,
+"satFat": 0.3,
+"sodium": 50.0,
+"calcium": 120.0,
+"iron": 0.58,
+"b12": 0.4,
+"vitC": 0.0,
+"allergens": [
+"soy"
+],
+"diet": "v",
+"category": "drink",
+"role": "protein",
+"units": [
+[
+"כוס",
+240.0
+],
+[
+"קרטון",
+1000.0
+]
+]
+},
+{
+"id": "cream_cheese5",
+"code": 8605,
+"name": "גבינת שמנת 5%",
+"officialName": "גבינת שמנת בטעם טבעי 5% שומן, תנובה",
+"en": "Cheese, cow milk, cream, 5% fat, Tnuva",
+"kcal": 110.0,
+"protein": 10.0,
+"fat": 5.0,
+"carbs": 4.5,
+"fiber": 3.5,
+"sugar": 3.2,
+"satFat": 3.0,
+"sodium": 300.0,
+"calcium": 120.0,
+"iron": 0.06,
+"b12": 0.4,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "dairy",
+"role": "fat",
+"units": [
+[
+"כף",
+40.0
+],
+[
+"קופסה",
+200.0
+]
+]
+},
+{
+"id": "butter",
+"code": 4388,
+"name": "חמאה",
+"officialName": "חמאה, תנובה, טרה",
+"en": "Butter, Tnuva/Tara",
+"kcal": 742.0,
+"protein": 0.5,
+"fat": 82.0,
+"carbs": 0.5,
+"fiber": 0,
+"sugar": 0.5,
+"satFat": 49.0,
+"sodium": 10.0,
+"calcium": 26.4,
+"iron": 0.0,
+"b12": 0.19,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כף",
+14.0
+],
+[
+"כפית",
+5.0
+],
+[
+"חבילה",
+200.0
+],
+[
+"אריזה אישית",
+10.0
+],
+[
+"אריזה/שקית קטנה",
+100.0
+]
+]
+},
+{
+"id": "bread_whole",
+"code": 1995,
+"name": "לחם מחיטה מלאה",
+"officialName": "לחם מחיטה מלאה, אנגל, לחם חי",
+"en": "Bread, whole wheat, Angel",
+"kcal": 247.0,
+"protein": 12.3,
+"fat": 8.8,
+"carbs": 29.6,
+"fiber": 8.4,
+"sugar": 1.6,
+"satFat": 3.2,
+"sodium": 217.0,
+"calcium": 25.7,
+"iron": 2.41,
+"b12": null,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"פרוסה דקה",
+24.0
+],
+[
+"פרוסה בינונית",
+32.0
+],
+[
+"פרוסה עבה",
+42.0
+],
+[
+"חבילה",
+500.0
+]
+]
+},
+{
+"id": "bread_rye",
+"code": 2035,
+"name": "לחם שיפון",
+"officialName": "לחם שיפון 60%, ברמן, לחם הארץ",
+"en": "Bread, rye (60%), Berman",
+"kcal": 213.0,
+"protein": 9.6,
+"fat": 1.5,
+"carbs": 36.4,
+"fiber": 7.5,
+"sugar": 2.2,
+"satFat": 0.24,
+"sodium": 382.0,
+"calcium": 27.2,
+"iron": 2.11,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"אריזה",
+500.0
+]
+]
+},
+{
+"id": "bread_light",
+"code": 8880,
+"name": "לחם קל מלא",
+"officialName": "לחם קל, קמח מלא, צרפתי, אנג'ל",
+"en": "Bread, French style, whole wheat, energy-reduced, Angel",
+"kcal": 179.0,
+"protein": 14.0,
+"fat": 3.4,
+"carbs": 23.0,
+"fiber": 12.0,
+"sugar": 0.2,
+"satFat": 0.6,
+"sodium": 425.0,
+"calcium": 39.7,
+"iron": 2.14,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"פרוסה",
+20.0
+],
+[
+"אריזה",
+500.0
+]
+]
+},
+{
+"id": "bread_white",
+"code": 1919,
+"name": "לחם לבן",
+"officialName": "לחם לבן, ברמן, אנג'ל, דוידוביץ, אילת",
+"en": "Bread, white, Angel/Berman/Davidowitz/Eilat",
+"kcal": 264.0,
+"protein": 8.3,
+"fat": 1.7,
+"carbs": 53.6,
+"fiber": 1.6,
+"sugar": 1.1,
+"satFat": 0.42,
+"sodium": 450.0,
+"calcium": 14.7,
+"iron": 0.99,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"פרוסה דקה",
+28.0
+],
+[
+"פרוסה בינונית",
+34.0
+],
+[
+"פרוסה עבה",
+48.0
+],
+[
+"אריזה",
+750.0
+]
+]
+},
+{
+"id": "challah",
+"code": 1965,
+"name": "חלה",
+"officialName": "חלה ביתית עם שמן סויה",
+"en": "Bread, challah, with soy oil, homemade",
+"kcal": 310.0,
+"protein": 9.2,
+"fat": 6.5,
+"carbs": 50.7,
+"fiber": 2.4,
+"sugar": 5.9,
+"satFat": 1.35,
+"sodium": 386.5,
+"calcium": 21.9,
+"iron": 1.05,
+"b12": 0.16,
+"vitC": 0.0,
+"allergens": [
+"gluten",
+"egg"
+],
+"diet": "vg",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"פרוסה דקה",
+30.0
+],
+[
+"פרוסה בינונית",
+44.0
+],
+[
+"פרוסה עבה",
+54.0
+]
+]
+},
+{
+"id": "pita",
+"code": 1955,
+"name": "פיתה",
+"officialName": "פיתה, דוידוביץ",
+"en": "Pita, Davidovich",
+"kcal": 242.0,
+"protein": 8.5,
+"fat": 0.8,
+"carbs": 50.2,
+"fiber": 1.9,
+"sugar": null,
+"satFat": 0.2,
+"sodium": 630.0,
+"calcium": 80.6,
+"iron": 1.31,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"יחידה",
+100.0
+]
+]
+},
+{
+"id": "tortilla_whole",
+"code": 2052,
+"name": "טורטיה מחיטה מלאה",
+"officialName": "טורטיה, מחיטה מלאה",
+"en": "Tortilla, whole wheat",
+"kcal": 310.0,
+"protein": 9.8,
+"fat": 9.8,
+"carbs": 36.1,
+"fiber": 9.8,
+"sugar": 2.4,
+"satFat": 4.88,
+"sodium": 512.0,
+"calcium": 244.0,
+"iron": 2.63,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"יחידה",
+35.0
+]
+]
+},
+{
+"id": "bagel",
+"code": 1980,
+"name": "בייגל",
+"officialName": "בייגל, אנג'ל",
+"en": "Bagel, Angel",
+"kcal": 220.0,
+"protein": 8.3,
+"fat": 1.1,
+"carbs": 45.0,
+"fiber": 2.3,
+"sugar": 6.1,
+"satFat": 0.2,
+"sodium": 215.0,
+"calcium": 19.4,
+"iron": 2.67,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"יחידה",
+85.0
+],
+[
+"יחידה גדולה",
+153.0
+]
+]
+},
+{
+"id": "rice_white",
+"code": 2721,
+"name": "אורז לבן מבושל",
+"officialName": "אורז לבן, מבושל, ללא תוספת שומן בבישול",
+"en": "Rice, white, cooked, fat not added",
+"kcal": 130.0,
+"protein": 2.7,
+"fat": 0.3,
+"carbs": 27.8,
+"fiber": 0.4,
+"sugar": 0.1,
+"satFat": 0.1,
+"sodium": 1.0,
+"calcium": 10.0,
+"iron": 0.2,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+158.0
+],
+[
+"כף",
+11.0
+],
+[
+"מנה קטנה",
+85.0
+],
+[
+"מנה בינונית",
+177.0
+],
+[
+"מנה גדולה",
+316.0
+]
+]
+},
+{
+"id": "rice_brown",
+"code": 2727,
+"name": "אורז מלא מבושל",
+"officialName": "אורז מלא, מבושל,רגיל/אינסטנט,ללא תוספת שומן בבישול",
+"en": "Rice, brown, regular, cooked, fat not added",
+"kcal": 110.0,
+"protein": 2.6,
+"fat": 0.9,
+"carbs": 21.0,
+"fiber": 1.8,
+"sugar": 0.4,
+"satFat": 0.18,
+"sodium": 301.0,
+"calcium": 10.0,
+"iron": 0.42,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+126.0
+],
+[
+"כף גדושה",
+12.0
+]
+]
+},
+{
+"id": "pasta",
+"code": 8552,
+"name": "פסטה מבושלת",
+"officialName": "אטריות/פסטה, חיטה, מבושלות, עם מלח, ללא תוספת שמן בבישול",
+"en": "Spaghetti, cooked, fat not added",
+"kcal": 157.0,
+"protein": 5.8,
+"fat": 0.9,
+"carbs": 28.9,
+"fiber": 1.8,
+"sugar": 0.6,
+"satFat": 0.17,
+"sodium": 232.0,
+"calcium": 7.0,
+"iron": 1.27,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"מנה קטנה",
+100.0
+],
+[
+"מנה בינונית",
+150.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "pasta_whole",
+"code": 8553,
+"name": "ספגטי מלא מבושל",
+"officialName": "ספגטי, מחיטה מלאה, מבושלות, ללא תוספת שומן בבישול",
+"en": "Spaghetti, cooked, whole wheat, fat not added",
+"kcal": 123.0,
+"protein": 5.3,
+"fat": 0.5,
+"carbs": 21.9,
+"fiber": 4.5,
+"sugar": 0.8,
+"satFat": 0.1,
+"sodium": 234.0,
+"calcium": 15.0,
+"iron": 1.06,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": []
+},
+{
+"id": "ptitim",
+"code": 2625,
+"name": "פתיתים מבושלים",
+"officialName": "פתיתים מבושלים ללא שמן",
+"en": "Noodles, small (ptitim), cooked, fat not added",
+"kcal": 155.0,
+"protein": 4.9,
+"fat": 0.6,
+"carbs": 31.6,
+"fiber": 1.4,
+"sugar": 0.2,
+"satFat": 0.08,
+"sodium": 230.7,
+"calcium": 12.6,
+"iron": 0.39,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+194.0
+],
+[
+"כף",
+21.0
+],
+[
+"כפית",
+7.0
+],
+[
+"מנה",
+194.0
+]
+]
+},
+{
+"id": "oats",
+"code": 8199,
+"name": "שיבולת שועל",
+"officialName": "שיבולת שועל, קוואקר, רגיל ואינסטנט, לא מבושל",
+"en": "Cereals, oats, regular and quick, not fortified, dry",
+"kcal": 379.0,
+"protein": 13.1,
+"fat": 6.5,
+"carbs": 57.6,
+"fiber": 10.1,
+"sugar": 1.0,
+"satFat": 1.11,
+"sodium": 6.0,
+"calcium": 52.0,
+"iron": 4.25,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+80.0
+],
+[
+"כף",
+8.0
+]
+]
+},
+{
+"id": "quinoa",
+"code": 2773,
+"name": "קינואה מבושלת",
+"officialName": "קינואה מבושלת ללא תוספת שומן",
+"en": "Quinoa, cooked, fat not added",
+"kcal": 140.0,
+"protein": 5.4,
+"fat": 2.3,
+"carbs": 21.7,
+"fiber": 2.7,
+"sugar": 0.0,
+"satFat": 0.27,
+"sodium": 66.3,
+"calcium": 23.9,
+"iron": 1.65,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+185.0
+],
+[
+"כף",
+14.0
+]
+]
+},
+{
+"id": "couscous",
+"code": 10127,
+"name": "קוסקוס מבושל",
+"officialName": "קוסקוס מבושל ללא שמן עם מלח",
+"en": "Couscous, whole wheat, cooked with salt, fat not added",
+"kcal": 175.0,
+"protein": 5.9,
+"fat": 0.3,
+"carbs": 33.7,
+"fiber": 2.3,
+"sugar": 0.0,
+"satFat": 0.05,
+"sodium": 318.6,
+"calcium": 16.6,
+"iron": 0.51,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+162.0
+],
+[
+"כף",
+14.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "couscous_whole",
+"code": 9783,
+"name": "קוסקוס מלא מבושל",
+"officialName": "קוסקוס מלא, מבושל עם שמן זית",
+"en": "Couscous, whole wheat, cooked with olive oil",
+"kcal": 128.0,
+"protein": 3.9,
+"fat": 1.6,
+"carbs": 25.4,
+"fiber": 3.2,
+"sugar": 0.0,
+"satFat": 0.14,
+"sodium": 207.3,
+"calcium": 14.4,
+"iron": 0.38,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+162.0
+],
+[
+"כף",
+14.0
+],
+[
+"כפית",
+6.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+]
+]
+},
+{
+"id": "bulgur_dry",
+"code": 8812,
+"name": "בורגול (יבש)",
+"officialName": "בורגול, יבש",
+"en": "Bulgur, uncooked",
+"kcal": 342.0,
+"protein": 12.3,
+"fat": 1.3,
+"carbs": 57.6,
+"fiber": 18.3,
+"sugar": 0.4,
+"satFat": 0.2,
+"sodium": 17.0,
+"calcium": 32.3,
+"iron": 2.27,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+140.0
+]
+]
+},
+{
+"id": "buckwheat",
+"code": 2668,
+"name": "כוסמת מבושלת",
+"officialName": "כוסמת, מבושלת, עם מלח, ללא תוספת שומן בבישול",
+"en": "Buckwheat groats, cooked, fat not added",
+"kcal": 92.0,
+"protein": 3.4,
+"fat": 0.6,
+"carbs": 17.2,
+"fiber": 2.7,
+"sugar": 0.9,
+"satFat": 0.13,
+"sodium": 150.0,
+"calcium": 7.0,
+"iron": 0.8,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+168.0
+],
+[
+"כף",
+14.0
+],
+[
+"כפית",
+5.0
+]
+]
+},
+{
+"id": "potato",
+"code": 3464,
+"name": "תפוח אדמה מבושל",
+"officialName": "תפוחי אדמה, מבושלים, עם קליפה, עם מלח, ללא תוספת שומן",
+"en": "Potatoes, boiled with peel, peel not eaten, fat not added",
+"kcal": 86.0,
+"protein": 1.9,
+"fat": 0.1,
+"carbs": 18.2,
+"fiber": 1.8,
+"sugar": 0.9,
+"satFat": 0.03,
+"sodium": 241.0,
+"calcium": 5.0,
+"iron": 0.31,
+"b12": 0.0,
+"vitC": 12.9,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "carb",
+"units": [
+[
+"מנה קטנה",
+70.0
+],
+[
+"מנה בינונית",
+228.0
+],
+[
+"מנה גדולה",
+304.0
+]
+]
+},
+{
+"id": "potato_baked",
+"code": 9260,
+"name": "תפוחי אדמה אפויים בשמן זית",
+"officialName": "תפוחי אדמה, אפויים בשמן זית עם קליפה",
+"en": "Potatoes, unpeeled, baked in olive oil",
+"kcal": 145.0,
+"protein": 2.8,
+"fat": 4.9,
+"carbs": 21.1,
+"fiber": 2.5,
+"sugar": 1.3,
+"satFat": 0.69,
+"sodium": 310.6,
+"calcium": 16.9,
+"iron": 1.24,
+"b12": 0.0,
+"vitC": 10.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "carb",
+"units": [
+[
+"מנה קטנה",
+70.0
+],
+[
+"מנה בינונית",
+228.0
+],
+[
+"מנה גדולה",
+304.0
+]
+]
+},
+{
+"id": "sweet_potato",
+"code": 3660,
+"name": "בטטה מבושלת",
+"officialName": "בטטה מבושלת, ללא קליפה, ללא תוספת שומן, עם מלח",
+"en": "Sweet potato, peeled, cooked, fat not added, salt added",
+"kcal": 76.0,
+"protein": 1.4,
+"fat": 0.1,
+"carbs": 15.1,
+"fiber": 2.5,
+"sugar": 5.7,
+"satFat": 0.03,
+"sodium": 272.0,
+"calcium": 27.0,
+"iron": 0.72,
+"b12": 0.0,
+"vitC": 12.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+50.0
+],
+[
+"יחידה בינונית",
+124.0
+],
+[
+"יחידה גדולה",
+288.0
+],
+[
+"כוס מעוך",
+205.0
+],
+[
+"כף",
+26.0
+]
+]
+},
+{
+"id": "corn",
+"code": 3787,
+"name": "תירס",
+"officialName": "תירס, טרי",
+"en": "Corn, raw",
+"kcal": 86.0,
+"protein": 3.3,
+"fat": 1.4,
+"carbs": 16.7,
+"fiber": 2.0,
+"sugar": 6.3,
+"satFat": 0.32,
+"sodium": 15.0,
+"calcium": 2.0,
+"iron": 0.52,
+"b12": 0.0,
+"vitC": 6.8,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "carb",
+"units": [
+[
+"כוס",
+81.0
+],
+[
+"כף",
+14.0
+]
+]
+},
+{
+"id": "granola",
+"code": 2849,
+"name": "גרנולה",
+"officialName": "דגני בוקר, גרנולה",
+"en": "Breakfast Cereal, granola, NFS",
+"kcal": 428.0,
+"protein": 11.2,
+"fat": 13.0,
+"carbs": 62.0,
+"fiber": 7.8,
+"sugar": 24.9,
+"satFat": 2.44,
+"sodium": 163.0,
+"calcium": 51.0,
+"iron": 3.87,
+"b12": 7.1,
+"vitC": 3.9,
+"allergens": [
+"gluten",
+"nuts"
+],
+"diet": "v",
+"category": "grain",
+"role": "carb",
+"units": [
+[
+"כוס",
+140.0
+],
+[
+"כף",
+8.0
+],
+[
+"מנה קטנה",
+30.0
+],
+[
+"מנה בינונית",
+60.0
+]
+]
+},
+{
+"id": "rice_cakes",
+"code": 2566,
+"name": "פריכיות אורז מלא",
+"officialName": "פריכיות אורז מלא, אסם",
+"en": "Rice cakes, brown rice, Osem",
+"kcal": 370.0,
+"protein": 8.1,
+"fat": 2.8,
+"carbs": 78.0,
+"fiber": 3.0,
+"sugar": 0.9,
+"satFat": 0.4,
+"sodium": 450.0,
+"calcium": 3.4,
+"iron": 1.51,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "snack",
+"role": "carb",
+"units": [
+[
+"יחידה",
+11.5
+],
+[
+"יחידה קטנה מאד",
+2.0
+],
+[
+"יחידה בינונית",
+5.5
+]
+]
+},
+{
+"id": "crispbread_rye",
+"code": 2561,
+"name": "פריכיות שיפון",
+"officialName": "פריכיות שיפון FINN CRISP",
+"en": "Rye cakes, Finn Crisp",
+"kcal": 360.0,
+"protein": 11.0,
+"fat": 2.4,
+"carbs": 60.0,
+"fiber": 17.0,
+"sugar": 2.9,
+"satFat": 0.5,
+"sodium": 600.0,
+"calcium": 38.7,
+"iron": 3.6,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "snack",
+"role": "carb",
+"units": [
+[
+"יחידה",
+6.0
+]
+]
+},
+{
+"id": "lentils",
+"code": 1669,
+"name": "עדשים מבושלות",
+"officialName": "עדשים יבשים, מבושלים עם מלח, ללא תוספת שומן בבישול",
+"en": "Lentils, dry, cooked, fat not added",
+"kcal": 115.0,
+"protein": 9.0,
+"fat": 0.4,
+"carbs": 12.1,
+"fiber": 7.9,
+"sugar": 1.8,
+"satFat": 0.05,
+"sodium": 233.0,
+"calcium": 19.0,
+"iron": 3.31,
+"b12": 0.0,
+"vitC": 1.5,
+"allergens": [],
+"diet": "v",
+"category": "legume",
+"role": "protein",
+"units": [
+[
+"כוס",
+180.0
+],
+[
+"כף",
+15.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "chickpeas",
+"code": 1653,
+"name": "גרגירי חומוס מבושלים",
+"officialName": "חומוס, גרגירים, מבושלים עם מלח",
+"en": "Chickpeas, dry, cooked, fat not added in cooking",
+"kcal": 180.0,
+"protein": 9.5,
+"fat": 3.0,
+"carbs": 21.4,
+"fiber": 8.6,
+"sugar": 5.3,
+"satFat": 0.31,
+"sodium": 243.0,
+"calcium": 48.0,
+"iron": 2.47,
+"b12": 0.0,
+"vitC": 1.4,
+"allergens": [],
+"diet": "v",
+"category": "legume",
+"role": "protein",
+"units": [
+[
+"כוס",
+170.0
+],
+[
+"כף",
+21.0
+],
+[
+"כף שטוחה",
+12.0
+],
+[
+"כף גדושה",
+22.0
+],
+[
+"כפית",
+7.0
+]
+]
+},
+{
+"id": "white_beans",
+"code": 8306,
+"name": "שעועית לבנה מבושלת",
+"officialName": "שעועית לבנה מבושלת, קפואה, סנפרוסט",
+"en": "Beans, white, cooked, frozen, Sunfrost",
+"kcal": 129.0,
+"protein": 9.1,
+"fat": 0,
+"carbs": 16.6,
+"fiber": 11.5,
+"sugar": 0.0,
+"satFat": 0.0,
+"sodium": 33.0,
+"calcium": 87.8,
+"iron": 3.61,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "legume",
+"role": "protein",
+"units": [
+[
+"כוס",
+141.0
+],
+[
+"כף",
+18.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "red_beans",
+"code": 8305,
+"name": "שעועית אדומה מבושלת",
+"officialName": "שעועית אדומה מבושלת, מקפוא, סנפרוסט",
+"en": "Beans, red, cooked, frozen, Sunfrost",
+"kcal": 91.0,
+"protein": 9.8,
+"fat": 0.6,
+"carbs": 25.2,
+"fiber": 13.7,
+"sugar": 1.0,
+"satFat": 0.13,
+"sodium": 22.0,
+"calcium": 61.4,
+"iron": 2.79,
+"b12": 0.0,
+"vitC": 1.1,
+"allergens": [],
+"diet": "v",
+"category": "legume",
+"role": "protein",
+"units": [
+[
+"כוס",
+141.0
+],
+[
+"כף",
+18.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "peas",
+"code": 3833,
+"name": "אפונה ירוקה",
+"officialName": "אפונה ירוקה, טריה",
+"en": "Peas, green, fresh",
+"kcal": 81.0,
+"protein": 5.4,
+"fat": 0.4,
+"carbs": 9.4,
+"fiber": 5.1,
+"sugar": 5.7,
+"satFat": 0.07,
+"sodium": 5.0,
+"calcium": 25.0,
+"iron": 1.47,
+"b12": 0.0,
+"vitC": 40.0,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "carb",
+"units": [
+[
+"כוס",
+178.0
+],
+[
+"כף",
+14.0
+],
+[
+"כפית",
+6.0
+]
+]
+},
+{
+"id": "hummus",
+"code": 1640,
+"name": "חומוס (ממרח)",
+"officialName": "סלט חומוס, ביתי",
+"en": "Salad, humus, homemade",
+"kcal": 269.0,
+"protein": 10.8,
+"fat": 17.6,
+"carbs": 12.0,
+"fiber": 7.1,
+"sugar": 3.2,
+"satFat": 2.81,
+"sodium": 170.2,
+"calcium": 64.1,
+"iron": 3.27,
+"b12": 0.0,
+"vitC": 5.4,
+"allergens": [
+"sesame"
+],
+"diet": "v",
+"category": "dish",
+"role": "fat",
+"units": [
+[
+"כף",
+38.0
+],
+[
+"כף שטוחה",
+12.0
+],
+[
+"כף גדושה",
+50.0
+],
+[
+"כפית",
+12.0
+],
+[
+"כפית שטוחה",
+6.0
+]
+]
+},
+{
+"id": "tahini",
+"code": 1898,
+"name": "טחינה גולמית",
+"officialName": "טחינה גולמית, לא מדוללת",
+"en": "Tahini, not diluted",
+"kcal": 665.0,
+"protein": 24.0,
+"fat": 60.0,
+"carbs": 2.0,
+"fiber": 11.0,
+"sugar": 1.0,
+"satFat": 10.0,
+"sodium": 9.0,
+"calcium": 152.0,
+"iron": 8.12,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"sesame"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כף",
+15.0
+],
+[
+"כף גדושה",
+17.0
+],
+[
+"כפית",
+5.0
+]
+]
+},
+{
+"id": "tahini_salad",
+"code": 1886,
+"name": "טחינה מוכנה",
+"officialName": "סלט טחינה ביתי או טחינה גולמית מדוללת עם מלח",
+"en": "Tahini salad, (diluted), homemade",
+"kcal": 277.0,
+"protein": 10.0,
+"fat": 24.5,
+"carbs": 2.3,
+"fiber": 4.6,
+"sugar": 0.8,
+"satFat": 4.08,
+"sodium": 323.8,
+"calcium": 72.8,
+"iron": 3.51,
+"b12": 0.0,
+"vitC": 9.4,
+"allergens": [
+"sesame"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כף",
+21.0
+],
+[
+"כף שטוחה",
+11.0
+],
+[
+"כף גדושה",
+39.0
+],
+[
+"כפית",
+10.0
+],
+[
+"כפית שטוחה",
+4.0
+]
+]
+},
+{
+"id": "falafel",
+"code": 9596,
+"name": "פלאפל (אפוי/בלי שמן)",
+"officialName": "כדורי פלאפל מטוגנים ללא תוספת שמן",
+"en": "Falafel (chickpea) balls, fried without oil",
+"kcal": 191.0,
+"protein": 8.7,
+"fat": 2.3,
+"carbs": 28.0,
+"fiber": 6.7,
+"sugar": 3.7,
+"satFat": 0.24,
+"sodium": 614.6,
+"calcium": 48.0,
+"iron": 2.07,
+"b12": 0.0,
+"vitC": 9.3,
+"allergens": [],
+"diet": "v",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"עיגול/כדור",
+16.3
+]
+]
+},
+{
+"id": "shakshuka",
+"code": 1591,
+"name": "שקשוקה בשמן זית",
+"officialName": "שקשוקה בשמן זית",
+"en": "Shakshuka in olive oil",
+"kcal": 94.0,
+"protein": 4.0,
+"fat": 6.8,
+"carbs": 3.3,
+"fiber": 1.2,
+"sugar": 2.6,
+"satFat": 1.42,
+"sodium": 248.1,
+"calcium": 24.6,
+"iron": 0.71,
+"b12": 0.23,
+"vitC": 25.2,
+"allergens": [
+"egg"
+],
+"diet": "vg",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+108.0
+],
+[
+"מנה בינונית",
+200.0
+]
+]
+},
+{
+"id": "majadra",
+"code": 3082,
+"name": "מג'דרה",
+"officialName": "מג'דרה עם אורז, בצל מטוגן ושמן זית",
+"en": "Mejadra with rice, with olive oil, homemade",
+"kcal": 164.0,
+"protein": 5.1,
+"fat": 4.7,
+"carbs": 22.1,
+"fiber": 3.4,
+"sugar": 1.5,
+"satFat": 0.69,
+"sodium": 240.1,
+"calcium": 17.1,
+"iron": 1.39,
+"b12": 0.0,
+"vitC": 1.8,
+"allergens": [],
+"diet": "v",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"כוס",
+175.0
+],
+[
+"כף",
+15.0
+],
+[
+"צלחת גדולה",
+430.0
+]
+]
+},
+{
+"id": "majadra_bulgur",
+"code": 3090,
+"name": "מג'דרה בורגול",
+"officialName": "מג'דרה עם בורגול ושמן זית",
+"en": "Mejadra, with bulgur and olive oil, homemade",
+"kcal": 137.0,
+"protein": 5.3,
+"fat": 4.7,
+"carbs": 14.0,
+"fiber": 5.8,
+"sugar": 1.5,
+"satFat": 0.66,
+"sodium": 368.0,
+"calcium": 17.1,
+"iron": 1.83,
+"b12": 0.0,
+"vitC": 1.8,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"כוס",
+175.0
+],
+[
+"כף",
+15.0
+],
+[
+"צלחת גדולה",
+430.0
+]
+]
+},
+{
+"id": "schnitzel_baked",
+"code": 9755,
+"name": "שניצל עוף אפוי",
+"officialName": "שניצל חזה עוף, אפוי",
+"en": "Shnitzel, chicken breast, baked",
+"kcal": 222.0,
+"protein": 27.8,
+"fat": 5.3,
+"carbs": 13.2,
+"fiber": 1.0,
+"sugar": 0.6,
+"satFat": 1.34,
+"sodium": 601.3,
+"calcium": 21.1,
+"iron": 1.03,
+"b12": 0.36,
+"vitC": 0.0,
+"allergens": [
+"gluten",
+"egg"
+],
+"diet": "o",
+"category": "dish",
+"role": "protein",
+"units": []
+},
+{
+"id": "schnitzel",
+"code": 818,
+"name": "שניצל עוף מטוגן",
+"officialName": "שניצל חזה עוף מטוגן בשמן קנולה",
+"en": "Shnitzel, chicken breast, fried in canola oil",
+"kcal": 270.0,
+"protein": 25.7,
+"fat": 9.3,
+"carbs": 18.3,
+"fiber": 1.2,
+"sugar": 0.6,
+"satFat": 1.54,
+"sodium": 536.2,
+"calcium": 20.2,
+"iron": 1.03,
+"b12": 0.33,
+"vitC": 0.0,
+"allergens": [
+"gluten",
+"egg"
+],
+"diet": "o",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"יחידה קטנה",
+100.0
+],
+[
+"יחידה בינונית",
+146.0
+],
+[
+"יחידה גדולה",
+230.0
+]
+]
+},
+{
+"id": "burekas_cheese",
+"code": 2988,
+"name": "בורקס גבינה",
+"officialName": "בורקס גבינה, שופרסל",
+"en": "Burekas, cheese filling, Shufersal",
+"kcal": 295.0,
+"protein": 6.2,
+"fat": 15.5,
+"carbs": 32.7,
+"fiber": 1.1,
+"sugar": 3.0,
+"satFat": 8.7,
+"sodium": 371.0,
+"calcium": 28.3,
+"iron": 0.47,
+"b12": 0.11,
+"vitC": 1.7,
+"allergens": [
+"gluten",
+"dairy",
+"egg"
+],
+"diet": "vg",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה",
+50.0
+],
+[
+"יחידה קטנה",
+16.6
+]
+]
+},
+{
+"id": "jachnun",
+"code": 3030,
+"name": "ג'חנון",
+"officialName": "ג'חנון תימני אפוי",
+"en": "Jachnun, Yemenite dish, baked",
+"kcal": 388.0,
+"protein": 5.0,
+"fat": 22.0,
+"carbs": 42.4,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 12.1,
+"sodium": 465.0,
+"calcium": 20.4,
+"iron": 0.63,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten",
+"dairy"
+],
+"diet": "vg",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה",
+116.5
+]
+]
+},
+{
+"id": "malawach",
+"code": 3025,
+"name": "מלאווח",
+"officialName": "מלאווח מטוגן בשמן קנולה",
+"en": "Melawech, fried in canola oil, homemade",
+"kcal": 395.0,
+"protein": 5.8,
+"fat": 21.2,
+"carbs": 45.7,
+"fiber": 1.5,
+"sugar": 6.8,
+"satFat": 10.75,
+"sodium": 597.1,
+"calcium": 10.4,
+"iron": 0.65,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+96.0
+],
+[
+"יחידה בינונית",
+138.0
+]
+]
+},
+{
+"id": "kubbeh_soup",
+"code": 2946,
+"name": "קובה סולת עם עוף",
+"officialName": "קובה סולת עם בשר עוף למרק",
+"en": "Kubbeh, semolina with chicken for soup, homemade",
+"kcal": 219.0,
+"protein": 10.0,
+"fat": 4.4,
+"carbs": 33.8,
+"fiber": 2.3,
+"sugar": 0.5,
+"satFat": 0.84,
+"sodium": 485.1,
+"calcium": 22.6,
+"iron": 1.02,
+"b12": 0.05,
+"vitC": 4.9,
+"allergens": [
+"gluten"
+],
+"diet": "o",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה",
+47.0
+]
+]
+},
+{
+"id": "chicken_soup",
+"code": 1530,
+"name": "מרק עוף צח",
+"officialName": "מרק עוף צח, כולל מוכן מאבקה",
+"en": "Soup, broth, chicken, including prepared from mix",
+"kcal": 6.0,
+"protein": 0.6,
+"fat": 0.2,
+"carbs": 0.4,
+"fiber": 0,
+"sugar": 0.4,
+"satFat": 0.01,
+"sodium": 371.0,
+"calcium": 4.0,
+"iron": 0.07,
+"b12": 0.02,
+"vitC": 0.0,
+"allergens": [],
+"diet": "o",
+"category": "dish",
+"role": "veg",
+"units": [
+[
+"מנה קטנה",
+130.0
+],
+[
+"מנה בינונית",
+260.0
+],
+[
+"מנה גדולה",
+390.0
+]
+]
+},
+{
+"id": "lentil_soup",
+"code": 1784,
+"name": "מרק עדשים",
+"officialName": "מרק עדשים, ללא תוספת שמן",
+"en": "Soup, lentil, fat not added, homemade",
+"kcal": 65.0,
+"protein": 4.9,
+"fat": 0.3,
+"carbs": 6.0,
+"fiber": 5.3,
+"sugar": 1.1,
+"satFat": 0.02,
+"sodium": 382.9,
+"calcium": 13.7,
+"iron": 0.66,
+"b12": 0.0,
+"vitC": 1.3,
+"allergens": [],
+"diet": "v",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+130.0
+],
+[
+"מנה בינונית",
+260.0
+],
+[
+"מנה גדולה",
+390.0
+]
+]
+},
+{
+"id": "white_bean_soup",
+"code": 4371,
+"name": "מרק שעועית לבנה",
+"officialName": "מרק שעועית לבנה עם שמן זית",
+"en": "Soup, white bean with vegetables and olive oil",
+"kcal": 86.0,
+"protein": 4.4,
+"fat": 2.3,
+"carbs": 9.7,
+"fiber": 3.2,
+"sugar": 1.1,
+"satFat": 0.34,
+"sodium": 110.8,
+"calcium": 51.8,
+"iron": 1.79,
+"b12": 0.0,
+"vitC": 3.2,
+"allergens": [],
+"diet": "v",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+130.0
+],
+[
+"מנה בינונית",
+260.0
+],
+[
+"מנה גדולה",
+390.0
+]
+]
+},
+{
+"id": "tabouleh",
+"code": 3093,
+"name": "טבולה",
+"officialName": "סלט טבולה מבורגול",
+"en": "Salad, tabbouleh, with bulgur, homemade",
+"kcal": 55.0,
+"protein": 1.4,
+"fat": 2.6,
+"carbs": 5.5,
+"fiber": 2.1,
+"sugar": 1.9,
+"satFat": 0.36,
+"sodium": 270.7,
+"calcium": 30.0,
+"iron": 0.92,
+"b12": 0.0,
+"vitC": 17.3,
+"allergens": [
+"gluten"
+],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+25.0
+],
+[
+"מנה קטנה",
+60.0
+],
+[
+"צלחת בינונית",
+113.0
+]
+]
+},
+{
+"id": "israeli_salad",
+"code": 9704,
+"name": "סלט ירקות ישראלי",
+"officialName": "סלט ירקות ישראלי ללא תוספת שמן",
+"en": "Salad, Israeli vegetable, without oil",
+"kcal": 17.0,
+"protein": 0.8,
+"fat": 0.2,
+"carbs": 2.9,
+"fiber": 1.0,
+"sugar": 2.4,
+"satFat": 0.03,
+"sodium": 188.8,
+"calcium": 14.9,
+"iron": 0.41,
+"b12": 0.0,
+"vitC": 13.3,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+20.0
+],
+[
+"כפית",
+8.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+150.0
+]
+]
+},
+{
+"id": "israeli_salad_oil",
+"code": 3895,
+"name": "סלט ירקות עם שמן זית",
+"officialName": "סלט ירקות ישראלי עם שמן זית",
+"en": "Salad, Israeli, with olive oil",
+"kcal": 50.0,
+"protein": 0.8,
+"fat": 4.0,
+"carbs": 2.8,
+"fiber": 1.0,
+"sugar": 2.3,
+"satFat": 0.56,
+"sodium": 181.7,
+"calcium": 14.3,
+"iron": 0.41,
+"b12": 0.0,
+"vitC": 12.8,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+20.0
+],
+[
+"כפית",
+8.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+150.0
+]
+]
+},
+{
+"id": "cabbage_salad",
+"code": 3865,
+"name": "סלט כרוב בשמן זית",
+"officialName": "סלט כרוב עם בצל ירוק ושמן זית",
+"en": "Salad, cabbage with green onion, with olive oil",
+"kcal": 68.0,
+"protein": 1.3,
+"fat": 4.9,
+"carbs": 3.4,
+"fiber": 2.4,
+"sugar": 2.8,
+"satFat": 0.7,
+"sodium": 203.3,
+"calcium": 45.2,
+"iron": 0.7,
+"b12": 0.0,
+"vitC": 30.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+25.0
+],
+[
+"כפית",
+10.0
+]
+]
+},
+{
+"id": "greek_salad",
+"code": 9331,
+"name": "סלט יווני עם בולגרית 5%",
+"officialName": "סלט יווני, עם גבינה בולגרית 5% ושמן זית",
+"en": "Salad, Greek with Bulgarian 5% fat cheese  and olive oil",
+"kcal": 106.0,
+"protein": 3.6,
+"fat": 8.8,
+"carbs": 2.9,
+"fiber": 1.0,
+"sugar": 2.2,
+"satFat": 1.54,
+"sodium": 496.1,
+"calcium": 59.5,
+"iron": 0.45,
+"b12": 0.07,
+"vitC": 6.1,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"מנה",
+190.0
+]
+]
+},
+{
+"id": "eggplant_roasted",
+"code": 3982,
+"name": "חציל קלוי",
+"officialName": "חצילים קלויים ללא תוספות",
+"en": "Eggplant, roasted",
+"kcal": 28.0,
+"protein": 1.1,
+"fat": 0.2,
+"carbs": 3.2,
+"fiber": 3.3,
+"sugar": 3.9,
+"satFat": 0.04,
+"sodium": 2.2,
+"calcium": 10.0,
+"iron": 0.26,
+"b12": 0.0,
+"vitC": 2.3,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+33.0
+],
+[
+"כפית",
+8.0
+]
+]
+},
+{
+"id": "eggplant_tahini",
+"code": 4200,
+"name": "סלט חצילים בטחינה",
+"officialName": "סלט חצילים קלויים בטחינה",
+"en": "Salad, eggplant, grilled, with tahini, homemade",
+"kcal": 81.0,
+"protein": 3.0,
+"fat": 5.2,
+"carbs": 3.3,
+"fiber": 3.8,
+"sugar": 3.4,
+"satFat": 0.87,
+"sodium": 261.6,
+"calcium": 25.7,
+"iron": 1.01,
+"b12": 0.0,
+"vitC": 5.4,
+"allergens": [
+"sesame"
+],
+"diet": "v",
+"category": "veg",
+"role": "fat",
+"units": [
+[
+"כף",
+24.0
+],
+[
+"כפית",
+10.0
+],
+[
+"גביע קטן",
+125.0
+],
+[
+"גביע בינוני",
+250.0
+],
+[
+"מנה קטנה",
+87.0
+]
+]
+},
+{
+"id": "stuffed_vine",
+"code": 9312,
+"name": "עלי גפן ממולאים",
+"officialName": "עלי גפן ממולאים אורז עם שמן סויה",
+"en": "Vine leaves, stuffed with rice, with soy oil",
+"kcal": 135.0,
+"protein": 3.0,
+"fat": 4.1,
+"carbs": 17.3,
+"fiber": 3.7,
+"sugar": 0.2,
+"satFat": 0.56,
+"sodium": 880.8,
+"calcium": 104.2,
+"iron": 1.18,
+"b12": 0.0,
+"vitC": 6.0,
+"allergens": [],
+"diet": "v",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה מאד",
+6.0
+],
+[
+"יחידה קטנה",
+20.0
+],
+[
+"יחידה גדולה",
+70.0
+]
+]
+},
+{
+"id": "moussaka_chicken",
+"code": 4383,
+"name": "מוסקה עוף",
+"officialName": "מוסקה בשר עוף",
+"en": "Moussaka, chicken",
+"kcal": 141.0,
+"protein": 9.4,
+"fat": 7.5,
+"carbs": 7.8,
+"fiber": 2.0,
+"sugar": 3.3,
+"satFat": 1.61,
+"sodium": 509.9,
+"calcium": 23.3,
+"iron": 1.13,
+"b12": 0.16,
+"vitC": 4.7,
+"allergens": [],
+"diet": "o",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"מנה",
+300.0
+]
+]
+},
+{
+"id": "chamin",
+"code": 690,
+"name": "חמין בקר",
+"officialName": "חמין בקר עם חיטה, תפוחי אדמה, ביצה ושמן סויה",
+"en": "Cholent, beef with wheat, potatoes, egg, and soy oil",
+"kcal": 155.0,
+"protein": 10.7,
+"fat": 6.7,
+"carbs": 13.4,
+"fiber": 1.9,
+"sugar": 0.6,
+"satFat": 2.17,
+"sodium": 284.0,
+"calcium": 21.8,
+"iron": 1.59,
+"b12": 0.65,
+"vitC": 8.2,
+"allergens": [
+"egg",
+"gluten"
+],
+"diet": "o",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"מנה קטנה",
+150.0
+],
+[
+"מנה בינונית",
+250.0
+],
+[
+"מנה גדולה",
+350.0
+]
+]
+},
+{
+"id": "pizza",
+"code": 2913,
+"name": "פיצה",
+"officialName": "פיצה בסיסית",
+"en": "Pizza, cheese, homemade",
+"kcal": 314.0,
+"protein": 8.8,
+"fat": 7.2,
+"carbs": 50.7,
+"fiber": 2.4,
+"sugar": 3.7,
+"satFat": 1.39,
+"sodium": 471.4,
+"calcium": 61.7,
+"iron": 1.09,
+"b12": 0.09,
+"vitC": 4.4,
+"allergens": [
+"gluten",
+"dairy"
+],
+"diet": "vg",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"מנה קטנה",
+100.0
+],
+[
+"מנה בינונית",
+150.0
+],
+[
+"מנה גדולה",
+300.0
+]
+]
+},
+{
+"id": "pancake",
+"code": 2972,
+"name": "פנקייק ביתי",
+"officialName": "פנקייק ביתי עם שמן סויה",
+"en": "Pancake with soy oil",
+"kcal": 218.0,
+"protein": 7.3,
+"fat": 8.2,
+"carbs": 27.4,
+"fiber": 0.7,
+"sugar": 8.8,
+"satFat": 2.37,
+"sodium": 216.7,
+"calcium": 86.5,
+"iron": 0.76,
+"b12": 0.44,
+"vitC": 0.0,
+"allergens": [
+"gluten",
+"egg",
+"dairy"
+],
+"diet": "vg",
+"category": "dish",
+"role": "carb",
+"units": [
+[
+"יחידה",
+58.0
+]
+]
+},
+{
+"id": "zucchini_pie",
+"code": 4120,
+"name": "פשטידת קישואים",
+"officialName": "פשטידת קישואים חלבית",
+"en": "Pie, zucchini, dairy",
+"kcal": 108.0,
+"protein": 6.7,
+"fat": 5.8,
+"carbs": 6.5,
+"fiber": 1.1,
+"sugar": 2.8,
+"satFat": 2.33,
+"sodium": 414.6,
+"calcium": 92.3,
+"iron": 0.62,
+"b12": 0.27,
+"vitC": 13.6,
+"allergens": [
+"egg",
+"dairy",
+"gluten"
+],
+"diet": "vg",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"מנה קטנה",
+100.0
+],
+[
+"מנה בינונית",
+150.0
+],
+[
+"מנה גדולה",
+300.0
+]
+]
+},
+{
+"id": "tuna_salad",
+"code": 1489,
+"name": "סלט טונה עם ירקות",
+"officialName": "סלט טונה עם עגבניה ופלפל, משימורי טונה במים, ללא תוספות",
+"en": "Fish, tuna, in water, salad with tomato and pepper",
+"kcal": 40.0,
+"protein": 6.9,
+"fat": 0.4,
+"carbs": 1.9,
+"fiber": 0.9,
+"sugar": 1.7,
+"satFat": 0.1,
+"sodium": 276.2,
+"calcium": 12.3,
+"iron": 0.73,
+"b12": 0.83,
+"vitC": 27.3,
+"allergens": [
+"fish"
+],
+"diet": "o",
+"category": "dish",
+"role": "protein",
+"units": [
+[
+"כף",
+20.0
+],
+[
+"כפית",
+8.0
+],
+[
+"קערית לפתן",
+162.0
+]
+]
+},
+{
+"id": "cucumber",
+"code": 3793,
+"name": "מלפפון",
+"officialName": "מלפפון, טרי, עם קליפה",
+"en": "Cucumber, with peel, raw",
+"kcal": 15.0,
+"protein": 0.6,
+"fat": 0.1,
+"carbs": 3.1,
+"fiber": 0.5,
+"sugar": 2.1,
+"satFat": 0.04,
+"sodium": 2.0,
+"calcium": 15.7,
+"iron": 0.27,
+"b12": 0.0,
+"vitC": 2.8,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה קטנה",
+52.0
+],
+[
+"יחידה בינונית",
+82.0
+],
+[
+"יחידה גדולה",
+140.0
+],
+[
+"פרוסה דקה",
+3.0
+],
+[
+"פרוסה בינונית",
+5.5
+]
+]
+},
+{
+"id": "tomato",
+"code": 3663,
+"name": "עגבנייה",
+"officialName": "עגבניה, טריה",
+"en": "Tomatoes, raw",
+"kcal": 18.0,
+"protein": 0.9,
+"fat": 0.2,
+"carbs": 2.7,
+"fiber": 1.2,
+"sugar": 2.6,
+"satFat": 0.03,
+"sodium": 5.0,
+"calcium": 10.0,
+"iron": 0.27,
+"b12": 0.0,
+"vitC": 13.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה קטנה מאד",
+12.0
+],
+[
+"יחידה קטנה",
+90.0
+],
+[
+"יחידה בינונית",
+160.0
+],
+[
+"יחידה גדולה",
+230.0
+],
+[
+"פרוסה",
+30.0
+]
+]
+},
+{
+"id": "pepper_red",
+"code": 3839,
+"name": "פלפל אדום",
+"officialName": "פלפל אדום, טרי",
+"en": "Pepper, sweet, red, fresh",
+"kcal": 31.0,
+"protein": 1.0,
+"fat": 0.3,
+"carbs": 3.9,
+"fiber": 2.1,
+"sugar": 4.2,
+"satFat": 0.03,
+"sodium": 4.0,
+"calcium": 7.0,
+"iron": 0.43,
+"b12": 0.0,
+"vitC": 127.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה קטנה",
+43.0
+],
+[
+"יחידה בינונית",
+109.0
+],
+[
+"יחידה גדולה",
+166.0
+],
+[
+"כוס קצוץ",
+149.0
+],
+[
+"פס/מקל",
+5.0
+]
+]
+},
+{
+"id": "carrot",
+"code": 9693,
+"name": "גזר אפוי",
+"officialName": "גזר אפוי ללא שמן",
+"en": "Carrots, baked, fat not added",
+"kcal": 47.0,
+"protein": 1.1,
+"fat": 0.3,
+"carbs": 7.9,
+"fiber": 3.2,
+"sugar": 5.5,
+"satFat": 0.04,
+"sodium": 259.5,
+"calcium": 38.3,
+"iron": 0.35,
+"b12": 0.0,
+"vitC": 6.5,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+21.5
+],
+[
+"כפית",
+9.0
+]
+]
+},
+{
+"id": "broccoli",
+"code": 3612,
+"name": "ברוקולי",
+"officialName": "ברוקולי, טרי",
+"en": "Broccoli, raw",
+"kcal": 34.0,
+"protein": 2.8,
+"fat": 0.4,
+"carbs": 4.0,
+"fiber": 2.6,
+"sugar": 1.7,
+"satFat": 0.04,
+"sodium": 33.0,
+"calcium": 47.0,
+"iron": 0.73,
+"b12": 0.0,
+"vitC": 89.2,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כוס",
+88.0
+]
+]
+},
+{
+"id": "cauliflower",
+"code": 3776,
+"name": "כרובית",
+"officialName": "כרובית, טריה",
+"en": "Cauliflower, raw",
+"kcal": 25.0,
+"protein": 1.9,
+"fat": 0.3,
+"carbs": 3.0,
+"fiber": 2.0,
+"sugar": 1.9,
+"satFat": 0.06,
+"sodium": 30.0,
+"calcium": 22.0,
+"iron": 0.42,
+"b12": 0.0,
+"vitC": 48.2,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה קטנה",
+154.0
+],
+[
+"יחידה בינונית",
+226.0
+],
+[
+"יחידה גדולה",
+389.0
+],
+[
+"כוס",
+100.0
+]
+]
+},
+{
+"id": "zucchini",
+"code": 9694,
+"name": "קישואים אפויים",
+"officialName": "קישואים אפויים ללא שמן",
+"en": "Zucchini, baked, fat not added",
+"kcal": 23.0,
+"protein": 1.7,
+"fat": 0.4,
+"carbs": 2.9,
+"fiber": 1.4,
+"sugar": 3.4,
+"satFat": 0.11,
+"sodium": 222.4,
+"calcium": 22.0,
+"iron": 0.51,
+"b12": 0.0,
+"vitC": 23.2,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"פרוסה בינונית",
+7.0
+],
+[
+"עיגול/כדור",
+14.0
+]
+]
+},
+{
+"id": "mushrooms",
+"code": 3812,
+"name": "פטריות",
+"officialName": "פטריות, טריות",
+"en": "Mushrooms, raw",
+"kcal": 22.0,
+"protein": 3.1,
+"fat": 0.3,
+"carbs": 2.3,
+"fiber": 1.0,
+"sugar": 2.0,
+"satFat": 0.05,
+"sodium": 5.0,
+"calcium": 3.0,
+"iron": 0.5,
+"b12": 0.04,
+"vitC": 2.1,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה",
+12.0
+],
+[
+"יחידה גדולה",
+25.0
+],
+[
+"כוס",
+70.0
+],
+[
+"כף",
+14.0
+],
+[
+"כפית",
+5.0
+]
+]
+},
+{
+"id": "spinach",
+"code": 3590,
+"name": "תרד",
+"officialName": "תרד, טרי",
+"en": "Spinach, raw",
+"kcal": 23.0,
+"protein": 2.9,
+"fat": 0.4,
+"carbs": 1.4,
+"fiber": 2.2,
+"sugar": 0.4,
+"satFat": 0.06,
+"sodium": 79.0,
+"calcium": 99.0,
+"iron": 2.71,
+"b12": 0.0,
+"vitC": 28.1,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה בינונית",
+2.0
+],
+[
+"יחידה גדולה",
+3.0
+],
+[
+"כוס",
+25.0
+]
+]
+},
+{
+"id": "lettuce",
+"code": 3809,
+"name": "חסה",
+"officialName": "חסה בוסטון",
+"en": "Lettuce, Boston, raw",
+"kcal": 13.0,
+"protein": 1.4,
+"fat": 0.2,
+"carbs": 1.1,
+"fiber": 1.1,
+"sugar": 0.9,
+"satFat": 0.03,
+"sodium": 5.0,
+"calcium": 35.0,
+"iron": 1.24,
+"b12": 0.0,
+"vitC": 3.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כוס קצוץ",
+55.0
+],
+[
+"עלה",
+11.0
+]
+]
+},
+{
+"id": "cabbage",
+"code": 3767,
+"name": "כרוב לבן",
+"officialName": "כרוב לבן, טרי",
+"en": "Cabbage, green, raw",
+"kcal": 25.0,
+"protein": 1.3,
+"fat": 0.1,
+"carbs": 3.3,
+"fiber": 2.5,
+"sugar": 3.2,
+"satFat": 0.03,
+"sodium": 18.0,
+"calcium": 40.0,
+"iron": 0.47,
+"b12": 0.0,
+"vitC": 36.6,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כוס",
+150.0
+],
+[
+"כף",
+12.0
+],
+[
+"כפית",
+4.0
+]
+]
+},
+{
+"id": "onion_green",
+"code": 3819,
+"name": "בצל ירוק",
+"officialName": "בצל ירוק, טרי",
+"en": "Onion, green (spring/scallions), raw",
+"kcal": 32.0,
+"protein": 1.8,
+"fat": 0.2,
+"carbs": 4.7,
+"fiber": 2.6,
+"sugar": 2.3,
+"satFat": 0.03,
+"sodium": 16.0,
+"calcium": 72.0,
+"iron": 1.48,
+"b12": 0.0,
+"vitC": 18.8,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה",
+35.0
+],
+[
+"כוס",
+100.0
+]
+]
+},
+{
+"id": "green_beans",
+"code": 3922,
+"name": "שעועית ירוקה בשום ושמן זית",
+"officialName": "שעועית ירוקה מבושלת עם שום ושמן זית",
+"en": "Beans, string, green, cooked with garlic, with olive oil",
+"kcal": 62.0,
+"protein": 1.5,
+"fat": 4.0,
+"carbs": 3.5,
+"fiber": 2.9,
+"sugar": 1.2,
+"satFat": 0.57,
+"sodium": 440.2,
+"calcium": 40.5,
+"iron": 0.64,
+"b12": 0.0,
+"vitC": 3.7,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"כף",
+21.0
+],
+[
+"מנה קטנה",
+50.0
+],
+[
+"מנה בינונית",
+100.0
+],
+[
+"מנה גדולה",
+200.0
+]
+]
+},
+{
+"id": "beet",
+"code": 3762,
+"name": "סלק",
+"officialName": "סלק, טרי",
+"en": "Beets, raw",
+"kcal": 43.0,
+"protein": 1.6,
+"fat": 0.2,
+"carbs": 6.8,
+"fiber": 2.8,
+"sugar": 6.8,
+"satFat": 0.03,
+"sodium": 78.0,
+"calcium": 16.0,
+"iron": 0.8,
+"b12": 0.0,
+"vitC": 4.9,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה",
+82.0
+],
+[
+"כוס",
+136.0
+]
+]
+},
+{
+"id": "kohlrabi",
+"code": 3801,
+"name": "קולרבי",
+"officialName": "קולרבי, טרי",
+"en": "Kohlrabi, raw",
+"kcal": 27.0,
+"protein": 1.7,
+"fat": 0.1,
+"carbs": 2.6,
+"fiber": 3.6,
+"sugar": 2.6,
+"satFat": 0.01,
+"sodium": 20.0,
+"calcium": 24.0,
+"iron": 0.4,
+"b12": 0.0,
+"vitC": 62.0,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה קטנה",
+54.0
+],
+[
+"יחידה בינונית",
+107.0
+],
+[
+"יחידה גדולה",
+206.0
+],
+[
+"פרוסה בינונית",
+24.0
+]
+]
+},
+{
+"id": "pumpkin",
+"code": 9508,
+"name": "דלעת",
+"officialName": "דלעת ערמונים, טריה",
+"en": "Squash, winter, acorn, raw",
+"kcal": 40.0,
+"protein": 0.8,
+"fat": 0.1,
+"carbs": 10.4,
+"fiber": 1.5,
+"sugar": null,
+"satFat": 0.02,
+"sodium": 3.0,
+"calcium": 33.0,
+"iron": 0.7,
+"b12": 0.0,
+"vitC": 11.0,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"יחידה בינונית",
+250.0
+]
+]
+},
+{
+"id": "veg_grilled",
+"code": 9384,
+"name": "ירקות בגריל",
+"officialName": "ירקות בגריל, עגבניה, פלפל, תפוח אדמה ושמן קנולה",
+"en": "Vegetables, tomato, pepper, potato, grilled with canola oil",
+"kcal": 77.0,
+"protein": 1.4,
+"fat": 4.0,
+"carbs": 8.3,
+"fiber": 1.9,
+"sugar": 2.5,
+"satFat": 0.31,
+"sodium": 204.0,
+"calcium": 10.9,
+"iron": 0.52,
+"b12": 0.0,
+"vitC": 52.4,
+"allergens": [],
+"diet": "v",
+"category": "veg",
+"role": "veg",
+"units": [
+[
+"מנה",
+172.0
+]
+]
+},
+{
+"id": "olive_oil",
+"code": 4443,
+"name": "שמן זית",
+"officialName": "שמן זית",
+"en": "Oil, olive",
+"kcal": 884.0,
+"protein": 0,
+"fat": 100.0,
+"carbs": 0,
+"fiber": 0,
+"sugar": 0.0,
+"satFat": 13.81,
+"sodium": 2.0,
+"calcium": 1.0,
+"iron": 0.56,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כוס",
+216.0
+],
+[
+"כף",
+10.0
+],
+[
+"כפית",
+3.0
+]
+]
+},
+{
+"id": "avocado",
+"code": 3223,
+"name": "אבוקדו",
+"officialName": "אבוקדו",
+"en": "Avocado",
+"kcal": 160.0,
+"protein": 2.0,
+"fat": 14.7,
+"carbs": 1.8,
+"fiber": 6.7,
+"sugar": 0.7,
+"satFat": 2.13,
+"sodium": 7.0,
+"calcium": 12.0,
+"iron": 0.55,
+"b12": 0.0,
+"vitC": 10.0,
+"allergens": [],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"יחידה קטנה",
+50.0
+],
+[
+"יחידה בינונית",
+114.0
+],
+[
+"יחידה גדולה",
+339.0
+],
+[
+"כוס קוביות",
+150.0
+],
+[
+"כוס מעוך",
+230.0
+]
+]
+},
+{
+"id": "olives",
+"code": 4282,
+"name": "זיתים שחורים",
+"officialName": "זיתים שחורים",
+"en": "Olives, black",
+"kcal": 105.0,
+"protein": 0.9,
+"fat": 9.5,
+"carbs": 3.1,
+"fiber": 3.0,
+"sugar": 0.0,
+"satFat": 1.26,
+"sodium": 735.0,
+"calcium": 90.0,
+"iron": 3.31,
+"b12": 0.0,
+"vitC": 1.1,
+"allergens": [],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"יחידה קטנה",
+3.0
+],
+[
+"יחידה גדולה",
+5.0
+]
+]
+},
+{
+"id": "almonds",
+"code": 1823,
+"name": "שקדים",
+"officialName": "שקדים מולבנים",
+"en": "Nuts, almonds, blanched",
+"kcal": 590.0,
+"protein": 21.4,
+"fat": 52.5,
+"carbs": 18.7,
+"fiber": 9.9,
+"sugar": 4.6,
+"satFat": 3.95,
+"sodium": 19.0,
+"calcium": 236.0,
+"iron": 3.28,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"nuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כוס",
+145.0
+],
+[
+"כוס פרוסות",
+124.0
+]
+]
+},
+{
+"id": "walnuts",
+"code": 1854,
+"name": "אגוזי מלך",
+"officialName": "אגוזי מלך, בלי קליפה, לא קלויים, ללא מלח",
+"en": "Nuts, walnuts, shelled, unsalted",
+"kcal": 654.0,
+"protein": 15.2,
+"fat": 65.2,
+"carbs": 7.0,
+"fiber": 6.7,
+"sugar": 2.6,
+"satFat": 6.13,
+"sodium": 2.0,
+"calcium": 98.0,
+"iron": 2.91,
+"b12": 0.0,
+"vitC": 1.3,
+"allergens": [
+"nuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"יחידה",
+5.5
+],
+[
+"כוס",
+100.0
+],
+[
+"כוס קצוץ",
+120.0
+]
+]
+},
+{
+"id": "cashew",
+"code": 1828,
+"name": "קשיו",
+"officialName": "אגוזי קשיו, טבעיים",
+"en": "Nuts, cashew",
+"kcal": 606.0,
+"protein": 15.0,
+"fat": 46.0,
+"carbs": 33.0,
+"fiber": 3.5,
+"sugar": 7.3,
+"satFat": 9.0,
+"sodium": 0.0,
+"calcium": 39.4,
+"iron": 7.11,
+"b12": 0.0,
+"vitC": 0.5,
+"allergens": [
+"nuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"יחידה",
+1.5
+]
+]
+},
+{
+"id": "pistachio",
+"code": 1848,
+"name": "פיסטוקים",
+"officialName": "אגוז, פיסטוק, בלי קליפה, ללא מלח, לא קלוי",
+"en": "Nuts, pistachio, shelled, not roasted",
+"kcal": 562.0,
+"protein": 20.3,
+"fat": 45.4,
+"carbs": 27.5,
+"fiber": 10.3,
+"sugar": 7.7,
+"satFat": 5.56,
+"sodium": 1.0,
+"calcium": 105.0,
+"iron": 3.92,
+"b12": 0.0,
+"vitC": 5.6,
+"allergens": [
+"nuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כוס",
+123.0
+]
+]
+},
+{
+"id": "peanuts",
+"code": 8263,
+"name": "בוטנים",
+"officialName": "בוטנים, טריים",
+"en": "Peanuts, all types, raw",
+"kcal": 567.0,
+"protein": 25.8,
+"fat": 49.2,
+"carbs": 16.1,
+"fiber": 8.5,
+"sugar": 4.7,
+"satFat": 6.28,
+"sodium": 18.0,
+"calcium": 92.0,
+"iron": 4.58,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"peanuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כוס",
+140.0
+],
+[
+"כף",
+15.0
+],
+[
+"כפית",
+6.0
+]
+]
+},
+{
+"id": "peanut_butter",
+"code": 1859,
+"name": "חמאת בוטנים טבעית",
+"officialName": "חמאת בוטנים טבעית, B&D",
+"en": "Peanut butter, natural, B&D",
+"kcal": 619.0,
+"protein": 28.0,
+"fat": 53.0,
+"carbs": 16.0,
+"fiber": 8.5,
+"sugar": 8.0,
+"satFat": 10.0,
+"sodium": 8.0,
+"calcium": 59.1,
+"iron": 2.36,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"peanuts"
+],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כף",
+25.0
+],
+[
+"כפית",
+8.0
+],
+[
+"צנצנת",
+350.0
+]
+]
+},
+{
+"id": "flax",
+"code": 1899,
+"name": "זרעי פשתן",
+"officialName": "זרעי פשתן",
+"en": "Seeds, flax",
+"kcal": 534.0,
+"protein": 18.3,
+"fat": 42.2,
+"carbs": 1.6,
+"fiber": 27.3,
+"sugar": 1.6,
+"satFat": 3.66,
+"sodium": 30.0,
+"calcium": 255.0,
+"iron": 5.73,
+"b12": 0.0,
+"vitC": 0.6,
+"allergens": [],
+"diet": "v",
+"category": "fat",
+"role": "fat",
+"units": [
+[
+"כוס",
+145.0
+],
+[
+"כף",
+7.0
+],
+[
+"כפית",
+3.0
+]
+]
+},
+{
+"id": "banana",
+"code": 3225,
+"name": "בננה",
+"officialName": "בננה, טריה, בלי קליפה",
+"en": "Banana, raw (without skin)",
+"kcal": 89.0,
+"protein": 1.1,
+"fat": 0.3,
+"carbs": 20.2,
+"fiber": 2.6,
+"sugar": 12.2,
+"satFat": 0.11,
+"sodium": 1.0,
+"calcium": 5.0,
+"iron": 0.26,
+"b12": 0.0,
+"vitC": 8.7,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+60.0
+],
+[
+"יחידה בינונית",
+72.0
+],
+[
+"יחידה גדולה",
+104.0
+],
+[
+"כוס מעוך",
+150.0
+]
+]
+},
+{
+"id": "apple",
+"code": 3201,
+"name": "תפוח עץ",
+"officialName": "תפוח עץ, עם קליפה (ללא ליבה)",
+"en": "Apple, with peel, raw, without core",
+"kcal": 52.0,
+"protein": 0.3,
+"fat": 0.2,
+"carbs": 11.4,
+"fiber": 2.4,
+"sugar": 10.4,
+"satFat": 0.03,
+"sodium": 1.0,
+"calcium": 6.0,
+"iron": 0.12,
+"b12": 0.0,
+"vitC": 4.6,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה מאד",
+104.0
+],
+[
+"יחידה קטנה",
+120.0
+],
+[
+"יחידה בינונית",
+147.0
+],
+[
+"יחידה גדולה",
+186.0
+]
+]
+},
+{
+"id": "orange",
+"code": 3120,
+"name": "תפוז",
+"officialName": "תפוז, טרי",
+"en": "Orange, raw",
+"kcal": 47.0,
+"protein": 0.9,
+"fat": 0.1,
+"carbs": 9.4,
+"fiber": 2.4,
+"sugar": 9.3,
+"satFat": 0.01,
+"sodium": 0.0,
+"calcium": 40.0,
+"iron": 0.1,
+"b12": 0.0,
+"vitC": 53.2,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+105.0
+],
+[
+"יחידה בינונית",
+186.0
+],
+[
+"יחידה גדולה",
+215.0
+]
+]
+},
+{
+"id": "dates",
+"code": 8213,
+"name": "תמר מג'הול",
+"officialName": "תמר, מג'הול",
+"en": "Dates, Medjool",
+"kcal": 277.0,
+"protein": 1.8,
+"fat": 0.2,
+"carbs": 75.0,
+"fiber": 6.7,
+"sugar": 66.5,
+"satFat": null,
+"sodium": 1.0,
+"calcium": 64.0,
+"iron": 0.9,
+"b12": null,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה",
+24.0
+]
+]
+},
+{
+"id": "strawberry",
+"code": 3339,
+"name": "תות שדה",
+"officialName": "תות שדה, טרי",
+"en": "Strawberries, raw",
+"kcal": 32.0,
+"protein": 0.7,
+"fat": 0.3,
+"carbs": 5.7,
+"fiber": 2.0,
+"sugar": 4.9,
+"satFat": 0.01,
+"sodium": 1.0,
+"calcium": 16.0,
+"iron": 0.41,
+"b12": 0.0,
+"vitC": 58.8,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+7.0
+],
+[
+"יחידה בינונית",
+12.0
+],
+[
+"יחידה גדולה",
+18.0
+],
+[
+"יחידה גדולה מאד",
+27.0
+],
+[
+"כוס",
+144.0
+]
+]
+},
+{
+"id": "blueberries",
+"code": 3327,
+"name": "אוכמניות",
+"officialName": "אוכמניות, טריות",
+"en": "Blueberries, raw",
+"kcal": 57.0,
+"protein": 0.7,
+"fat": 0.3,
+"carbs": 12.1,
+"fiber": 2.4,
+"sugar": 10.0,
+"satFat": 0.03,
+"sodium": 1.0,
+"calcium": 6.0,
+"iron": 0.28,
+"b12": 0.0,
+"vitC": 9.7,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה",
+1.4
+],
+[
+"כוס",
+145.0
+]
+]
+},
+{
+"id": "watermelon",
+"code": 3322,
+"name": "אבטיח",
+"officialName": "אבטיח, טרי",
+"en": "Watermelon, raw",
+"kcal": 30.0,
+"protein": 0.6,
+"fat": 0.2,
+"carbs": 7.2,
+"fiber": 0.4,
+"sugar": 6.2,
+"satFat": 0.02,
+"sodium": 1.0,
+"calcium": 7.0,
+"iron": 0.24,
+"b12": 0.0,
+"vitC": 8.1,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"כוס",
+186.0
+],
+[
+"פרוסה בינונית",
+201.0
+],
+[
+"פרוסה עבה",
+250.0
+]
+]
+},
+{
+"id": "melon",
+"code": 3228,
+"name": "מלון",
+"officialName": "מלון כתום, טרי",
+"en": "Cantaloupe,, raw",
+"kcal": 34.0,
+"protein": 0.8,
+"fat": 0.2,
+"carbs": 7.3,
+"fiber": 0.9,
+"sugar": 7.9,
+"satFat": 0.05,
+"sodium": 16.0,
+"calcium": 9.0,
+"iron": 0.21,
+"b12": 0.0,
+"vitC": 36.7,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+279.0
+],
+[
+"יחידה בינונית",
+522.0
+],
+[
+"יחידה גדולה",
+709.0
+],
+[
+"כוס קוביות",
+170.0
+],
+[
+"פרוסה בינונית",
+118.0
+]
+]
+},
+{
+"id": "grapes",
+"code": 3250,
+"name": "ענבים",
+"officialName": "ענבים, לפנ לסוג, טרי",
+"en": "Grapes, NS as to type, raw",
+"kcal": 69.0,
+"protein": 0.7,
+"fat": 0.2,
+"carbs": 17.2,
+"fiber": 0.9,
+"sugar": 15.5,
+"satFat": 0.05,
+"sodium": 2.0,
+"calcium": 10.0,
+"iron": 0.36,
+"b12": 0.0,
+"vitC": 3.2,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+4.0
+],
+[
+"יחידה בינונית",
+7.0
+],
+[
+"כוס",
+142.0
+]
+]
+},
+{
+"id": "mango",
+"code": 3263,
+"name": "מנגו",
+"officialName": "מנגו, טרי",
+"en": "Mango, raw",
+"kcal": 60.0,
+"protein": 0.8,
+"fat": 0.4,
+"carbs": 13.4,
+"fiber": 1.6,
+"sugar": 13.7,
+"satFat": 0.09,
+"sodium": 1.0,
+"calcium": 11.0,
+"iron": 0.16,
+"b12": 0.0,
+"vitC": 36.4,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+188.0
+],
+[
+"יחידה בינונית",
+305.0
+],
+[
+"יחידה גדולה",
+421.0
+]
+]
+},
+{
+"id": "pear",
+"code": 3283,
+"name": "אגס",
+"officialName": "אגס, טרי",
+"en": "Pear, raw",
+"kcal": 57.0,
+"protein": 0.4,
+"fat": 0.1,
+"carbs": 12.1,
+"fiber": 3.1,
+"sugar": 9.8,
+"satFat": 0.02,
+"sodium": 1.0,
+"calcium": 9.0,
+"iron": 0.18,
+"b12": 0.0,
+"vitC": 4.3,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+92.0
+],
+[
+"יחידה בינונית",
+113.0
+],
+[
+"יחידה גדולה",
+184.0
+]
+]
+},
+{
+"id": "kiwi",
+"code": 3255,
+"name": "קיווי",
+"officialName": "קיווי, טרי",
+"en": "Kiwi fruit, raw",
+"kcal": 61.0,
+"protein": 1.1,
+"fat": 0.5,
+"carbs": 11.7,
+"fiber": 3.0,
+"sugar": 9.0,
+"satFat": 0.03,
+"sodium": 3.0,
+"calcium": 34.0,
+"iron": 0.31,
+"b12": 0.0,
+"vitC": 92.7,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה",
+76.0
+],
+[
+"יחידה קטנה",
+59.0
+],
+[
+"יחידה בינונית",
+78.0
+],
+[
+"יחידה גדולה",
+110.0
+],
+[
+"כוס",
+177.0
+]
+]
+},
+{
+"id": "pomegranate",
+"code": 3308,
+"name": "רימון",
+"officialName": "רימון, חי, כראוי לאכילה",
+"en": "Pomegranate, raw",
+"kcal": 83.0,
+"protein": 1.7,
+"fat": 1.2,
+"carbs": 14.7,
+"fiber": 4.0,
+"sugar": 13.7,
+"satFat": 0.12,
+"sodium": 3.0,
+"calcium": 10.0,
+"iron": 0.3,
+"b12": 0.0,
+"vitC": 10.2,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה בינונית",
+282.0
+],
+[
+"כוס",
+174.0
+],
+[
+"כף",
+16.0
+],
+[
+"כפית",
+6.0
+]
+]
+},
+{
+"id": "fig",
+"code": 3247,
+"name": "תאנה",
+"officialName": "תאנה, טריה",
+"en": "Fig, raw",
+"kcal": 74.0,
+"protein": 0.8,
+"fat": 0.3,
+"carbs": 16.3,
+"fiber": 2.9,
+"sugar": 16.3,
+"satFat": 0.06,
+"sodium": 1.0,
+"calcium": 35.0,
+"iron": 0.37,
+"b12": 0.0,
+"vitC": 2.0,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה קטנה",
+40.0
+],
+[
+"יחידה בינונית",
+50.0
+],
+[
+"יחידה גדולה",
+64.0
+]
+]
+},
+{
+"id": "raisins",
+"code": 3199,
+"name": "צימוקים",
+"officialName": "צימוקים, ללא חרצנים",
+"en": "Raisins",
+"kcal": 299.0,
+"protein": 3.1,
+"fat": 0.5,
+"carbs": 75.5,
+"fiber": 3.7,
+"sugar": 59.2,
+"satFat": 0.06,
+"sodium": 11.0,
+"calcium": 50.0,
+"iron": 1.88,
+"b12": 0.0,
+"vitC": 2.3,
+"allergens": [],
+"diet": "v",
+"category": "fruit",
+"role": "carb",
+"units": [
+[
+"יחידה",
+2.0
+],
+[
+"כוס",
+145.0
+],
+[
+"כף",
+14.0
+],
+[
+"כפית",
+6.0
+]
+]
+},
+{
+"id": "honey",
+"code": 4544,
+"name": "דבש",
+"officialName": "דבש",
+"en": "Honey",
+"kcal": 304.0,
+"protein": 0.3,
+"fat": 0,
+"carbs": 82.2,
+"fiber": 0.2,
+"sugar": 82.1,
+"satFat": 0.0,
+"sodium": 4.0,
+"calcium": 6.0,
+"iron": 0.42,
+"b12": 0.0,
+"vitC": 0.5,
+"allergens": [],
+"diet": "vg",
+"category": "other",
+"role": "carb",
+"units": [
+[
+"כוס",
+339.0
+],
+[
+"כף",
+21.0
+],
+[
+"כפית",
+5.0
+]
+]
+},
+{
+"id": "silan",
+"code": 4547,
+"name": "סילאן",
+"officialName": "סירופ תמרים, סילאן",
+"en": "Honey, date, silan",
+"kcal": 316.0,
+"protein": 0.2,
+"fat": 0,
+"carbs": 79.0,
+"fiber": 0,
+"sugar": 76.9,
+"satFat": null,
+"sodium": 0.9,
+"calcium": 72.3,
+"iron": 1.02,
+"b12": null,
+"vitC": 0.0,
+"allergens": [],
+"diet": "v",
+"category": "other",
+"role": "carb",
+"units": [
+[
+"כוס",
+344.0
+],
+[
+"כף",
+22.0
+],
+[
+"כפית",
+9.0
+],
+[
+"צנצנת",
+900.0
+]
+]
+},
+{
+"id": "dark_chocolate",
+"code": 8810,
+"name": "שוקולד מריר 70%",
+"officialName": "שוקולד מריר, 70-85% מוצקי קקאו",
+"en": "Chocolate, dark, 70-85% cacao solids",
+"kcal": 598.0,
+"protein": 7.8,
+"fat": 42.6,
+"carbs": 45.9,
+"fiber": 10.9,
+"sugar": 24.0,
+"satFat": 24.49,
+"sodium": 20.0,
+"calcium": 73.0,
+"iron": 11.9,
+"b12": 0.28,
+"vitC": null,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "snack",
+"role": "fat",
+"units": [
+[
+"יחידה בינונית",
+9.0
+],
+[
+"אריזה",
+100.0
+],
+[
+"ריבוע/ קוביה",
+4.0
+]
+]
+},
+{
+"id": "bamba",
+"code": 2581,
+"name": "במבה",
+"officialName": "חטיף בוטנים, במבה, אסם",
+"en": "Snack, corn-based with peanut, Bamba, Osem",
+"kcal": 534.0,
+"protein": 17.5,
+"fat": 34.0,
+"carbs": 39.5,
+"fiber": 5.5,
+"sugar": 3.2,
+"satFat": 5.6,
+"sodium": 390.0,
+"calcium": 29.3,
+"iron": 8.0,
+"b12": 0.96,
+"vitC": 20.0,
+"allergens": [
+"peanuts"
+],
+"diet": "v",
+"category": "snack",
+"role": "fat",
+"units": [
+[
+"יחידה בינונית",
+60.0
+],
+[
+"כף",
+4.0
+],
+[
+"אריזה",
+200.0
+],
+[
+"שקית",
+25.0
+],
+[
+"אריזה גדולה",
+80.0
+]
+]
+},
+{
+"id": "halva",
+"code": 4711,
+"name": "חלבה",
+"officialName": "חלבה פשוטה",
+"en": "Halvah, plain",
+"kcal": 522.0,
+"protein": 8.0,
+"fat": 31.9,
+"carbs": 53.1,
+"fiber": 4.5,
+"sugar": 53.1,
+"satFat": 5.6,
+"sodium": 19.0,
+"calcium": 24.0,
+"iron": 2.51,
+"b12": 0.0,
+"vitC": 0.0,
+"allergens": [
+"sesame"
+],
+"diet": "v",
+"category": "snack",
+"role": "fat",
+"units": [
+[
+"כף",
+9.0
+],
+[
+"כפית",
+4.0
+],
+[
+"חבילה",
+100.0
+],
+[
+"אריזה אישית",
+25.0
+]
+]
+},
+{
+"id": "coffee_cappuccino",
+"code": 4814,
+"name": "קפוצ׳ינו",
+"officialName": "קפה, מוכן קפוצ'ינו",
+"en": "Cappuccino",
+"kcal": 32.0,
+"protein": 1.7,
+"fat": 1.7,
+"carbs": 2.5,
+"fiber": 0.1,
+"sugar": 2.6,
+"satFat": 0.95,
+"sodium": 23.0,
+"calcium": 60.0,
+"iron": 0.04,
+"b12": 0.18,
+"vitC": 0.0,
+"allergens": [
+"dairy"
+],
+"diet": "vg",
+"category": "drink",
+"role": "other",
+"units": [
+[
+"כוס",
+240.0
+],
+[
+"ספל",
+250.0
+]
+]
+},
+{
+"id": "lemon_juice",
+"code": 3143,
+"name": "מיץ לימון",
+"officialName": "מיץ לימון טבעי",
+"en": "Juice, lemon",
+"kcal": 22.0,
+"protein": 0.3,
+"fat": 0.2,
+"carbs": 6.6,
+"fiber": 0.3,
+"sugar": 2.5,
+"satFat": 0.04,
+"sodium": 1.0,
+"calcium": 6.0,
+"iron": 0.08,
+"b12": 0.0,
+"vitC": 38.7,
+"allergens": [],
+"diet": "v",
+"category": "other",
+"role": "veg",
+"units": [
+[
+"כף",
+15.0
+],
+[
+"כפית",
+4.0
+]
+]
+},
+{
+"id": "tomato_sauce_ketchup",
+"code": 3700,
+"name": "קטשופ",
+"officialName": "קטשופ עגבניות",
+"en": "Tomato ketchup (catsup)",
+"kcal": 112.0,
+"protein": 1.3,
+"fat": 0.2,
+"carbs": 25.9,
+"fiber": 0.3,
+"sugar": 21.7,
+"satFat": 0.05,
+"sodium": 907.0,
+"calcium": 16.0,
+"iron": 0.41,
+"b12": 0.0,
+"vitC": 4.1,
+"allergens": [],
+"diet": "v",
+"category": "other",
+"role": "carb",
+"units": [
+[
+"כף",
+17.0
+],
+[
+"כפית",
+6.0
+],
+[
+"אריזה",
+750.0
+],
+[
+"אריזה אישית",
+10.0
+]
+]
+},
+{
+"id": "amba",
+"code": 3267,
+"name": "עמבה",
+"officialName": "עמבה",
+"en": "Mango, Amba, pickled, homemade",
+"kcal": 41.0,
+"protein": 0.7,
+"fat": 0.3,
+"carbs": 9.8,
+"fiber": 1.0,
+"sugar": 7.9,
+"satFat": 0.06,
+"sodium": 183.4,
+"calcium": 9.0,
+"iron": 0.18,
+"b12": 0.0,
+"vitC": 46.1,
+"allergens": [],
+"diet": "v",
+"category": "other",
+"role": "veg",
+"units": [
+[
+"כף",
+11.0
+]
+]
+},
+{
+"id": "schug",
+"code": 3711,
+"name": "סחוג",
+"officialName": "סחוג ביתי",
+"en": "S'chug, homemade",
+"kcal": 78.0,
+"protein": 3.5,
+"fat": 0.4,
+"carbs": 15.7,
+"fiber": 1.7,
+"sugar": 3.1,
+"satFat": 0.05,
+"sodium": 131.1,
+"calcium": 80.1,
+"iron": 1.26,
+"b12": 0.0,
+"vitC": 103.3,
+"allergens": [],
+"diet": "v",
+"category": "other",
+"role": "veg",
+"units": [
+[
+"כף",
+12.0
+],
+[
+"כפית",
+6.0
+]
+]
+}
+]
+}

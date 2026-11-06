@@ -1,6 +1,10 @@
 import { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
+import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
+import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
+import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
+import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import type { Sex } from '../engine/types';
 
 export interface BodyParams {
@@ -10,7 +14,10 @@ export interface BodyParams {
   bodyFatPct: number;
 }
 
-/** Shape coefficients derived from height, weight and body fat. Exported for tests and for the data overlay. */
+/**
+ * Shape coefficients derived from height, weight and body fat (and from them, lean mass).
+ * The shape follows the numbers; it does not exaggerate change. Exported for tests.
+ */
 export function bodyShape(p: BodyParams) {
   const H = p.heightCm / 100;
   const bmi = p.weightKg / (H * H);
@@ -21,122 +28,211 @@ export function bodyShape(p: BodyParams) {
   const refFfmi = male ? 19 : 15.5;
   const girth = Math.pow(bmi / 22, 0.45);
   const fat = (p.bodyFatPct - refBf) / 100;
-  const muscle = 1 + (ffmi - refFfmi) * 0.03;
+  const muscle = Math.max(0.9, 1 + (ffmi - refFfmi) * 0.03);
   const s = H / 1.75;
   return {
     H,
-    shoulder: (male ? 0.205 : 0.178) * s * girth * Math.max(0.9, muscle),
-    chest: (male ? 0.165 : 0.155) * s * girth * (1 + fat * 0.6) * Math.max(0.92, muscle),
-    waist: (male ? 0.138 : 0.122) * s * girth * (1 + fat * (male ? 2.4 : 1.6)),
-    hip: (male ? 0.158 : 0.178) * s * girth * (1 + fat * (male ? 1.1 : 1.7)),
-    thigh: (male ? 0.072 : 0.078) * s * girth * (1 + fat * 1.2) * Math.max(0.9, muscle),
-    arm: (male ? 0.046 : 0.04) * s * girth * (1 + fat * 1.0) * Math.max(0.9, muscle),
+    fat,
+    muscle,
+    shoulder: (male ? 0.205 : 0.178) * s * girth * muscle,
+    chest: (male ? 0.165 : 0.152) * s * girth * (1 + fat * 0.6) * Math.max(0.92, muscle),
+    waist: (male ? 0.136 : 0.12) * s * girth * (1 + fat * (male ? 2.4 : 1.6)),
+    belly: (male ? 0.14 : 0.126) * s * girth * (1 + fat * (male ? 2.8 : 1.9)),
+    hip: (male ? 0.156 : 0.176) * s * girth * (1 + fat * (male ? 1.1 : 1.7)),
+    thigh: (male ? 0.074 : 0.08) * s * girth * (1 + fat * 1.2) * muscle,
+    calf: (male ? 0.05 : 0.048) * s * girth * (1 + fat * 0.6) * muscle,
+    arm: (male ? 0.047 : 0.041) * s * girth * (1 + fat * 1.0) * muscle,
+    neck: (male ? 0.056 : 0.048) * s * Math.max(0.9, girth * 0.95),
   };
 }
 
+/* ---------- hologram shading ---------- */
+
 const vertex = `
-varying vec3 vN; varying vec3 vView; varying float vY;
+varying vec3 vN; varying vec3 vView; varying vec3 vW;
 void main(){
   vec4 wp = modelMatrix * vec4(position,1.0);
-  vY = wp.y;
+  vW = wp.xyz;
   vN = normalize(normalMatrix * normal);
   vec4 mv = viewMatrix * wp;
   vView = normalize(-mv.xyz);
   gl_Position = projectionMatrix * mv;
 }`;
 const fragment = `
-uniform vec3 uColor; uniform float uTime; uniform float uOpacity;
-varying vec3 vN; varying vec3 vView; varying float vY;
+uniform vec3 uColor; uniform vec3 uTop; uniform float uTime; uniform float uOpacity; uniform float uH;
+varying vec3 vN; varying vec3 vView; varying vec3 vW;
 void main(){
-  float fres = pow(1.0 - max(dot(vN, vView), 0.0), 2.2);
-  float scan = 0.5 + 0.5 * sin(vY * 140.0 - uTime * 3.0);
-  float sweep = smoothstep(0.06, 0.0, abs(fract(vY * 0.35 - uTime * 0.12) - 0.5) - 0.44);
-  float a = (0.12 + fres * 0.85 + scan * 0.06 + sweep * 0.35) * uOpacity;
-  gl_FragColor = vec4(uColor * (0.55 + fres * 0.9 + sweep * 0.6), a);
+  float fres = pow(1.0 - abs(dot(vN, vView)), 2.4);
+  float h = clamp(vW.y / uH, 0.0, 1.0);
+  vec3 col = mix(uColor, uTop, h);
+  float scan = smoothstep(0.55, 1.0, 0.5 + 0.5 * sin(vW.y * 220.0 - uTime * 4.0));
+  float grid = smoothstep(0.92, 1.0, 0.5 + 0.5 * sin(atan(vW.z, vW.x) * 24.0));
+  float sweep = smoothstep(0.045, 0.0, abs(fract(h * 0.9 - uTime * 0.16) - 0.5) - 0.455);
+  float flick = 0.94 + 0.06 * sin(uTime * 23.0 + vW.y * 9.0);
+  float a = (0.035 + fres * 0.5 + scan * 0.05 + grid * 0.03 + sweep * 0.25) * uOpacity * flick;
+  gl_FragColor = vec4(col * (0.35 + fres * 0.75 + sweep * 0.6 + scan * 0.1), a);
 }`;
 
-function holoMaterial(color: THREE.Color, opacity: number) {
+function holoMaterial(color: string, top: string, opacity: number, H: number) {
   return new THREE.ShaderMaterial({
-    uniforms: { uColor: { value: color }, uTime: { value: 0 }, uOpacity: { value: opacity } },
+    uniforms: { uColor: { value: new THREE.Color(color) }, uTop: { value: new THREE.Color(top) }, uTime: { value: 0 }, uOpacity: { value: opacity }, uH: { value: H } },
     vertexShader: vertex,
     fragmentShader: fragment,
     transparent: true,
     depthWrite: false,
-    side: THREE.DoubleSide,
+    side: THREE.FrontSide,
     blending: THREE.AdditiveBlending,
   });
 }
 
-function buildBody(p: BodyParams, mat: THREE.Material): THREE.Group {
+const beamFragment = `
+uniform vec3 uColor; uniform float uTime; varying vec3 vW; varying vec3 vN; varying vec3 vView;
+void main(){
+  float h = clamp(vW.y / 2.1, 0.0, 1.0);
+  float fade = (1.0 - h) * (1.0 - h);
+  float ray = 0.6 + 0.4 * sin(atan(vW.z, vW.x) * 18.0 + uTime * 0.8);
+  gl_FragColor = vec4(uColor, fade * 0.06 * ray);
+}`;
+
+/** A rounded, tapered limb as one smooth surface (no visible joints). */
+function limb(len: number, r1: number, r2: number, mat: THREE.Material): THREE.Mesh {
+  const pts: THREE.Vector2[] = [];
+  const cap = 6;
+  for (let i = 0; i <= cap; i++) {
+    const a = (i / cap) * (Math.PI / 2);
+    pts.push(new THREE.Vector2(Math.sin(a) * r2, -len / 2 - r2 * 0.6 + (1 - Math.cos(a)) * r2 * 0.6));
+  }
+  for (let i = 1; i < 10; i++) {
+    const t = i / 10;
+    const bulge = Math.sin(t * Math.PI) * 0.08 * (r1 + r2);
+    pts.push(new THREE.Vector2(r2 + (r1 - r2) * t + bulge, -len / 2 + len * t));
+  }
+  for (let i = 0; i <= cap; i++) {
+    const a = (i / cap) * (Math.PI / 2);
+    pts.push(new THREE.Vector2(Math.cos(a) * r1, len / 2 + Math.sin(a) * r1 * 0.6));
+  }
+  return new THREE.Mesh(new THREE.LatheGeometry(pts, 32), mat);
+}
+
+function place(m: THREE.Object3D, a: THREE.Vector3, b: THREE.Vector3) {
+  m.position.copy(a).add(b).multiplyScalar(0.5);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), a.clone().sub(b).normalize());
+}
+
+export function buildBody(p: BodyParams, mat: THREE.Material): THREE.Group {
   const b = bodyShape(p);
   const H = b.H;
+  const k = H / 1.75;
   const g = new THREE.Group();
+  // torso: one smooth lathe from crotch to neck base
   const prof: [number, number][] = [
-    [0.001, 0.455],
-    [b.hip * 0.82, 0.47],
-    [b.hip, 0.52],
-    [(b.hip + b.waist) / 2, 0.57],
-    [b.waist, 0.615],
+    [0.001, 0.452],
+    [b.hip * 0.62, 0.458],
+    [b.hip * 0.9, 0.475],
+    [b.hip, 0.505],
+    [b.hip * 0.97, 0.535],
+    [(b.hip + b.belly) / 2, 0.56],
+    [b.belly, 0.585],
+    [b.waist, 0.62],
     [(b.waist + b.chest) / 2, 0.665],
-    [b.chest, 0.72],
-    [b.shoulder * 0.92, 0.79],
-    [b.shoulder * 0.55, 0.815],
-    [0.052 * (H / 1.75), 0.835],
-    [0.001, 0.84],
+    [b.chest * 0.98, 0.7],
+    [b.chest, 0.725],
+    [b.shoulder * 0.86, 0.765],
+    [b.shoulder * 0.9, 0.79],
+    [b.shoulder * 0.62, 0.812],
+    [b.neck * 1.25, 0.828],
+    [b.neck, 0.84],
+    [b.neck * 0.98, 0.875],
+    [b.neck * 1.05, 0.885],
+    [0.001, 0.886],
   ];
-  const torsoGeo = new THREE.LatheGeometry(
-    prof.map(([r, y]) => new THREE.Vector2(r, y * H)),
-    48,
-  );
-  const torso = new THREE.Mesh(torsoGeo, mat);
-  torso.scale.z = 0.66 + Math.max(0, (p.bodyFatPct - (p.sex === 'male' ? 15 : 25)) / 100) * 0.9;
+  const torso = new THREE.Mesh(new THREE.LatheGeometry(prof.map(([r, y]) => new THREE.Vector2(r, y * H)), 64), mat);
+  // belly and glutes push forward/back with body fat; chest deeper with muscle
+  torso.scale.z = 0.66 + Math.max(0, b.fat) * 0.9;
   g.add(torso);
-
-  const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.05 * (H / 1.75), 0.055 * (H / 1.75), 0.06 * H, 24), mat);
-  neck.position.y = 0.86 * H;
-  g.add(neck);
-  const head = new THREE.Mesh(new THREE.SphereGeometry(0.105 * (H / 1.75), 32, 24), mat);
-  head.scale.set(0.86, 1.08, 0.95);
-  head.position.y = 0.935 * H;
+  const head = new THREE.Mesh(new THREE.SphereGeometry(0.104 * k, 40, 28), mat);
+  head.scale.set(0.84, 1.1, 0.95);
+  head.position.y = 0.94 * H;
   g.add(head);
 
-  const k = H / 1.75;
-  const seg = (a: THREE.Vector3, c: THREE.Vector3, r1: number, r2: number) => {
-    const len = a.distanceTo(c);
-    const m = new THREE.Mesh(new THREE.CylinderGeometry(r2, r1, len, 28, 1, true), mat);
-    m.position.copy(a).add(c).multiplyScalar(0.5);
-    m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), c.clone().sub(a).normalize());
-    g.add(m);
-  };
-  const joint = (at: THREE.Vector3, r: number, sy = 1) => {
-    const m = new THREE.Mesh(new THREE.SphereGeometry(r, 24, 16), mat);
-    m.position.copy(at);
-    m.scale.y = sy;
-    g.add(m);
-  };
   for (const side of [-1, 1]) {
-    // legs
-    const hipJ = new THREE.Vector3(side * b.hip * 0.5, 0.465 * H, 0);
-    const knee = new THREE.Vector3(side * b.hip * 0.4, 0.27 * H, 0.005);
-    const ankle = new THREE.Vector3(side * b.hip * 0.36, 0.045 * H, -0.005);
-    seg(hipJ, knee, b.thigh, b.thigh * 0.58);
-    joint(knee, b.thigh * 0.58);
-    seg(knee, ankle, b.thigh * 0.62, b.thigh * 0.34);
-    joint(ankle, b.thigh * 0.34);
-    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.045 * k, 20, 12), mat);
-    foot.scale.set(0.8, 0.45, 2.1);
-    foot.position.set(ankle.x, 0.02 * H, 0.045 * k);
+    const hipJ = new THREE.Vector3(side * b.hip * 0.5, 0.47 * H, 0);
+    const knee = new THREE.Vector3(side * b.hip * 0.4, 0.268 * H, 0.008);
+    const ankle = new THREE.Vector3(side * b.hip * 0.36, 0.05 * H, -0.006);
+    const thigh = limb(hipJ.distanceTo(knee), b.thigh, b.thigh * 0.6, mat);
+    place(thigh, hipJ, knee);
+    g.add(thigh);
+    const calf = limb(knee.distanceTo(ankle), b.calf * 1.08, b.calf * 0.62, mat);
+    place(calf, knee, ankle);
+    g.add(calf);
+    const foot = new THREE.Mesh(new THREE.SphereGeometry(0.046 * k, 24, 14), mat);
+    foot.scale.set(0.78, 0.42, 2.1);
+    foot.position.set(ankle.x, 0.022 * H, 0.045 * k);
     g.add(foot);
-    // arms
-    const sh = new THREE.Vector3(side * (b.shoulder - b.arm * 0.2), 0.795 * H, 0);
-    const elbow = new THREE.Vector3(side * (b.shoulder + b.arm * 0.55), 0.625 * H, -0.01);
-    const wrist = new THREE.Vector3(side * (b.shoulder + b.arm * 0.75), 0.475 * H, 0.02);
-    joint(sh, b.arm * 1.15);
-    seg(sh, elbow, b.arm, b.arm * 0.78);
-    joint(elbow, b.arm * 0.78);
-    seg(elbow, wrist, b.arm * 0.8, b.arm * 0.52);
-    joint(new THREE.Vector3(wrist.x, wrist.y - 0.04 * k, wrist.z), 0.038 * k, 1.5);
+
+    const sh = new THREE.Vector3(side * (b.shoulder - b.arm * 0.15), 0.792 * H, 0);
+    const elbow = new THREE.Vector3(side * (b.shoulder + b.arm * 0.55), 0.622 * H, -0.012);
+    const wrist = new THREE.Vector3(side * (b.shoulder + b.arm * 0.78), 0.47 * H, 0.02);
+    const upper = limb(sh.distanceTo(elbow), b.arm * 1.05, b.arm * 0.8, mat);
+    place(upper, sh, elbow);
+    g.add(upper);
+    const fore = limb(elbow.distanceTo(wrist), b.arm * 0.82, b.arm * 0.52, mat);
+    place(fore, elbow, wrist);
+    g.add(fore);
+    const hand = new THREE.Mesh(new THREE.SphereGeometry(0.036 * k, 20, 14), mat);
+    hand.scale.set(0.7, 1.45, 0.45);
+    hand.position.set(wrist.x + side * 0.004, wrist.y - 0.055 * k, wrist.z);
+    g.add(hand);
+    const deltoid = new THREE.Mesh(new THREE.SphereGeometry(b.arm * 1.22, 24, 16), mat);
+    deltoid.position.copy(sh).add(new THREE.Vector3(side * 0.006, 0.004, 0));
+    g.add(deltoid);
   }
+  return g;
+}
+
+function projector(color: string, x: number, beamMat: THREE.ShaderMaterial): THREE.Group {
+  const g = new THREE.Group();
+  g.position.x = x;
+  // glowing base disc
+  const c = document.createElement('canvas');
+  c.width = c.height = 128;
+  const ctx = c.getContext('2d')!;
+  const grd = ctx.createRadialGradient(64, 64, 4, 64, 64, 64);
+  grd.addColorStop(0, color);
+  grd.addColorStop(0.35, color + '88');
+  grd.addColorStop(1, color + '00');
+  ctx.fillStyle = grd;
+  ctx.fillRect(0, 0, 128, 128);
+  const disc = new THREE.Mesh(new THREE.CircleGeometry(0.42, 48), new THREE.MeshBasicMaterial({ map: new THREE.CanvasTexture(c), transparent: true, depthWrite: false, blending: THREE.AdditiveBlending }));
+  disc.rotation.x = -Math.PI / 2;
+  disc.position.y = 0.003;
+  g.add(disc);
+  for (const [r, w, o] of [[0.26, 0.012, 0.9], [0.34, 0.006, 0.5], [0.4, 0.004, 0.35]] as const) {
+    const ring = new THREE.Mesh(new THREE.RingGeometry(r, r + w, 96), new THREE.MeshBasicMaterial({ color, transparent: true, opacity: o, side: THREE.DoubleSide, depthWrite: false, blending: THREE.AdditiveBlending }));
+    ring.rotation.x = -Math.PI / 2;
+    ring.position.y = 0.004;
+    ring.userData.spin = r === 0.34 ? 0.4 : r === 0.4 ? -0.25 : 0;
+    g.add(ring);
+  }
+  // light beam
+  const beam = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.27, 2.1, 48, 1, true), beamMat);
+  beam.position.y = 1.05;
+  g.add(beam);
+  // rising particles
+  const n = 90;
+  const pos = new Float32Array(n * 3);
+  for (let i = 0; i < n; i++) {
+    const a = Math.random() * Math.PI * 2;
+    const r = 0.08 + Math.random() * 0.26;
+    pos[i * 3] = Math.cos(a) * r;
+    pos[i * 3 + 1] = Math.random() * 2;
+    pos[i * 3 + 2] = Math.sin(a) * r;
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  const pts = new THREE.Points(geo, new THREE.PointsMaterial({ color, size: 0.012, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending }));
+  pts.userData.particles = true;
+  g.add(pts);
   return g;
 }
 
@@ -149,100 +245,197 @@ export function webglAvailable(): boolean {
   }
 }
 
-export function Avatar3D(props: { bodies: (BodyParams & { label: string; color: string })[]; height?: number }) {
+export interface AvatarBody extends BodyParams {
+  label: string;
+  color: string;
+  sub?: string;
+}
+
+const lerp = (a: number, b: number, t: number) => a + (b - a) * t;
+const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
+
+/**
+ * Holographic body view. With two bodies, the second shows the forecast and carries a faint
+ * outline of the first, so the change is visible without exaggerating it. Changing the
+ * forecast morphs smoothly between shapes.
+ */
+export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?: boolean }) {
   const mount = useRef<HTMLDivElement>(null);
   const [ok] = useState(webglAvailable);
-  const bodiesKey = JSON.stringify(props.bodies);
+  const api = useRef<{ setBodies: (b: AvatarBody[]) => void } | null>(null);
+  const n = props.bodies.length;
+  const colorsKey = props.bodies.map((b) => b.color).join();
 
+  // scene setup: once per number of bodies / colours
   useEffect(() => {
     if (!ok || !mount.current) return;
     const el = mount.current;
     const w = el.clientWidth || 320;
     const h = props.height ?? 360;
-    const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     renderer.setSize(w, h);
     el.appendChild(renderer.domElement);
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(32, w / h, 0.1, 50);
-    const n = props.bodies.length;
-    camera.position.set(0, 1.0, 3.6 + (n - 1) * 0.9);
+    scene.background = new THREE.Color('#071216');
+    scene.fog = new THREE.Fog('#071216', 4, 9);
+    const camera = new THREE.PerspectiveCamera(30, w / h, 0.1, 50);
+    camera.position.set(0, 1.05, 3.9 + (n - 1) * 1.0);
     const controls = new OrbitControls(camera, renderer.domElement);
-    controls.target.set(0, 0.85, 0);
+    controls.target.set(0, 0.9, 0);
     controls.enablePan = false;
     controls.enableZoom = false;
-    controls.autoRotate = true;
-    controls.autoRotateSpeed = 1.2;
+    controls.enableDamping = true;
     controls.minPolarAngle = Math.PI * 0.3;
-    controls.maxPolarAngle = Math.PI * 0.6;
+    controls.maxPolarAngle = Math.PI * 0.58;
 
-    const mats: THREE.ShaderMaterial[] = [];
-    const root = new THREE.Group();
-    props.bodies.forEach((bp, i) => {
-      const m = holoMaterial(new THREE.Color(bp.color), 1);
-      mats.push(m);
-      const body = buildBody(bp, m);
-      body.position.x = n === 1 ? 0 : ((n - 1) / 2 - i) * 0.75;
-      root.add(body);
-      const ring = new THREE.Mesh(new THREE.RingGeometry(0.22, 0.24, 64), new THREE.MeshBasicMaterial({ color: bp.color, transparent: true, opacity: 0.5, side: THREE.DoubleSide }));
-      ring.rotation.x = -Math.PI / 2;
-      ring.position.set(body.position.x, 0.002, 0);
-      root.add(ring);
-    });
-    scene.add(root);
-    const grid = new THREE.PolarGridHelper(1.6, 12, 6, 64, 0x3a6f80, 0x24434d);
+    const composer = new EffectComposer(renderer);
+    composer.addPass(new RenderPass(scene, camera));
+    const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.55, 0.35, 0.2);
+    composer.addPass(bloom);
+    composer.addPass(new OutputPass());
+
+    const grid = new THREE.PolarGridHelper(2.2, 16, 8, 96, 0x1f5866, 0x123642);
     (grid.material as THREE.Material).transparent = true;
-    (grid.material as THREE.Material).opacity = 0.35;
+    (grid.material as THREE.Material).opacity = 0.5;
     scene.add(grid);
 
-    let raf = 0;
-    const clock = new THREE.Clock();
-    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    const xs = props.bodies.map((_, i) => (n === 1 ? 0 : ((n - 1) / 2 - i) * 0.8)); // first body on the right (RTL timeline)
+    const mats: THREE.ShaderMaterial[] = [];
+    const beams: THREE.ShaderMaterial[] = [];
+    const holders = props.bodies.map((b, i) => {
+      const m = holoMaterial(b.color, '#' + new THREE.Color(b.color).lerp(new THREE.Color('#ffffff'), 0.3).getHexString(), 0.9, b.heightCm / 100);
+      mats.push(m);
+      const beamMat = new THREE.ShaderMaterial({ uniforms: { uColor: { value: new THREE.Color(b.color) }, uTime: { value: 0 } }, vertexShader: vertex, fragmentShader: beamFragment, transparent: true, depthWrite: false, side: THREE.DoubleSide, blending: THREE.AdditiveBlending });
+      beams.push(beamMat);
+      scene.add(projector(b.color, xs[i], beamMat));
+      const holder = new THREE.Group();
+      holder.position.x = xs[i];
+      scene.add(holder);
+      return holder;
+    });
+    const ghostMat = holoMaterial('#dff6ff', '#ffffff', 0.16, 1.75);
+    mats.push(ghostMat);
+    const ghostHolder = new THREE.Group();
+    if (n > 1) {
+      ghostHolder.position.x = xs[n - 1];
+      scene.add(ghostHolder);
+    }
+
+    let current: BodyParams[] = props.bodies.map((b) => ({ ...b }));
+    let from: BodyParams[] = current;
+    let to: BodyParams[] = current;
+    let t0 = 0;
+    const MORPH = 900;
+    const rebuild = (params: BodyParams[]) => {
+      holders.forEach((holder, i) => {
+        holder.children.forEach((c) => (c as THREE.Mesh).geometry?.dispose());
+        holder.clear();
+        holder.add(buildBody(params[i], mats[i]));
+      });
+      if (n > 1 && props.ghost !== false) {
+        ghostHolder.children.forEach((c) => (c as THREE.Mesh).geometry?.dispose());
+        ghostHolder.clear();
+        const ghost = buildBody(params[0], ghostMat);
+        ghost.scale.setScalar(1.002);
+        ghostHolder.add(ghost);
+      }
+    };
+    rebuild(current);
+    api.current = {
+      setBodies: (b) => {
+        from = current;
+        to = b.map((x) => ({ sex: x.sex, heightCm: x.heightCm, weightKg: x.weightKg, bodyFatPct: x.bodyFatPct }));
+        t0 = performance.now();
+      },
+    };
+
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
     controls.autoRotate = !reduce;
+    controls.autoRotateSpeed = 0.9;
+    let raf = 0;
+    let visible = true;
+    const io = new IntersectionObserver(([e]) => (visible = e.isIntersecting));
+    io.observe(el);
+    const clock = new THREE.Clock();
     const tick = () => {
-      const t = clock.getElapsedTime();
-      mats.forEach((m) => (m.uniforms.uTime.value = reduce ? 0 : t));
-      controls.update();
-      renderer.render(scene, camera);
       raf = requestAnimationFrame(tick);
+      if (!visible) return;
+      const t = clock.getElapsedTime();
+      const dt = clock.getDelta();
+      if (to !== from) {
+        const k = Math.min(1, (performance.now() - t0) / (reduce ? 1 : MORPH));
+        const e = ease(k);
+        current = to.map((p, i) => ({ ...p, weightKg: lerp(from[i]?.weightKg ?? p.weightKg, p.weightKg, e), bodyFatPct: lerp(from[i]?.bodyFatPct ?? p.bodyFatPct, p.bodyFatPct, e) }));
+        rebuild(current);
+        if (k >= 1) from = to;
+      }
+      mats.forEach((m) => (m.uniforms.uTime.value = reduce ? 0 : t));
+      beams.forEach((m) => (m.uniforms.uTime.value = reduce ? 0 : t));
+      if (!reduce)
+        scene.traverse((o) => {
+          if (o.userData.spin) o.rotation.z += o.userData.spin * 0.016;
+          if (o.userData.particles) {
+            const a = (o as THREE.Points).geometry.getAttribute('position') as THREE.BufferAttribute;
+            for (let i = 0; i < a.count; i++) {
+              let y = a.getY(i) + 0.004 + dt * 0;
+              if (y > 2) y = 0;
+              a.setY(i, y);
+            }
+            a.needsUpdate = true;
+          }
+        });
+      controls.update();
+      composer.render();
     };
     tick();
     const onResize = () => {
       const nw = el.clientWidth || w;
       renderer.setSize(nw, h);
+      composer.setSize(nw, h);
       camera.aspect = nw / h;
       camera.updateProjectionMatrix();
     };
     window.addEventListener('resize', onResize);
     return () => {
       cancelAnimationFrame(raf);
+      io.disconnect();
       window.removeEventListener('resize', onResize);
       controls.dispose();
       scene.traverse((o) => {
-        if (o instanceof THREE.Mesh) {
-          o.geometry.dispose();
-          (Array.isArray(o.material) ? o.material : [o.material]).forEach((m) => m.dispose());
-        }
+        const m = o as THREE.Mesh;
+        m.geometry?.dispose();
+        const mat = m.material as THREE.Material | THREE.Material[] | undefined;
+        (Array.isArray(mat) ? mat : mat ? [mat] : []).forEach((x) => x.dispose());
       });
+      composer.dispose();
       renderer.dispose();
       el.removeChild(renderer.domElement);
+      api.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ok, bodiesKey, props.height]);
+  }, [ok, n, colorsKey, props.height, props.ghost]);
+
+  // shape changes morph instead of rebuilding the scene
+  const shapeKey = JSON.stringify(props.bodies.map((b) => [b.weightKg, b.bodyFatPct, b.heightCm, b.sex]));
+  useEffect(() => {
+    api.current?.setBodies(props.bodies);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [shapeKey]);
 
   if (!ok) return <div className="avatar-fallback">התצוגה התלת־ממדית לא נתמכת במכשיר הזה. הנתונים מוצגים למטה.</div>;
   return (
     <div className="avatar-wrap">
-      <div ref={mount} className="avatar-canvas" style={{ height: props.height ?? 360 }} aria-label="אבטאר תלת־ממדי של הגוף" role="img" />
-      {props.bodies.length > 1 && (
-        <div className="avatar-labels">
-          {props.bodies.map((b) => (
-            <span key={b.label} style={{ color: b.color }}>
-              {b.label}
-            </span>
-          ))}
-        </div>
-      )}
+      <div ref={mount} className="avatar-canvas" style={{ height: props.height ?? 360 }} aria-label={`תצוגה תלת־ממדית: ${props.bodies.map((b) => `${b.label} ${b.sub ?? ''}`).join(', ')}`} role="img" />
+      <div className="avatar-labels">
+        {props.bodies.map((b) => (
+          <span key={b.label + b.color} style={{ color: b.color }}>
+            <b>{b.label}</b>
+            {b.sub && <small>{b.sub}</small>}
+          </span>
+        ))}
+      </div>
+      {n > 1 && props.ghost !== false && <div className="avatar-legend">קו המתאר הלבן = הגוף של היום, לשם השוואה</div>}
     </div>
   );
 }

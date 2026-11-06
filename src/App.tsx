@@ -10,8 +10,9 @@ import { Progress } from './screens/Progress';
 import { Programs } from './screens/Programs';
 import { Profile } from './screens/Profile';
 import { Pro } from './screens/Pro';
+import { Devices } from './screens/Devices';
 
-export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'pro';
+export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'pro' | 'devices';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'today', label: 'היום', icon: 'M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z' },
@@ -33,6 +34,8 @@ export function App() {
   const done = useStore((s) => s.onboardingDone && !!s.profile);
   const tourDone = useStore((s) => s.tourDone);
   const theme = useStore((s) => s.settings.theme);
+  const photo = useStore((s) => s.profilePhoto);
+  const name = useStore((s) => s.profile?.name);
   const [tab, setTab] = useState<Tab>('today');
   const [tour, setTour] = useState(false);
 
@@ -70,8 +73,8 @@ export function App() {
           <div className="brand">
             <span className="logo-mark">P</span> PRIME
           </div>
-          <button className={`icon-btn ${tab === 'profile' ? 'on' : ''}`} onClick={() => go('profile')} aria-label="פרופיל והגדרות">
-            <Icon d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0" />
+          <button className={`avatar-btn ${tab === 'profile' ? 'on' : ''}`} onClick={() => go('profile')} aria-label="פרופיל והגדרות">
+            {photo ? <img src={photo} alt="" /> : name ? <span>{name.trim()[0]}</span> : <Icon d="M12 12a4 4 0 100-8 4 4 0 000 8zM4 21a8 8 0 0116 0" />}
           </button>
         </header>
         <main>
@@ -90,6 +93,7 @@ export function App() {
             />
           )}
           {tab === 'pro' && <Pro back={() => go('profile')} />}
+          {tab === 'devices' && <Devices back={() => go('profile')} />}
         </main>
         <nav className="tabbar" aria-label="ניווט ראשי">
           {TABS.map((t) => (

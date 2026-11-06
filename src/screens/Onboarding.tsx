@@ -352,8 +352,8 @@ export function Onboarding() {
               <Avatar3D
                 height={320}
                 bodies={[
-                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: profile.weightKg, bodyFatPct: profile.bodyFatPct!, label: 'היום', color: '#5ad1e6' },
-                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: fc[12].weightKg, bodyFatPct: fc[12].bodyFatPct, label: 'בעוד 12 שבועות', color: '#9b8cff' },
+                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: profile.weightKg, bodyFatPct: profile.bodyFatPct!, label: 'היום', color: '#4fd8ec' },
+                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: fc[12].weightKg, bodyFatPct: fc[12].bodyFatPct, label: 'בעוד 12 שבועות', color: '#a594ff' },
                 ]}
               />
               <div className="compare">

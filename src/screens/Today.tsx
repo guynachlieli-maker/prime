@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt } from '../ui/kit';
 import { WEEK_TIPS } from '../ui/Tour';
-import { addLog, addWeighIn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, setState, todayISO, useStore } from '../state/store';
+import { recordRecipe } from '../engine/learning';
+import { addLog, addWeighIn, learn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, setState, todayISO, useStore } from '../state/store';
 import { eatenOn, useAdaptive, useAlerts, usePlan, useSafety } from '../state/derived';
 import { RECIPES } from '../data/recipes';
 import { SLOT_LABEL } from '../engine/menu';
@@ -132,11 +133,11 @@ export function Today({ go }: { go: (t: Tab) => void }) {
             <div>
               <strong>{nextRecipe.name}</strong>
               <div className="muted">
-                {fmt(nextMeal.nutrients.kcal)} קק"ל · {fmt(nextMeal.nutrients.protein)} ג׳ חלבון{nextMeal.scale !== 1 ? ` · מנה ×${nextMeal.scale}` : ''}
+                {fmt(nextMeal.nutrients.kcal)} קק"ל · {fmt(nextMeal.nutrients.protein)} ג׳ חלבון
               </div>
             </div>
             <Button
-              onClick={() =>
+              onClick={() => {
                 addLog({
                   date,
                   time: nowTime(),
@@ -144,8 +145,9 @@ export function Today({ go }: { go: (t: Tab) => void }) {
                   items: [{ foodId: nextRecipe.id, name: nextRecipe.name, grams: 0 }],
                   method: 'plan',
                   nutrients: nextMeal.nutrients,
-                })
-              }
+                });
+                learn((l) => recordRecipe(l, nextRecipe.id, 'eaten'));
+              }}
             >
               אכלתי בדיוק את זה
             </Button>
@@ -203,6 +205,30 @@ export function Today({ go }: { go: (t: Tab) => void }) {
           </Button>
         </div>
       </div>
+
+      {s.deviceData.length > 0 &&
+        (() => {
+          const last = [...s.deviceData].reverse();
+          const steps = last.find((d) => d.date === date && d.steps)?.steps;
+          const sleep = last.find((d) => d.sleepHours)?.sleepHours;
+          const hr = last.find((d) => d.restingHr)?.restingHr;
+          return (
+            <button className="device-strip as-link" onClick={() => go('devices')} aria-label="נתוני מכשירים">
+              <div>
+                <b>{steps ? fmt(steps) : '—'}</b>
+                <span>צעדים היום</span>
+              </div>
+              <div>
+                <b>{sleep ? fmt(sleep, 1) : '—'}</b>
+                <span>שעות שינה</span>
+              </div>
+              <div>
+                <b>{hr ?? '—'}</b>
+                <span>דופק במנוחה</span>
+              </div>
+            </button>
+          );
+        })()}
 
       <Sheet open={weighOpen} onClose={() => setWeighOpen(false)} title="שקילה">
         <p className="fineprint">הכי מדויק: בבוקר, אחרי שירותים ולפני אוכל. פעם ביום מספיק.</p>

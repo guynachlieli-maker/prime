@@ -13,7 +13,7 @@ const SHOTS = process.argv[2];
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({
       id: 'msg_test', type: 'message', role: 'assistant', model: 'claude-opus-5-5', stop_reason: 'end_turn', stop_sequence: null,
       usage: { input_tokens: 10, output_tokens: 10 },
-      content: [{ type: 'text', text: JSON.stringify({ items: [{ foodId: 'rice_white', grams: 180, confidence: 'high' }, { foodId: 'chicken_breast', grams: 140, confidence: 'medium' }, { foodId: 'unknown_x', grams: 50, confidence: 'low' }], clarifyingQuestion: 'נוסף שמן לעוף?', notes: 'אורז לבן וחזה עוף.' }) }],
+      content: [{ type: 'text', text: JSON.stringify({ items: [{ foodId: 'rice_white', grams: 180, confidence: 'high' }, { foodId: 'chicken_breast', grams: 140, confidence: 'medium' }, { foodId: 'unknown_x', grams: 50, confidence: 'low' }], clarifyingQuestion: 'נוסף שמן לעוף?', clarifyingFoodId: 'olive_oil', notes: 'אורז לבן וחזה עוף.' }) }],
     }) });
   });
   // seed a finished profile directly
@@ -43,7 +43,7 @@ const SHOTS = process.argv[2];
   const total = await page.locator('.basket-total strong').textContent();
   console.log('ITEMS', names.join(' | '), 'TOTAL', total);
   console.log('REQ model', reqBody.model, 'format', reqBody.output_config && reqBody.output_config.format && reqBody.output_config.format.type, 'img', reqBody.messages[0].content[0].type);
-  await page.getByRole('button', { name: 'כן, נוסף שמן (כף)' }).click();
+  await page.getByRole('button', { name: /כן, להוסיף/ }).click();
   await page.getByRole('button', { name: 'אישור ורישום' }).click();
   await page.locator('.tab-menu').click();
   await page.waitForTimeout(300);

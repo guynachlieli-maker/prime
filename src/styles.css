@@ -358,3 +358,98 @@ a { color: var(--accent); }
 .msgs { list-style: none; padding: 0; }
 .msgs li { background: var(--accent-soft); border-radius: 12px; padding: 8px 12px; margin: 6px 0; font-size: 14px; }
 .avatar-loading { display: grid; place-items: center; color: #9fd6e0; font-size: 14px; }
+
+/* ---------- selected state: never color alone (WCAG 1.4.1) ---------- */
+/* Every selected control gets: a solid fill + contrasting text, a thick border, bold text and a check mark. */
+.segmented button.on,
+.choice.on,
+.chip.on,
+.yesno-btns button.on,
+.days button.on,
+.week-slider button.on {
+  background: var(--accent);
+  color: var(--accent-ink);
+  border-color: var(--text);
+  font-weight: 800;
+  box-shadow: 0 0 0 2px var(--text) inset;
+}
+.segmented button.on::before,
+.chip.on::before,
+.yesno-btns button.on::before,
+.week-slider button.on::before {
+  content: '✓';
+  margin-inline-end: 6px;
+  font-weight: 900;
+}
+.segmented button { border: 2px solid transparent; }
+.choice { border-width: 2px; position: relative; }
+.choice.on .choice-desc { color: var(--accent-ink); opacity: 0.9; }
+.choice.on .choice-icon { background: var(--accent-ink); color: var(--accent); }
+.choice.on::after {
+  content: '✓';
+  position: absolute;
+  inset-inline-end: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: var(--accent-ink);
+  color: var(--accent);
+  font-weight: 900;
+}
+.days button.on span { color: var(--accent-ink); }
+.days button.on b::after { content: ' ✓'; }
+.chip.small.on::before { content: none; }
+/* unselected controls keep a visible outline so the two states differ in shape, not just colour */
+.yesno-btns button:not(.on), .chip:not(.on), .week-slider button:not(.on), .days button:not(.on) { border-style: solid; border-width: 1.5px; }
+
+/* ---------- profile & avatar button ---------- */
+.avatar-btn { width: 38px; height: 38px; border-radius: 50%; border: 2px solid var(--line); background: var(--surface2); overflow: hidden; padding: 0; cursor: pointer; display: grid; place-items: center; color: var(--muted); font-weight: 800; }
+.avatar-btn.on { border-color: var(--accent); }
+.avatar-btn img { width: 100%; height: 100%; object-fit: cover; }
+.me-row { display: flex; gap: 16px; align-items: center; }
+.me-photo { position: relative; width: 84px; height: 84px; flex: none; border-radius: 50%; border: 3px solid var(--accent); background: var(--surface2); padding: 0; cursor: pointer; overflow: visible; display: grid; place-items: center; font-size: 32px; font-weight: 800; color: var(--accent); }
+.me-photo img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+.me-edit { position: absolute; bottom: -2px; inset-inline-start: -2px; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: var(--accent-ink); display: grid; place-items: center; font-style: normal; font-size: 14px; }
+.me-text { flex: 1; }
+.learned { list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.learned li { display: flex; flex-direction: column; background: var(--surface2); border-radius: 12px; padding: 10px 12px; }
+.learned span { color: var(--muted); font-size: 14px; }
+
+/* ---------- capture: scanner, spinner, sources ---------- */
+.scanner { position: relative; aspect-ratio: 4 / 3; border-radius: 18px; overflow: hidden; background: #0a1418; display: grid; place-items: center; }
+.scanner video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; }
+.scanner.on video { opacity: 1; }
+.scan-idle { color: #9fd6e0; padding: 16px; text-align: center; }
+.scan-line { position: absolute; left: 10%; right: 10%; height: 2px; background: #ff4d4d; box-shadow: 0 0 12px #ff4d4d; top: 50%; animation: scan 1.6s ease-in-out infinite alternate; }
+@keyframes scan { from { top: 25%; } to { top: 75%; } }
+.spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.8s linear infinite; vertical-align: -2px; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.src { font-size: 12px; }
+.src.moh { color: var(--good); }
+.src.check { color: var(--warn); font-weight: 600; }
+.official { font-size: 12px; }
+.result-main { min-width: 0; flex: 1 1 180px; }
+
+/* ---------- devices ---------- */
+.providers .card { padding: 0; }
+.provider-head { width: 100%; text-align: right; background: none; border: 0; padding: 14px 16px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.provider-name { font-weight: 700; display: flex; align-items: center; gap: 8px; }
+.provider .check { width: 22px; height: 22px; border-radius: 50%; background: var(--good); color: #fff; display: grid; place-items: center; font-size: 13px; }
+.provider.connected { border-color: var(--good); border-width: 2px; }
+.provider-body { padding: 0 16px 16px; }
+.live-hr .big-num { color: var(--protein); }
+.device-strip { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0; }
+.device-strip div { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+.device-strip b { font-size: 18px; }
+.device-strip span { font-size: 12px; color: var(--muted); }
+.device-strip.as-link { width: 100%; background: none; border: 0; padding: 0; cursor: pointer; font: inherit; color: inherit; }
+.avatar-canvas { background: #071216; }
+.avatar-labels span { display: flex; flex-direction: column; align-items: center; }
+.avatar-labels small { color: var(--muted); font-weight: 600; font-size: 12px; }
+.avatar-legend { text-align: center; font-size: 12px; color: var(--muted); margin-top: 4px; }
+.week-slider button { white-space: nowrap; font-size: 13px; padding: 8px 2px; }
+.week-slider button.on::before { margin-inline-end: 3px; }

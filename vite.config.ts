@@ -5,5 +5,5 @@ export default defineConfig({
   plugins: [react()],
   build: { chunkSizeWarningLimit: 1200 },
   esbuild: { charset: 'ascii' },
-  test: { globals: true, environment: 'node' },
+  test: { globals: true, environment: 'node', include: ['src/**/*.test.ts'] },
 });

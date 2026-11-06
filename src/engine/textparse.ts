@@ -56,8 +56,15 @@ export function parseFoodText(text: string): ParsedItem[] {
       qty = grams;
     } else {
       const units = best.food.units.filter((u) => u.grams > 1);
-      const named = units.find((u) => part.includes(u.label.split(' ')[0]));
-      const unit = named ?? units[0] ?? { label: 'גרם', grams: 100 };
+      const named = units.find((u) => part.includes(u.label.split(' ')[0]) && u.label.split(' ')[0].length > 2);
+      const preferred =
+        units.find((u) => u.label === 'יחידה') ??
+        units.find((u) => u.label.includes('בינונית')) ??
+        units.find((u) => u.label.startsWith('יחידה')) ??
+        units.find((u) => u.label.startsWith('פרוסה')) ??
+        units.find((u) => u.label.startsWith('מנה'));
+      const namedFit = named && named.label.startsWith('פרוסה') ? units.find((u) => u.label === 'פרוסה בינונית') ?? named : named;
+      const unit = namedFit ?? preferred ?? units[0] ?? { label: 'גרם', grams: 100 };
       grams = unit.grams * qty;
       unitLabel = unit.label;
     }

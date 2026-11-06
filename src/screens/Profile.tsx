@@ -1,4 +1,6 @@
-import { useState } from 'react';
+import { useRef, useState } from 'react';
+import { summarize, EMPTY_LEARNING } from '../engine/learning';
+import { RECIPES } from '../data/recipes';
 import { Banner, Button, Card, ChoiceCards, NumberField, Segmented, Toggle, fmt } from '../ui/kit';
 import { deleteAllData, exportData, loadDemoData, saveProfile, setState, useStore } from '../state/store';
 import { SAFETY_CONFIG } from '../engine/safety';
@@ -10,6 +12,17 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
   const s = useStore((x) => x);
   const [key, setKey] = useState(s.settings.apiKey ?? '');
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const photoRef = useRef<HTMLInputElement>(null);
+  const learned = summarize(s.learning, (id) => RECIPES.find((r) => r.id === id)?.name ?? id);
+  const onPhoto = async (f: File | undefined) => {
+    if (!f) return;
+    const bmp = await createImageBitmap(f);
+    const side = Math.min(bmp.width, bmp.height);
+    const c = document.createElement('canvas');
+    c.width = c.height = 256;
+    c.getContext('2d')!.drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 256, 256);
+    setState({ profilePhoto: c.toDataURL('image/jpeg', 0.82) });
+  };
   if (!s.profile) return null;
   const p = s.profile;
   const upd = (patch: Partial<P>) => saveProfile({ ...p, ...patch });
@@ -27,6 +40,54 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
   return (
     <div className="screen">
       <h1>פרופיל והגדרות</h1>
+
+      <Card className="me">
+        <div className="me-row">
+          <button className="me-photo" onClick={() => photoRef.current?.click()} aria-label="החלפת תמונת פרופיל">
+            {s.profilePhoto ? <img src={s.profilePhoto} alt="תמונת הפרופיל שלך" /> : <span>{p.name ? p.name.trim()[0] : '+'}</span>}
+            <i className="me-edit" aria-hidden="true">✎</i>
+          </button>
+          <div className="me-text">
+            <label className="field">
+              <span className="field-label">שם</span>
+              <input value={p.name} onChange={(e) => upd({ name: e.target.value.slice(0, 30) })} />
+            </label>
+            {s.profilePhoto && (
+              <button className="link" onClick={() => setState({ profilePhoto: undefined })}>
+                הסרת התמונה
+              </button>
+            )}
+          </div>
+        </div>
+        <input ref={photoRef} type="file" accept="image/*" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
+        <p className="fineprint">התמונה נשמרת רק במכשיר הזה.</p>
+      </Card>
+
+      <Card title="מכשירים ונתוני בריאות" action={<Button kind="secondary" onClick={() => go('devices')}>ניהול</Button>}>
+        <p className="muted">{s.devices.length ? `מחובר: ${s.devices.map((d) => d.name).join(', ')}` : 'Garmin, Whoop, Apple Watch, Samsung, Oura, משקלים ורצועות דופק.'}</p>
+      </Card>
+
+      <Card title="מה המערכת למדה עליך">
+        {learned.length === 0 ? (
+          <p className="muted">עדיין לומדת. אחרי כמה ימים של רישום, החלפות מנות ותיקוני צילום, יופיע כאן מה למדנו ואיך זה משנה את התפריט וההערכות.</p>
+        ) : (
+          <ul className="learned">
+            {learned.map((f) => (
+              <li key={f.title}>
+                <strong>{f.title}</strong>
+                <span>{f.detail}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+        {s.tdeeOverride && <p className="muted">ההוצאה היומית שלך עודכנה לפי הנתונים בפועל: {fmt(s.tdeeOverride)} קק"ל.</p>}
+        <p className="fineprint">הלמידה משנה רק את סדר ההעדפות והכיול. היא לא משנה את מעקות הבטיחות.</p>
+        {(learned.length > 0 || s.tdeeOverride) && (
+          <Button kind="ghost" onClick={() => setState({ learning: EMPTY_LEARNING, tdeeOverride: undefined })}>
+            איפוס הלמידה
+          </Button>
+        )}
+      </Card>
 
       <Card title="המטרה">
         <ChoiceCards

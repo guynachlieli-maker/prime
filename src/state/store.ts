@@ -3,6 +3,7 @@ import { computeTargets } from '../engine/targets';
 import type { Nutrients, Profile, Targets } from '../engine/types';
 import type { WeighIn } from '../engine/adaptive';
 import type { Slot } from '../data/recipes';
+import { EMPTY_LEARNING, recordMealTime, type LearningState } from '../engine/learning';
 
 export type LogMethod = 'photo' | 'barcode' | 'search' | 'voice' | 'plan' | 'favorite';
 
@@ -40,6 +41,25 @@ export interface SafetyEvent {
   message: string;
 }
 
+export interface DeviceSample {
+  date: string;
+  source: string;
+  steps?: number;
+  activeKcal?: number;
+  restingHr?: number;
+  hrv?: number;
+  sleepHours?: number;
+  weightKg?: number;
+  bodyFatPct?: number;
+}
+
+export interface ConnectedDevice {
+  id: string;
+  name: string;
+  kind: 'bluetooth-hr' | 'bluetooth-scale' | 'file' | 'cloud';
+  lastSync: string;
+}
+
 export interface State {
   version: 1;
   profile?: Profile;
@@ -58,6 +78,10 @@ export interface State {
   planFixed: Record<string, Record<number, string>>;
   activeProgramId?: string;
   safetyEvents: SafetyEvent[];
+  learning: LearningState;
+  profilePhoto?: string;
+  devices: ConnectedDevice[];
+  deviceData: DeviceSample[];
   settings: {
     apiKey?: string;
     hideAvatar: boolean;
@@ -82,6 +106,9 @@ const initial: State = {
   favorites: [],
   planFixed: {},
   safetyEvents: [],
+  learning: EMPTY_LEARNING,
+  devices: [],
+  deviceData: [],
   settings: { hideAvatar: false, trainingConsent: false, theme: 'system', detailed: false, reminders: true },
 };
 
@@ -91,7 +118,7 @@ function load(): State {
     if (!raw) return initial;
     const parsed = JSON.parse(raw) as State;
     if (parsed.version !== 1) return initial;
-    return { ...initial, ...parsed, settings: { ...initial.settings, ...parsed.settings } };
+    return { ...initial, ...parsed, learning: { ...EMPTY_LEARNING, ...(parsed.learning ?? {}) }, settings: { ...initial.settings, ...parsed.settings } };
   } catch {
     return initial;
   }
@@ -149,7 +176,30 @@ export function recomputeTargets() {
 }
 
 export function addLog(log: Omit<MealLog, 'id'>) {
-  setState((s) => ({ logs: [...s.logs, { ...log, id: uid() }] }));
+  setState((s) => ({ logs: [...s.logs, { ...log, id: uid() }], learning: recordMealTime(s.learning, log.slot, log.time) }));
+}
+
+export function learn(fn: (l: LearningState) => LearningState) {
+  setState((s) => ({ learning: fn(s.learning) }));
+}
+
+/** Merge device samples by date+source (latest import wins). */
+export function addDeviceData(samples: DeviceSample[], device: Omit<ConnectedDevice, 'lastSync'>) {
+  setState((s) => {
+    const key = (d: DeviceSample) => `${d.date}|${d.source}`;
+    const map = new Map(s.deviceData.map((d) => [key(d), d]));
+    for (const d of samples) map.set(key(d), { ...map.get(key(d)), ...d });
+    const devices = [...s.devices.filter((x) => x.id !== device.id), { ...device, lastSync: new Date().toISOString() }];
+    return { deviceData: [...map.values()].sort((a, b) => a.date.localeCompare(b.date)).slice(-400), devices };
+  });
+  // weights from a scale or health export also feed the weight trend (one per day, morning value)
+  const weights = samples.filter((d) => d.weightKg && d.weightKg > 30 && d.weightKg < 300);
+  if (weights.length)
+    setState((s) => {
+      const have = new Set(s.weighIns.map((w) => w.date));
+      const add = weights.filter((w) => !have.has(w.date)).map((w) => ({ date: w.date, kg: Math.round(w.weightKg! * 10) / 10, time: '07:00' }));
+      return add.length ? { weighIns: [...s.weighIns, ...add].sort((a, b) => a.date.localeCompare(b.date)) } : {};
+    });
 }
 
 export function removeLog(id: string) {

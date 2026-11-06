@@ -79,10 +79,10 @@ export function Progress() {
             bodies={
               twin
                 ? [
-                    { sex: p.sex, heightCm: p.heightCm, weightKg: fc[0].weightKg, bodyFatPct: fc[0].bodyFatPct, label: 'היום', color: '#5ad1e6' },
-                    { sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: week === 0 ? 'היום' : `בעוד ${week} שבועות`, color: '#9b8cff' },
+                    { sex: p.sex, heightCm: p.heightCm, weightKg: fc[0].weightKg, bodyFatPct: fc[0].bodyFatPct, label: 'היום', sub: `${fmt(fc[0].weightKg, 1)} ק"ג · ${fmt(fc[0].bodyFatPct, 1)}%`, color: '#4fd8ec' },
+                    { sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: week === 0 ? 'היום' : `בעוד ${week} שבועות`, sub: `כ-${fmt(at.weightKg, 1)} ק"ג · ${fmt(at.bodyFatPct, 1)}%`, color: '#a594ff' },
                   ]
-                : [{ sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: '', color: week === 0 ? '#5ad1e6' : '#9b8cff' }]
+                : [{ sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: week === 0 ? 'היום' : `בעוד ${week} שבועות`, sub: `${fmt(at.weightKg, 1)} ק"ג · ${fmt(at.bodyFatPct, 1)}%`, color: week === 0 ? '#4fd8ec' : '#a594ff' }]
             }
           />
           <div className="week-slider" role="radiogroup" aria-label="נקודת זמן">

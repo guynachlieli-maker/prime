@@ -172,13 +172,25 @@ describe('forecast', () => {
 
 describe('menu engine', () => {
   const target = { kcal: 2300, protein: 170, fat: 64, carbs: 258 };
-  it('builds a day within ±5% kcal for a typical profile', () => {
+  it('hits ±5% kcal and ±10% protein across 297 profiles (diet × meals × 1400-3600 kcal × days)', () => {
     let ok = 0;
-    for (let d = 1; d <= 14; d++) {
-      const plan = planDay({ date: `2026-11-${String(d).padStart(2, '0')}`, profile: omer, target });
-      if (Math.abs(plan.deviation.kcalPct) <= 0.05) ok++;
-    }
-    expect(ok).toBeGreaterThanOrEqual(12);
+    let n = 0;
+    for (const diet of ['omnivore', 'vegetarian', 'vegan'] as const)
+      for (const meals of [3, 4, 5])
+        for (let kcal = 1400; kcal <= 3600; kcal += 200)
+          for (let d = 1; d <= 3; d++) {
+            const protein = Math.round((kcal * (diet === 'vegan' ? 0.2 : 0.27)) / 4);
+            const fat = Math.round((kcal * 0.27) / 9);
+            const carbs = Math.round((kcal - protein * 4 - fat * 9) / 4);
+            const p = planDay({ date: `2026-11-0${d}`, profile: { ...omer, diet, mealsPerDay: meals, maxPrepMinutes: 60 }, target: { kcal, protein, fat, carbs } });
+            n++;
+            if (p.withinTolerance) ok++;
+          }
+    expect(ok / n).toBeGreaterThanOrEqual(0.95);
+  });
+  it('a typical day is within tolerance', () => {
+    const plan = planDay({ date: '2026-11-05', profile: omer, target });
+    expect(plan.withinTolerance).toBe(true);
   });
   it('allergy is a hard exclusion', () => {
     const p = { ...omer, allergies: ['egg' as const, 'dairy' as const] };
@@ -196,6 +208,7 @@ describe('menu engine', () => {
   it('offers 3 alternatives and a shopping list', () => {
     const plan = planDay({ date: '2026-11-05', profile: omer, target });
     expect(alternativesFor(plan, 0, { profile: omer, target }).length).toBe(3);
+    for (const m of plan.meals) for (const it of m.items) expect(it.grams).toBeGreaterThan(0);
     expect(shoppingList([plan]).length).toBeGreaterThan(3);
   });
 });
@@ -203,18 +216,29 @@ describe('menu engine', () => {
 describe('data', () => {
   it('Hebrew search finds common foods', () => {
     expect(searchFoods('חומוס')[0].id).toBe('hummus');
-    expect(searchFoods('שניצל')[0].id).toBe('schnitzel');
+    expect(['schnitzel', 'schnitzel_baked']).toContain(searchFoods('שניצל')[0].id);
   });
   it('every recipe item references a known food', () => {
     const ids = new Set(FOODS.map((f) => f.id));
     for (const r of RECIPES) for (const i of r.items) expect(ids.has(i.foodId)).toBe(true);
   });
-  it('food macros are internally consistent (Atwater within 20%; low-energy vegetables skipped because total carbs include fiber)', () => {
+  it('foods carry official Ministry of Health values', () => {
+    expect(FOODS.length).toBeGreaterThanOrEqual(150);
     for (const f of FOODS) {
-      const n = f.per100g;
-      const atwater = n.protein * 4 + n.carbs * 4 + n.fat * 9;
-      if (n.kcal > 50) expect(Math.abs(atwater - n.kcal) / n.kcal).toBeLessThan(0.2);
+      expect(f.source).toBe('moh');
+      expect(f.code).toBeGreaterThan(0);
+      expect(f.per100g.kcal).toBeGreaterThanOrEqual(0);
+      expect(f.per100g.protein + f.per100g.fat + f.per100g.carbs).toBeLessThanOrEqual(101);
     }
+    // spot-check a few published values (per 100 g)
+    const byId = Object.fromEntries(FOODS.map((f) => [f.id, f]));
+    expect(byId.egg.per100g.kcal).toBe(143);
+    expect(byId.cottage5.per100g.protein).toBe(11);
+    expect(byId.rice_white.per100g.kcal).toBe(130);
+  });
+  it('has 100+ recipes, each with a known food and a slot', () => {
+    expect(RECIPES.length).toBeGreaterThanOrEqual(100);
+    expect(new Set(RECIPES.map((r) => r.id)).size).toBe(RECIPES.length);
   });
 });
 
@@ -226,12 +250,91 @@ describe('free-text parsing', () => {
     expect(ids).toContain('egg');
     expect(ids).toContain('bread_whole');
     expect(ids).toContain('pita');
-    expect(r.find((x) => x.food.id === 'egg')!.grams).toBe(110);
-    expect(r.find((x) => x.food.id === 'pita')!.grams).toBe(35);
+    expect(r.find((x) => x.food.id === 'egg')!.grams).toBeCloseTo(99, 0);
+    expect(r.find((x) => x.food.id === 'pita')!.grams).toBe(50);
+    expect(r.find((x) => x.food.id === 'bread_whole')!.grams).toBe(32);
   });
   it('reads explicit grams', () => {
     const r = parseFoodText('150 גרם חזה עוף');
     expect(r[0].food.id).toBe('chicken_breast');
     expect(r[0].grams).toBe(150);
+  });
+});
+
+import { parseAppleHealthXml, parseHealthCsv, parseHeartRate, parseWeight } from './devices';
+describe('device import', () => {
+  const today = new Date().toISOString().slice(0, 10);
+  it('parses Apple Health records without double counting iPhone + Watch', () => {
+    const xml = `<HealthData>
+<Record type="HKQuantityTypeIdentifierStepCount" sourceName="iPhone" unit="count" creationDate="${today} 10:00:00 +0200" startDate="${today} 09:00:00 +0200" endDate="${today} 10:00:00 +0200" value="4000"/>
+<Record type="HKQuantityTypeIdentifierStepCount" sourceName="Apple Watch" unit="count" startDate="${today} 09:00:00 +0200" endDate="${today} 10:00:00 +0200" value="4200"/>
+<Record type="HKQuantityTypeIdentifierRestingHeartRate" sourceName="Apple Watch" unit="count/min" startDate="${today} 07:00:00 +0200" endDate="${today} 07:00:00 +0200" value="54"/>
+<Record type="HKQuantityTypeIdentifierBodyMass" sourceName="Health" unit="kg" startDate="${today} 07:05:00 +0200" endDate="${today} 07:05:00 +0200" value="81.4"/>
+<Record type="HKCategoryTypeIdentifierSleepAnalysis" sourceName="Apple Watch" startDate="${today} 00:30:00 +0200" endDate="${today} 07:00:00 +0200" value="HKCategoryValueSleepAnalysisAsleepCore"/>
+</HealthData>`;
+    // split mid-record to exercise chunk boundaries
+    const d = parseAppleHealthXml([xml.slice(0, 300), xml.slice(300)]);
+    expect(d).toHaveLength(1);
+    expect(d[0].steps).toBe(4200);
+    expect(d[0].restingHr).toBe(54);
+    expect(d[0].weightKg).toBe(81.4);
+    expect(d[0].sleepHours).toBe(6.5);
+  });
+  it('parses a Whoop-style CSV by column names', () => {
+    const csv = 'Cycle start time,Recovery score %,Resting heart rate (bpm),Heart rate variability (ms),Asleep duration (min)\n2026-11-01 23:10:00,64,52,71,412\n2026-11-02 23:30:00,80,50,85,455';
+    const d = parseHealthCsv(csv, 'Whoop');
+    expect(d.map((x) => [x.date, x.restingHr, x.hrv, x.sleepHours])).toEqual([
+      ['2026-11-01', 52, 71, 6.9],
+      ['2026-11-02', 50, 85, 7.6],
+    ]);
+  });
+  it('parses Bluetooth heart-rate and weight packets', () => {
+    expect(parseHeartRate(new DataView(new Uint8Array([0x00, 72]).buffer))).toBe(72);
+    expect(parseHeartRate(new DataView(new Uint8Array([0x01, 0x2c, 0x01]).buffer))).toBe(300);
+    // 80.0 kg = 16000 * 0.005
+    expect(parseWeight(new DataView(new Uint8Array([0x00, 0x80, 0x3e]).buffer))).toBeCloseTo(80, 3);
+  });
+});
+
+import { EMPTY_LEARNING, preferences, photoFactor, recordPhotoCorrection, recordRecipe, recordMealTime, usualTime } from './learning';
+describe('learning', () => {
+  it('learns preferences from eats and swaps', () => {
+    let l = EMPTY_LEARNING;
+    for (let i = 0; i < 4; i++) l = recordRecipe(l, 'a', 'eaten');
+    for (let i = 0; i < 3; i++) l = recordRecipe(l, 'b', 'swappedOut');
+    const p = preferences(l);
+    expect(p.a).toBeGreaterThan(0.5);
+    expect(p.b).toBeLessThan(-0.5);
+  });
+  it('calibrates photo estimates only after 3 corrections, within ±25%', () => {
+    let l = EMPTY_LEARNING;
+    l = recordPhotoCorrection(l, 500, 650);
+    l = recordPhotoCorrection(l, 400, 520);
+    expect(photoFactor(l)).toBe(1);
+    l = recordPhotoCorrection(l, 600, 780);
+    expect(photoFactor(l)).toBeCloseTo(1.25, 2);
+    for (let i = 0; i < 20; i++) l = recordPhotoCorrection(l, 500, 1000);
+    expect(photoFactor(l)).toBe(1.25);
+  });
+  it('learns usual meal times', () => {
+    let l = EMPTY_LEARNING;
+    for (const t of ['13:05', '13:20', '12:50']) l = recordMealTime(l, 'lunch', t);
+    expect(usualTime(l, 'lunch')).toBe('13:05');
+  });
+  it('preferences change which recipe is chosen, within targets', () => {
+    const base = { date: '2026-11-05', profile: omer, target: { kcal: 2300, protein: 170, fat: 64, carbs: 258 } };
+    const p1 = planDay(base);
+    const first = p1.meals[0].recipeId;
+    const p2 = planDay({ ...base, preferences: { [first]: -1 } });
+    expect(p2.meals[0].recipeId).not.toBe(first);
+    expect(p2.withinTolerance).toBe(true);
+  });
+});
+
+describe('search', () => {
+  it('returns only matching foods', () => {
+    const r = searchFoods('במבה');
+    expect(r.length).toBeGreaterThan(0);
+    for (const f of r) expect([f.name, ...f.aliases, f.officialName].join(' ')).toContain('במבה');
   });
 });

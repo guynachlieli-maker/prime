@@ -1,10 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Banner, Button, Card, Pending, Sheet, fmt } from '../ui/kit';
-import { setState, todayISO, useStore, addLog, nowTime } from '../state/store';
+import { setState, todayISO, useStore, addLog, nowTime, learn } from '../state/store';
+import { preferences, recordRecipe } from '../engine/learning';
 import { menuTargets, planFor } from '../state/derived';
 import { RECIPES } from '../data/recipes';
 import { FOOD_BY_ID } from '../data/foods';
-import { SLOT_LABEL, alternativesFor, shoppingList } from '../engine/menu';
+import { SLOT_LABEL, alternativesFor, describeAmount, shoppingList } from '../engine/menu';
 
 const DAYS = ['א׳', 'ב׳', 'ג׳', 'ד׳', 'ה׳', 'ו׳', 'ש׳'];
 
@@ -27,7 +28,7 @@ export function Menu() {
   const target = menuTargets(s);
   if (!plan || !target || !s.profile) return null;
   const profile = s.profile;
-  const alts = swap !== null ? alternativesFor(plan, swap, { profile, target }) : [];
+  const alts = swap !== null ? alternativesFor(plan, swap, { profile, target, preferences: preferences(s.learning) }) : [];
   const week = dates.map((d) => planFor(s, d.iso)!).filter(Boolean);
   const list = shop ? shoppingList(week) : [];
   const shopText = list.map((i) => `• ${FOOD_BY_ID[i.foodId].name}: ${i.grams >= 1000 ? fmt(i.grams / 1000, 1) + ' ק"ג' : i.grams + ' ג׳'}`).join('\n');
@@ -56,7 +57,13 @@ export function Menu() {
           </span>
           <span className={`badge ${plan.withinTolerance ? 'good' : 'warn'}`}>{plan.withinTolerance ? 'ביעד' : `סטייה ${fmt(plan.deviation.kcalPct * 100)}%`}</span>
         </div>
-        {!plan.withinTolerance && <p className="fineprint">עם ההעדפות שבחרת, אין מספיק מתכונים כדי לעמוד ביעד בדיוק. הספרייה תגדל לקראת ההשקה.</p>}
+        {!plan.withinTolerance && (
+          <p className="fineprint">
+            {profile.mealsPerDay < 5 && plan.deviation.kcalPct < 0
+              ? 'היעד גבוה ביחס למספר הארוחות: המנות כבר בגודל המקסימלי הסביר. מומלץ להוסיף ארוחת ביניים (בפרופיל: ארוחות ביום).'
+              : 'עם ההעדפות שבחרת, אין מספיק מתכונים כדי לעמוד ביעד בדיוק. הספרייה תגדל לקראת ההשקה.'}
+          </p>
+        )}
       </Card>
 
       {plan.meals.map((m, idx) => {
@@ -68,16 +75,15 @@ export function Menu() {
               <strong>{r.name}</strong>
               <span className="muted">
                 {fmt(m.nutrients.kcal)} קק"ל · {fmt(m.nutrients.protein)} חלבון · {fmt(m.nutrients.carbs)} פחמימה · {fmt(m.nutrients.fat)} שומן
-                {m.scale !== 1 && ` · מנה ×${m.scale}`}
               </span>
             </button>
             {isOpen && (
               <div className="recipe">
                 <h4>מצרכים</h4>
                 <ul>
-                  {r.items.map((it) => (
+                  {m.items.map((it) => (
                     <li key={it.foodId}>
-                      {FOOD_BY_ID[it.foodId].name}: {Math.round(it.grams * m.scale)} ג׳
+                      {FOOD_BY_ID[it.foodId].name}: {describeAmount(it.foodId, it.grams)}
                     </li>
                   ))}
                 </ul>
@@ -87,6 +93,7 @@ export function Menu() {
                     <li key={st}>{st}</li>
                   ))}
                 </ol>
+                <p className="fineprint">הכמויות מותאמות ליעדים שלך. הערכים מחושבים ממאגר התזונה של משרד הבריאות.</p>
                 {!r.approvedBy && <Pending what="אישור דיאטנית למתכון" />}
               </div>
             )}
@@ -95,7 +102,13 @@ export function Menu() {
                 החלפת מנה
               </Button>
               {date === todayISO() && (
-                <Button kind="ghost" onClick={() => addLog({ date, time: nowTime(), slot: m.slot, items: [{ foodId: r.id, name: r.name, grams: 0 }], method: 'plan', nutrients: m.nutrients })}>
+                <Button
+                  kind="ghost"
+                  onClick={() => {
+                    addLog({ date, time: nowTime(), slot: m.slot, items: [{ foodId: r.id, name: r.name, grams: 0 }], method: 'plan', nutrients: m.nutrients });
+                    learn((l) => recordRecipe(l, r.id, 'eaten'));
+                  }}
+                >
                   אכלתי את זה
                 </Button>
               )}
@@ -112,11 +125,13 @@ export function Menu() {
               <div>
                 <strong>{a.recipe.name}</strong>
                 <div className="muted">
-                  {fmt(a.nutrients.kcal)} קק"ל · {fmt(a.nutrients.protein)} חלבון{a.scale !== 1 ? ` · מנה ×${a.scale}` : ''}
+                  {fmt(a.nutrients.kcal)} קק"ל · {fmt(a.nutrients.protein)} חלבון
                 </div>
               </div>
               <Button
                 onClick={() => {
+                  const old = plan.meals[swap!].recipeId;
+                  learn((l) => recordRecipe(recordRecipe(l, old, 'swappedOut'), a.recipe.id, 'swappedIn'));
                   setState((x) => ({ planFixed: { ...x.planFixed, [date]: { ...(x.planFixed[date] ?? {}), [swap!]: a.recipe.id } } }));
                   setSwap(null);
                 }}

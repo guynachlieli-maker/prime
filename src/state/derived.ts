@@ -6,6 +6,7 @@ import { detectBehavior } from '../engine/safety';
 import { SAFETY_CONFIG, evaluateSafety } from '../engine/safety';
 import { useStore, todayISO, type State } from './store';
 import type { Nutrients } from '../engine/types';
+import { preferences } from '../engine/learning';
 
 export function menuTargets(s: State): MenuTargets | null {
   if (!s.targets) return null;
@@ -17,20 +18,21 @@ const cache = new Map<string, DayPlan>();
 export function planFor(s: State, date: string): DayPlan | null {
   const t = menuTargets(s);
   if (!s.profile || !t) return null;
-  const key = JSON.stringify([date, t, s.profile.diet, s.profile.allergies, s.profile.kosher, s.profile.mealsPerDay, s.profile.maxPrepMinutes, s.profile.dislikes, s.planFixed[date] ?? {}]);
+  const prefs = preferences(s.learning);
+  const key = JSON.stringify([date, t, s.profile.diet, s.profile.allergies, s.profile.kosher, s.profile.mealsPerDay, s.profile.maxPrepMinutes, s.profile.dislikes, s.planFixed[date] ?? {}, prefs]);
   const hit = cache.get(key);
   if (hit) return hit;
   const y = new Date(date + 'T12:00:00');
   y.setDate(y.getDate() - 1);
   const yKey = todayISO(y);
   const prev = yKey < date ? planDayNoCache(s, yKey, t) : null;
-  const plan = planDay({ date, profile: s.profile, target: t, avoid: prev?.meals.map((m) => m.recipeId), fixed: s.planFixed[date] });
+  const plan = planDay({ date, profile: s.profile, target: t, avoid: prev?.meals.map((m) => m.recipeId), fixed: s.planFixed[date], preferences: prefs });
   cache.set(key, plan);
   return plan;
 }
 
 function planDayNoCache(s: State, date: string, t: MenuTargets): DayPlan {
-  return planDay({ date, profile: s.profile!, target: t, fixed: s.planFixed[date] });
+  return planDay({ date, profile: s.profile!, target: t, fixed: s.planFixed[date], preferences: preferences(s.learning) });
 }
 
 export function usePlan(date: string) {
