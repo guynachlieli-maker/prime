@@ -13,6 +13,8 @@ type Mode = 'photo' | 'barcode' | 'search' | 'text' | 'favorites';
 type BasketItem = LogItem & { conf?: 'high' | 'medium' | 'low' };
 
 const CONF_RANGE = { high: 0.1, medium: 0.2, low: 0.35 } as const;
+const SITE = 'https://guynachlieli-maker.github.io/prime/';
+const embedded = typeof window !== 'undefined' && window.top !== window.self;
 
 function hourSlot(): Slot {
   const h = new Date().getHours();
@@ -42,6 +44,8 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   const [listening, setListening] = useState(false);
   const [code, setCode] = useState('');
   const [missingCode, setMissingCode] = useState<string | null>(null);
+  const [known, setKnown] = useState<import('../engine/barcode').KnownProduct | null>(null);
+  const [suggest, setSuggest] = useState<Food[]>([]);
   const [scanning, setScanning] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -109,6 +113,8 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     reset();
     setCode(c);
     setMissingCode(null);
+    setKnown(null);
+    setSuggest([]);
     setBusy('מחפש את המוצר…');
     try {
       const { lookupBarcode } = await import('../engine/barcode');
@@ -125,6 +131,17 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         );
       } else {
         setMissingCode(c);
+        const { identifyBarcode, nameKeywords } = await import('../engine/barcode');
+        const k = await identifyBarcode(c);
+        setKnown(k);
+        if (k) {
+          try {
+            await loadFullDb();
+          } catch {
+            /* suggestions from core foods only */
+          }
+          setSuggest(searchAll(nameKeywords(k.name), 3));
+        } else setSuggest([]);
       }
     } catch {
       setErr('טבלת המוצרים לא נטענה. אפשר לצלם את התווית התזונתית.');
@@ -174,7 +191,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       const img = await prepareImage(file);
       try {
         const r = await readNutritionLabel({ file: img.blob, apiKey: s.settings.apiKey });
-        const f = foodFromLabel(missingCode, r);
+        const f = foodFromLabel(missingCode, { ...r, name: r.name || known?.name || '' });
         setMethod('barcode');
         addFood(f, r.servingGrams ?? 100);
         setMissingCode(null);
@@ -252,6 +269,15 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         </select>
       </label>
 
+      {embedded && (mode === 'photo' || mode === 'barcode') && (
+        <Banner kind="info">
+          המצלמה לא נפתחת? בתוך claude.ai הגישה למצלמה חסומה.{' '}
+          <a href={SITE} target="_blank" rel="noreferrer">
+            פתחו את PRIME כאתר
+          </a>{' '}
+          (מצלמה, סריקת ברקוד חיה, התקנה למסך הבית).
+        </Banner>
+      )}
       {saved && <Banner kind="info">נרשם. הטבעת במסך "היום" כבר מעודכנת.</Banner>}
       {busy && (
         <Banner kind="info">
@@ -337,7 +363,40 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           </div>
           {missingCode && (
             <Banner kind="warn">
-              <strong>המוצר {missingCode} עוד לא במאגרים.</strong> צלמו פעם אחת את התווית התזונתית שעל האריזה. נקרא ממנה את הערכים, והמוצר יישמר לסריקות הבאות.
+              {known ? (
+                <>
+                  <strong>זיהינו: {known.name}</strong>
+                  <span className="muted">
+                    {[known.manufacturer, known.country, known.quantity && `${known.quantity} ${known.unit}`].filter(Boolean).join(' · ')}
+                  </span>
+                  <span>לא מצאנו ערכים תזונתיים מאומתים למוצר הזה.</span>
+                  {suggest.length > 0 && (
+                    <div className="suggest">
+                      <span className="muted">מוצרים דומים במאגר משרד הבריאות:</span>
+                      {suggest.map((f) => (
+                        <button
+                          key={f.id}
+                          className="suggest-item"
+                          onClick={() => {
+                            setMethod('barcode');
+                            addFood(f, 100);
+                            setMissingCode(null);
+                            setInfo(`נוסף לפי ${f.name} (משרד הבריאות). כדי לדייק, אפשר לצלם את התווית.`);
+                          }}
+                        >
+                          <b>{f.name}</b>
+                          <small>{Math.round(f.per100g.kcal)} קק"ל ל-100 ג׳</small>
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                  <span>הכי מדויק: צלמו פעם אחת את התווית התזונתית, והמוצר יישמר לסריקות הבאות.</span>
+                </>
+              ) : (
+                <>
+                  <strong>הברקוד {missingCode} לא נמצא במאגרים.</strong> צלמו פעם אחת את התווית התזונתית שעל האריזה. נקרא ממנה את הערכים, והמוצר יישמר לסריקות הבאות.
+                </>
+              )}
               <input ref={labelRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onLabel(e.target.files?.[0])} />
               <div className="row wrap" style={{ marginTop: 8 }}>
                 <Button onClick={() => labelRef.current?.click()}>צילום התווית</Button>

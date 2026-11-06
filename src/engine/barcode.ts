@@ -292,3 +292,58 @@ export function foodFromLabel(code: string | null, reading: { name: string; per1
   if (code) rememberProduct(f);
   return f;
 }
+
+/* ---------- Israeli supermarket barcode index (price-transparency files) ---------- */
+
+export interface KnownProduct {
+  code: string;
+  name: string;
+  manufacturer: string;
+  country: string;
+  quantity: string;
+  unit: string;
+}
+
+type IndexRow = [string, string, string, string, string, string];
+let index: Map<string, IndexRow> | null = null;
+let indexLoading: Promise<Map<string, IndexRow>> | null = null;
+
+function loadIndex(): Promise<Map<string, IndexRow>> {
+  if (index) return Promise.resolve(index);
+  if (!indexLoading)
+    indexLoading = fetch('./il-barcodes.json')
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json() as Promise<{ products: IndexRow[] }>;
+      })
+      .then((d) => (index = new Map(d.products.map((p) => [p[0], p]))))
+      .catch((e) => {
+        indexLoading = null;
+        throw e;
+      });
+  return indexLoading;
+}
+
+/** Identifies a product sold in Israeli supermarkets (name, maker, size). No nutrition values. */
+export async function identifyBarcode(code: string): Promise<KnownProduct | null> {
+  try {
+    const t = await loadIndex();
+    const r = t.get(code) ?? t.get(code.padStart(13, '0'));
+    if (!r) return null;
+    const [c, name, manufacturer, country, quantity, unit] = r;
+    return { code: c, name, manufacturer, country, quantity, unit };
+  } catch {
+    return null;
+  }
+}
+
+/** Words of a product name that help find it in the Ministry of Health table. */
+export function nameKeywords(name: string): string {
+  return name
+    .replace(/\d+([.,]\d+)?\s*(גרם|גר|ג'|ג|מ"ל|מל|ליטר|ל'|ק"ג|יח'|יחידות|%)/g, ' ')
+    .replace(/["'״׳()\-+*/.,]/g, ' ')
+    .split(/\s+/)
+    .filter((w) => w.length > 1 && !/^\d+$/.test(w))
+    .slice(0, 4)
+    .join(' ');
+}
