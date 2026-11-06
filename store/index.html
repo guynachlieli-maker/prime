@@ -1,0 +1,281 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>שלווה | מכשיר עיסוי שיאצו לצוואר ולכתפיים עם חימום</title>
+<meta name="description" content="עיסוי שיאצו עמוק עם חימום נעים לצוואר, לכתפיים ולגב, בבית, במשרד וברכב. משלוח חינם, 30 יום להחזרה ללא שאלות, תשלום מאובטח.">
+<meta property="og:title" content="שלווה | עיסוי שיאצו עם חימום, בבית">
+<meta property="og:description" content="15 דקות ביום והכתפיים משתחררות. משלוח חינם ו-30 יום להחזרה.">
+<meta property="og:type" content="product">
+<meta name="theme-color" content="#1f3b36">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<a class="skip" href="#main">דילוג לתוכן הראשי</a>
+
+<!-- פס הודעה עליון -->
+<div class="topbar" role="note">
+  <span>🚚 משלוח חינם לכל הארץ</span>
+  <span class="dot" aria-hidden="true">•</span>
+  <span>↩️ 30 יום להחזרה ללא שאלות</span>
+  <span class="dot hide-s" aria-hidden="true">•</span>
+  <span class="hide-s">🔒 תשלום מאובטח</span>
+</div>
+
+<header class="header">
+  <div class="wrap header-in">
+    <a class="logo" href="#top" aria-label="שלווה, לראש העמוד">שלווה<small>SHALVA</small></a>
+    <nav class="nav" aria-label="ניווט ראשי">
+      <a href="#benefits">למה שלווה</a>
+      <a href="#how">איך זה עובד</a>
+      <a href="#faq">שאלות</a>
+    </nav>
+    <a class="btn btn-sm" href="#buy">להזמנה</a>
+  </div>
+</header>
+
+<main id="main">
+
+<!-- HERO + קנייה -->
+<section class="hero" id="top">
+  <div class="wrap hero-grid">
+    <div class="gallery">
+      <figure class="main-img" id="mainImg">
+        <!-- להחליף בתמונות מוצר אמיתיות: assets/product-1.jpg וכו' (ראו README) -->
+        <img src="assets/product-1.jpg" alt="מכשיר העיסוי שלווה מונח על הכתפיים" onerror="this.remove()">
+        <svg class="illu" viewBox="0 0 400 400" aria-hidden="true">
+          <defs>
+            <linearGradient id="g1" x1="0" x2="1" y1="0" y2="1"><stop offset="0" stop-color="#e9ded0"/><stop offset="1" stop-color="#d7c6b1"/></linearGradient>
+            <radialGradient id="glow" cx=".5" cy=".5" r=".5"><stop offset="0" stop-color="#ffb26b" stop-opacity=".9"/><stop offset="1" stop-color="#ffb26b" stop-opacity="0"/></radialGradient>
+          </defs>
+          <rect width="400" height="400" rx="28" fill="url(#g1)"/>
+          <circle cx="200" cy="120" r="46" fill="#c9a98a"/>
+          <path d="M90 360c0-90 50-170 110-170s110 80 110 170z" fill="#b9977a"/>
+          <path d="M70 230c30-55 80-70 130-70s100 15 130 70l-22 30c-28-40-66-58-108-58s-80 18-108 58z" fill="#1f3b36"/>
+          <circle cx="160" cy="205" r="34" fill="url(#glow)"/><circle cx="240" cy="205" r="34" fill="url(#glow)"/>
+          <circle cx="160" cy="205" r="9" fill="#ffcf9a"/><circle cx="240" cy="205" r="9" fill="#ffcf9a"/>
+          <path d="M72 232l-20 40M328 232l20 40" stroke="#1f3b36" stroke-width="16" stroke-linecap="round"/>
+        </svg>
+      </figure>
+      <ul class="thumbs" aria-label="נקודות מפתח">
+        <li>🔥 חימום</li><li>🌀 8 ראשי עיסוי</li><li>🔋 3 עוצמות</li><li>🚗 גם ברכב</li>
+      </ul>
+    </div>
+
+    <div class="buybox" id="buy">
+      <p class="kicker">מתנת החנוכה שבאמת משתמשים בה</p>
+      <h1>הכתפיים שלך ראויות<br>לעיסוי כל יום. לא רק בחופשה.</h1>
+      <p class="lead">מכשיר עיסוי שיאצו עם חימום נעים, שמניחים על הצוואר ומפעילים בלחיצה. 15 דקות, ואתם מרגישים את ההבדל.</p>
+
+      <ul class="ticks">
+        <li>עיסוי לישה עמוק, כמו ידיים של מעסה, עם 8 ראשים מסתובבים</li>
+        <li>חימום מרגיע שנכנס לשרירים התפוסים</li>
+        <li>מתאים לצוואר, כתפיים, גב תחתון, ירכיים ושוקיים</li>
+        <li>כיבוי אוטומטי אחרי 15 דקות, לשקט נפשי</li>
+      </ul>
+
+      <div class="deadline" id="deadline" hidden>
+        <span>🎁 <b id="deadlineLabel"></b>: נשארו</span>
+        <span class="clock" id="clock" aria-live="off"></span>
+      </div>
+
+      <fieldset class="bundles" id="bundles">
+        <legend>בחרו חבילה</legend>
+        <!-- נבנה מ-config.js -->
+      </fieldset>
+
+      <button class="btn btn-buy" id="buyBtn" type="button">
+        <span class="buy-main">להזמנה מאובטחת</span>
+        <span class="buy-sub" id="buySub"></span>
+      </button>
+
+      <div class="pay-icons" aria-label="אמצעי תשלום">
+        <span>Visa</span><span>Mastercard</span><span>Isracard</span><span>Amex</span><span>Apple Pay</span><span>Google Pay</span>
+      </div>
+
+      <ul class="trust">
+        <li><b>🚚 משלוח חינם</b><span id="shipDays"></span></li>
+        <li><b>↩️ <span id="gDays"></span> יום ניסיון</b><span>לא אהבתם? מחזירים כסף</span></li>
+        <li><b>🔒 קופה מאובטחת</b><span>Shopify, הצפנת SSL</span></li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- בעיה -->
+<section class="band problem">
+  <div class="wrap narrow center">
+    <h2>מכירים את זה?</h2>
+    <div class="pains">
+      <div><span>💻</span><p>יום שלם מול מחשב, והצוואר מרגיש כמו בטון</p></div>
+      <div><span>📱</span><p>ראש מורכן לטלפון, כתפיים שעולות לאוזניים</p></div>
+      <div><span>🚗</span><p>פקקים, נהיגה, ועומס שמצטבר בגב העליון</p></div>
+      <div><span>💸</span><p>עיסוי אצל מעסה עולה 250-350 ₪, ואין זמן לקבוע</p></div>
+    </div>
+    <p class="bridge">שלווה מביאה את העיסוי אליכם: על הספה, בהפסקה במשרד, או ברכב לפני שנוסעים הביתה.</p>
+  </div>
+</section>
+
+<!-- יתרונות -->
+<section class="section" id="benefits">
+  <div class="wrap">
+    <h2 class="center">למה כל כך הרבה אנשים לא מוותרים על ה-15 דקות האלה</h2>
+    <div class="cards">
+      <article class="card"><div class="ic">🌀</div><h3>עיסוי שיאצו תלת־ממדי</h3><p>8 ראשי עיסוי שמסתובבים לשני הכיוונים ולשים את השרירים, בדיוק במקומות שהכי תפוסים.</p></article>
+      <article class="card"><div class="ic">🔥</div><h3>חימום שמרגיע</h3><p>חום נעים ומבוקר שמגביר את תחושת ההרפיה. מפעילים ומכבים בלחיצה.</p></article>
+      <article class="card"><div class="ic">🎚️</div><h3>3 עוצמות</h3><p>מעדין ועד עמוק. מתאים גם למי שרגיש וגם למי שאוהב עיסוי חזק.</p></article>
+      <article class="card"><div class="ic">🙌</div><h3>ידיים חופשיות</h3><p>לולאות יד מאפשרות לשלוט בלחץ, או פשוט להישען אחורה ולהירגע.</p></article>
+      <article class="card"><div class="ic">🚗</div><h3>בית, משרד ורכב</h3><p>מגיע עם מתאם לחשמל ומתאם למצת ברכב. לשימוש ברכב חונה בלבד.</p></article>
+      <article class="card"><div class="ic">⏱️</div><h3>כיבוי אוטומטי</h3><p>נכבה לבד אחרי 15 דקות, אז אפשר להירדם בלי לדאוג.</p></article>
+    </div>
+  </div>
+</section>
+
+<!-- איך זה עובד -->
+<section class="section soft" id="how">
+  <div class="wrap">
+    <h2 class="center">3 צעדים לכתפיים משוחררות</h2>
+    <ol class="steps">
+      <li><b>מניחים</b><span>על הצוואר, הכתפיים או הגב, ומכניסים את הידיים ללולאות.</span></li>
+      <li><b>לוחצים</b><span>בוחרים עוצמה, כיוון וחימום. לוקח שתי שניות.</span></li>
+      <li><b>נרגעים</b><span>15 דקות של עיסוי. המכשיר נכבה לבד בסוף.</span></li>
+    </ol>
+  </div>
+</section>
+
+<!-- השוואה -->
+<section class="section">
+  <div class="wrap narrow">
+    <h2 class="center">שלווה מול האלטרנטיבות</h2>
+    <div class="table-wrap">
+      <table class="compare">
+        <thead><tr><th scope="col"></th><th scope="col" class="us">שלווה</th><th scope="col">מעסה</th><th scope="col">כרית חימום</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">עלות</th><td class="us">תשלום אחד</td><td>250-350 ₪ לטיפול</td><td>זול</td></tr>
+          <tr><th scope="row">זמין מתי שבא לכם</th><td class="us">✔</td><td>✘ צריך לקבוע</td><td>✔</td></tr>
+          <tr><th scope="row">עיסוי לישה</th><td class="us">✔</td><td>✔</td><td>✘</td></tr>
+          <tr><th scope="row">חימום</th><td class="us">✔</td><td>לפעמים</td><td>✔</td></tr>
+          <tr><th scope="row">בבית, במשרד וברכב</th><td class="us">✔</td><td>✘</td><td>✘</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<!-- מתנה -->
+<section class="band gift">
+  <div class="wrap narrow center">
+    <h2>מחפשים מתנה לחנוכה?</h2>
+    <p>להורים, לבן או בת הזוג, לחברה מהעבודה שתמיד מתלוננת על הגב. מתנה שמשתמשים בה כל ערב, ונזכרים בכם בכל פעם.</p>
+    <p class="small">טיפ: חבילת הזוג משתלמת במיוחד. אחד לכם, אחד במתנה.</p>
+    <a class="btn" href="#buy">לבחירת חבילה</a>
+  </div>
+</section>
+
+<!-- ביקורות (מוצג רק אם יש ביקורות אמיתיות ב-config) -->
+<section class="section" id="reviews" hidden>
+  <div class="wrap">
+    <h2 class="center">מה אומרים הלקוחות</h2>
+    <p class="center rating-sum" id="ratingSum"></p>
+    <div class="reviews" id="reviewList"></div>
+  </div>
+</section>
+
+<!-- אחריות -->
+<section class="section soft">
+  <div class="wrap narrow guarantee">
+    <div class="seal" aria-hidden="true"><b id="gDays2"></b><span>יום</span></div>
+    <div>
+      <h2>ניסיון של <span id="gDays3"></span> יום, בלי סיכון</h2>
+      <p>תשתמשו בשלווה בבית. אם לא הרגשתם הבדל, כתבו לנו ונחזיר לכם את הכסף. בלי טפסים מסובכים ובלי שאלות מביכות.</p>
+    </div>
+  </div>
+</section>
+
+<!-- מפרט -->
+<section class="section">
+  <div class="wrap narrow">
+    <h2 class="center">מה בקופסה ומפרט</h2>
+    <div class="spec">
+      <ul>
+        <li>מכשיר עיסוי שלווה</li>
+        <li>מתאם חשמל לבית</li>
+        <li>מתאם למצת ברכב</li>
+        <li>מדריך שימוש בעברית</li>
+      </ul>
+      <dl>
+        <dt>ראשי עיסוי</dt><dd>8, סיבוב דו־כיווני</dd>
+        <dt>עוצמות</dt><dd>3</dd>
+        <dt>חימום</dt><dd>כן, ניתן לכיבוי</dd>
+        <dt>כיבוי אוטומטי</dt><dd>15 דקות</dd>
+        <dt>אחריות יצרן</dt><dd>12 חודשים</dd>
+      </dl>
+    </div>
+  </div>
+</section>
+
+<!-- שאלות נפוצות -->
+<section class="section soft" id="faq">
+  <div class="wrap narrow">
+    <h2 class="center">שאלות נפוצות</h2>
+    <div class="faq">
+      <details><summary>מתי ההזמנה תגיע?</summary><p>המשלוח חינם לכל הארץ ומגיע תוך <span class="shipDays"></span> מרגע ההזמנה. תקבלו מספר מעקב במייל או ב-SMS.</p></details>
+      <details><summary>איך משלמים? זה בטוח?</summary><p>התשלום מתבצע בקופה המאובטחת של Shopify, בהצפנת SSL. אפשר לשלם בכרטיס אשראי, ב-Apple Pay או ב-Google Pay. אנחנו לא רואים ולא שומרים את פרטי הכרטיס.</p></details>
+      <details><summary>ואם זה לא מתאים לי?</summary><p>יש לכם <span class="gDays"></span> יום לנסות. לא מרוצים? פנו אלינו ונחזיר את הכסף. בנוסף, עומדת לכם זכות ביטול לפי חוק הגנת הצרכן. פרטים ב<a href="policies.html#returns">מדיניות ההחזרות</a>.</p></details>
+      <details><summary>זה כואב? העיסוי חזק מדי?</summary><p>יש 3 עוצמות, ואתם שולטים בלחץ דרך לולאות היד. מתחילים בעוצמה הנמוכה ומעלים לפי ההרגשה. אפשר גם להניח מגבת דקה בין המכשיר לגוף.</p></details>
+      <details><summary>אפשר להשתמש ברכב?</summary><p>כן, המתאם למצת מגיע בקופסה. לשימוש כשהרכב חונה או כנוסעים בלבד, לא בזמן נהיגה.</p></details>
+      <details><summary>למי זה לא מתאים?</summary><p>שלווה הוא מוצר לרווחה ולהרפיה, לא מכשיר רפואי. נשים בהריון, אנשים עם קוצב לב, פציעה טרייה, מחלת עור או בעיה רפואית, יתייעצו עם רופא לפני השימוש. לא מתאים לילדים.</p></details>
+      <details><summary>יש אחריות?</summary><p>כן, 12 חודשי אחריות על תקלות. אם משהו לא עובד, נחליף לכם מכשיר.</p></details>
+    </div>
+  </div>
+</section>
+
+<!-- קריאה אחרונה -->
+<section class="band final">
+  <div class="wrap narrow center">
+    <h2>הערב הזה יכול להסתיים בכתפיים רפויות</h2>
+    <p>משלוח חינם, <span class="gDays"></span> יום ניסיון, תשלום מאובטח.</p>
+    <a class="btn btn-lg" href="#buy">אני רוצה את שלווה</a>
+  </div>
+</section>
+
+</main>
+
+<footer class="footer">
+  <div class="wrap footer-in">
+    <div>
+      <b class="logo light">שלווה</b>
+      <p id="bizLine"></p>
+    </div>
+    <nav aria-label="מדיניות">
+      <a href="policies.html#shipping">משלוחים</a>
+      <a href="policies.html#returns">החזרות וביטולים</a>
+      <a href="policies.html#terms">תקנון</a>
+      <a href="policies.html#privacy">פרטיות</a>
+      <a href="policies.html#accessibility">הצהרת נגישות</a>
+      <a id="footMail" href="#" hidden>צור קשר</a>
+    </nav>
+  </div>
+  <p class="disclaimer">המוצר מיועד לרווחה ולהרפיה ואינו מכשיר רפואי. אינו מיועד לאבחון, טיפול או ריפוי של מחלה.</p>
+</footer>
+
+<!-- סרגל קנייה דביק במובייל -->
+<div class="sticky" id="sticky" aria-hidden="true">
+  <div class="sticky-price"><b id="stickyPrice"></b><s id="stickyCompare"></s></div>
+  <button class="btn" id="stickyBtn" type="button" tabindex="-1">להזמנה</button>
+</div>
+
+<a class="wa" id="wa" href="#" target="_blank" rel="noopener" hidden aria-label="שיחה בוואטסאפ">
+  <svg viewBox="0 0 32 32" width="28" height="28" aria-hidden="true"><path fill="#fff" d="M16 3a13 13 0 0 0-11.2 19.6L3 29l6.6-1.7A13 13 0 1 0 16 3zm0 23.6c-2 0-4-.6-5.7-1.6l-.4-.2-3.9 1 1-3.8-.3-.4A10.6 10.6 0 1 1 16 26.6zm5.8-7.9c-.3-.2-1.9-.9-2.2-1-.3-.1-.5-.2-.7.2l-1 1.2c-.2.2-.4.2-.7.1a8.7 8.7 0 0 1-4.3-3.8c-.3-.6.3-.5 1-1.7.1-.2 0-.4 0-.6l-1-2.4c-.3-.6-.5-.5-.7-.5h-.6c-.2 0-.6.1-.9.4-.3.3-1.2 1.1-1.2 2.8s1.2 3.2 1.4 3.5c.2.2 2.4 3.7 5.8 5.1 2.2.9 3 1 4.1.8.7-.1 1.9-.8 2.2-1.5.3-.8.3-1.4.2-1.5l-.4-.3z"/></svg>
+</a>
+
+<div class="toast" id="toast" role="alert" hidden></div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
