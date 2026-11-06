@@ -178,7 +178,8 @@ export function labelLooksConsistent(r: LabelReading): boolean {
 
 export function describeApiError(e: unknown): string {
   if (e instanceof VisionError) return e.message;
-  if (e instanceof Anthropic.AuthenticationError) return 'מפתח ה-API לא תקין. בדקו אותו בהגדרות.';
+  if (e instanceof Anthropic.AuthenticationError) return 'קוד הגישה לזיהוי תמונות לא תקין. בדקו אותו בפרופיל.';
+  if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(e.message)) return 'אין יתרה בחשבון של זיהוי התמונות. אפשר לבחור את המנות מהרשימה.';
   if (e instanceof Anthropic.RateLimitError) return 'יותר מדי בקשות. נסו שוב בעוד דקה.';
   if (e instanceof Anthropic.APIConnectionError) return 'אין חיבור לשרת. אפשר לרשום ידנית.';
   if (e instanceof Anthropic.APIError) return `שגיאה מהשרת (${e.status}). אפשר לרשום ידנית.`;
@@ -206,4 +207,18 @@ export async function prepareImage(file: File): Promise<{ blob: Blob; thumb: str
   const big = draw(1280);
   const blob: Blob = await new Promise((res, rej) => big.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', 0.85));
   return { blob, thumb: draw(160).toDataURL('image/jpeg', 0.7) };
+}
+
+/** Checks a personal access key with a tiny request. */
+export async function checkKey(apiKey: string): Promise<'ok' | 'no_credit' | 'invalid' | 'error'> {
+  try {
+    const client = new Anthropic({ apiKey, dangerouslyAllowBrowser: true });
+    await client.messages.create({ model: 'claude-haiku-5-5', max_tokens: 5, messages: [{ role: 'user', content: 'hi' }] });
+    return 'ok';
+  } catch (e) {
+    if (e instanceof Anthropic.AuthenticationError) return 'invalid';
+    if (e instanceof Anthropic.BadRequestError && /credit balance/i.test(e.message)) return 'no_credit';
+    if (e instanceof Anthropic.PermissionDeniedError) return 'invalid';
+    return 'error';
+  }
 }

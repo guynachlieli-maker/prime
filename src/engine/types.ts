@@ -61,6 +61,10 @@ export interface Profile {
   sleepHours: number;
   goal: Goal;
   pace: Pace;
+  /** Optional target weight (kg). When set, the engine derives the weekly pace from it. */
+  targetWeightKg?: number;
+  /** Optional ISO date (YYYY-MM-DD) to reach the target weight by. */
+  targetDate?: string;
   diet: DietStyle;
   kosher: boolean;
   allergies: Allergen[];
@@ -87,6 +91,8 @@ export interface Targets {
   waterMl: Explained<number>;
   weeklyChangeKg: Explained<number>;
   floorApplied: boolean;
+  /** Target-weight plan, when the user gave a target weight. */
+  goalPlan?: { targetKg: number; targetDate?: string; etaISO: string | null; weeks: number | null; feasible: boolean | null; insight: string } | null;
   createdAt: string;
 }
 

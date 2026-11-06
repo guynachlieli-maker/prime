@@ -1,11 +1,14 @@
 import { useEffect, useMemo, useState } from 'react';
-import { Avatar3D } from '../ui/LazyAvatar';
+import { BodyJourney } from '../ui/BodyJourney';
 import { Banner, Button, ChoiceCards, InfoDot, NumberField, Segmented, Toggle, WhyButton, YesNo, fmt } from '../ui/kit';
 import { evaluateSafety, bmi } from '../engine/safety';
 import { computeTargets, ACTIVITY_FACTORS } from '../engine/targets';
 import { estimateBodyFatFromBmi, forecastBody, navyBodyFat } from '../engine/forecast';
 import { EMPTY_SCREENING, type Allergen, type Profile } from '../engine/types';
 import { saveProfile, setState } from '../state/store';
+import { minHealthyWeight } from '../engine/pace';
+
+const isoIn = (weeks: number) => new Date(Date.now() + weeks * 7 * 864e5).toISOString().slice(0, 10);
 
 const DRAFT = 'prime.draft';
 type Draft = Partial<Profile> & { step: number; bfMode?: 'unknown' | 'known' | 'tape'; waist?: number; neck?: number; hip?: number };
@@ -21,7 +24,7 @@ const ALLERGENS: { value: Allergen; label: string }[] = [
   { value: 'soy', label: 'סויה' },
 ];
 
-const STEPS = ['פתיחה', 'מטרה', 'נתוני גוף', 'שאלון התאמה', 'פעילות והרגלים', 'העדפות', 'חיבור מכשירים', 'רגע הגילוי', 'התוכנית שלך'];
+const STEPS = ['פתיחה', 'מטרה', 'נתוני גוף', 'שאלון התאמה', 'פעילות והרגלים', 'העדפות', 'משקל יעד', 'רגע הגילוי', 'התוכנית שלך'];
 
 function loadDraft(): Partial<Draft> {
   try {
@@ -67,6 +70,8 @@ function toProfile(d: Draft): Profile | null {
     mealsPerDay: d.mealsPerDay ?? 4,
     maxPrepMinutes: d.maxPrepMinutes ?? 30,
     screening: d.screening ?? { ...EMPTY_SCREENING },
+    targetWeightKg: d.targetWeightKg,
+    targetDate: d.targetDate,
   };
 }
 
@@ -99,7 +104,7 @@ export function Onboarding() {
     3: true,
     4: true,
     5: true,
-    6: true,
+    6: d.targetWeightKg === undefined || !profile || d.targetWeightKg >= minHealthyWeight(profile.heightCm),
     7: true,
     8: true,
   };
@@ -322,12 +327,45 @@ export function Onboarding() {
         </>
       )}
 
-      {step === 6 && (
+      {step === 6 && profile && (
         <>
-          <h1>חיבור מכשירים</h1>
-          <p className="lead">שעון, משקל חכם ו-Apple Health או Health Connect.</p>
-          <Banner>בגרסת הדפדפן אין גישה לנתוני בריאות של הטלפון. החיבור יגיע באפליקציה לאייפון ולאנדרואיד. בינתיים אפשר להזין צעדים ומשקל ידנית.</Banner>
-          <p className="fineprint">אפשר לדלג על השלב הזה.</p>
+          <h1>משקל יעד</h1>
+          <p className="lead">לאיזה משקל תרצה להגיע? אם יש תאריך שחשוב לך, נבדוק אם אפשר להגיע אליו בקצב בטוח, ונבנה את הקצב לפיו.</p>
+          <NumberField label="משקל יעד" value={d.targetWeightKg} onChange={(v) => up({ targetWeightKg: v ?? undefined })} unit='ק"ג' min={35} max={250} step={0.5} hint={`היום: ${fmt(profile.weightKg, 1)} ק"ג`} />
+          {d.targetWeightKg !== undefined && d.targetWeightKg < minHealthyWeight(profile.heightCm) && (
+            <Banner kind="safety">המשקל הזה נמוך מהטווח הבריא לגובה שלך (BMI 18.5, כ-{fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג). בחר יעד של {fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג ומעלה.</Banner>
+          )}
+          <Toggle label="יש לי תאריך יעד" desc="למשל חתונה, תחרות או חופשה" checked={!!d.targetDate} onChange={(on) => up({ targetDate: on ? isoIn(12) : undefined })} />
+          {d.targetDate && (
+            <label className="field">
+              <span className="field-label">עד מתי?</span>
+              <span className="field-input">
+                <input type="date" value={d.targetDate} min={isoIn(2)} onChange={(e) => up({ targetDate: e.target.value || undefined })} />
+              </span>
+            </label>
+          )}
+          {targets?.goalPlan ? (
+            <div className={`insight ${targets.goalPlan.feasible === false ? 'warn' : ''}`}>
+              <strong>{targets.goalPlan.feasible === false ? 'התאריך קרוב מדי לקצב בטוח' : 'הקצב שנבחר עבורך'}</strong>
+              <p>{targets.goalPlan.insight}</p>
+              <div className="insight-nums">
+                <span>
+                  <b dir="ltr">{fmt(targets.weeklyChangeKg.value, 2)}</b> ק"ג בשבוע
+                </span>
+                <span>
+                  <b>{fmt(targets.kcal.value)}</b> קק"ל ביום
+                </span>
+                {targets.goalPlan.etaISO && (
+                  <span>
+                    יעד: <b>{new Date(targets.goalPlan.etaISO).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })}</b>
+                  </span>
+                )}
+              </div>
+              {targets.floorApplied && <p className="fineprint">היעד הקלורי נעצר ברצפה הבטוחה, ולכן ההתקדמות תהיה מעט איטית יותר מהחישוב.</p>}
+            </div>
+          ) : (
+            <p className="fineprint">אפשר גם בלי משקל יעד: נבחר קצב לפי המטרה שלך, ותוכל להוסיף יעד בפרופיל.</p>
+          )}
         </>
       )}
 
@@ -338,42 +376,20 @@ export function Onboarding() {
             <Banner kind="safety">בחרנו לא להציג תחזית גוף בשלב הזה. נתמקד באכילה מסודרת ובהרגשה שלך.</Banner>
           ) : (
             <>
-              <p className="lead">מימין: הגוף שלך היום. משמאל: הגוף הצפוי בעוד 12 שבועות בקצב שבחרת.</p>
-              <Segmented
-                label="קצב"
-                value={d.pace ?? 'balanced'}
-                onChange={(pace) => up({ pace })}
-                options={[
-                  { value: 'gentle', label: 'רגוע' },
-                  { value: 'balanced', label: 'מאוזן' },
-                  { value: 'fast', label: 'מהיר' },
-                ]}
-              />
-              <Avatar3D
-                height={320}
-                bodies={[
-                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: profile.weightKg, bodyFatPct: profile.bodyFatPct!, label: 'היום', color: '#4fd8ec' },
-                  { sex: profile.sex, heightCm: profile.heightCm, weightKg: fc[12].weightKg, bodyFatPct: fc[12].bodyFatPct, label: 'בעוד 12 שבועות', color: '#a594ff' },
-                ]}
-              />
-              <div className="compare">
-                <div>
-                  <span>היום</span>
-                  <b>
-                    {fmt(profile.weightKg, 1)} ק"ג · {fmt(profile.bodyFatPct!, 1)}% שומן
-                  </b>
-                </div>
-                <div>
-                  <span>שבוע 12 (הערכה)</span>
-                  <b>
-                    {fmt(fc[12].weightLowKg, 1)}-{fmt(fc[12].weightHighKg, 1)} ק"ג · כ-{fmt(fc[12].bodyFatPct, 1)}% שומן
-                  </b>
-                </div>
-              </div>
-              <p className="fineprint">
-                זו הערכה לפי מודל מחקרי, וכל גוף מגיב אחרת. {profile.bodyFatSource === 'estimate' && 'אחוז השומן ההתחלתי הוא הערכה גסה.'}{' '}
-                <WhyButton title="איך מחושבת התחזית" e={{ why: 'התחזית מחשבת יום אחרי יום את ההפרש בין מה שתאכל למה שהגוף שורף, ומחלקת את השינוי בין שומן לשריר לפי היחס של Forbes. אימוני כוח וחלבון גבוה מקטינים את חלק השריר שיורד. הטווח מבטא אי־ודאות של 10% בהוצאה היומית.', sources: ['hall2011', 'forbes', 'deurenberg'] }} label="איך זה מחושב?" />
-              </p>
+              <p className="lead">{targets.goalPlan ? `ככה הגוף שלך משתנה בדרך ל-${fmt(targets.goalPlan.targetKg, 1)} ק"ג. לחצו ▶ כדי לראות את השינוי, או גררו את הסרגל.` : 'ככה הגוף שלך צפוי להשתנות בחצי השנה הקרובה. לחצו ▶ כדי לראות את השינוי.'}</p>
+              {!targets.goalPlan && (
+                <Segmented
+                  label="קצב"
+                  value={d.pace ?? 'balanced'}
+                  onChange={(pace) => up({ pace })}
+                  options={[
+                    { value: 'gentle', label: 'רגוע' },
+                    { value: 'balanced', label: 'מאוזן' },
+                    { value: 'fast', label: 'מהיר' },
+                  ]}
+                />
+              )}
+              <BodyJourney profile={profile} targets={targets} height={340} />
             </>
           )}
         </>
@@ -420,6 +436,15 @@ export function Onboarding() {
           </div>
           {safety?.flags.includes('refer_dietitian') && <Banner kind="warn">מומלץ לעבור על התוכנית עם דיאטנית קלינית.</Banner>}
           {safety?.flags.includes('needs_doctor_for_training') && <Banner kind="warn">לפני תוכנית אימונים, מומלץ לקבל אישור רופא.</Banner>}
+          <div className="insight">
+            <strong>תזכורות</strong>
+            <p>נזכיר לך בשעות הארוחות, בבוקר השקילה ובערב נשלח הודעת עידוד קצרה. אפשר לשנות שעות ולהוסיף תזכורות משלך בפרופיל.</p>
+            {typeof window !== 'undefined' && 'Notification' in window && window.top === window.self && Notification.permission === 'default' && (
+              <Button kind="secondary" onClick={() => import('../state/notify').then((m) => m.askNotifyPermission())}>
+                לאפשר התראות
+              </Button>
+            )}
+          </div>
           <p className="fineprint">אחרי שבועיים של רישום, נבדוק אם ההוצאה היומית שלך שונה מההערכה, ונציע עדכון.</p>
         </>
       )}
@@ -432,7 +457,7 @@ export function Onboarding() {
         )}
         {step < STEPS.length - 1 ? (
           <Button onClick={() => go(step + 1)} disabled={!canNext[step]}>
-            {step === 0 ? 'בוא נתחיל' : step === 6 ? 'דלג' : 'המשך'}
+            {step === 0 ? 'בוא נתחיל' : step === 6 && d.targetWeightKg === undefined ? 'דלג' : 'המשך'}
           </Button>
         ) : (
           <Button onClick={finish}>יאללה, מתחילים</Button>

@@ -60,7 +60,7 @@ export function Devices({ back }: { back: () => void }) {
       setBusy(null);
       const name = (e as { name?: string })?.name;
       if (name === 'NotFoundError') return; // the viewer closed the chooser
-      setMsg({ kind: 'warn', text: name === 'SecurityError' ? 'הדפדפן לא מאפשר Bluetooth בעמוד הזה. פתחו את האפליקציה ישירות בכרום, או השתמשו בייבוא קובץ.' : 'החיבור נכשל. ודאו שהמכשיר במצב שידור וקרוב לטלפון.' });
+      setMsg({ kind: 'warn', text: name === 'SecurityError' ? 'אין גישה ל-Bluetooth כאן. פתחו את PRIME בכרום, או ייבאו קובץ מהשעון.' : 'החיבור נכשל. ודאו שהמכשיר במצב שידור וקרוב לטלפון.' });
     }
   };
 
@@ -72,7 +72,7 @@ export function Devices({ back }: { back: () => void }) {
           חזרה
         </Button>
       </div>
-      <p className="lead">שעונים, טבעות, משקלים ורצועות דופק. הנתונים משמשים לתמונת מצב יומית ולתחזית, ונשמרים רק במכשיר הזה.</p>
+      <p className="lead">מייבאים את הנתונים מהשעון, מהטבעת או מהמשקל: צעדים, שינה, דופק ומשקל. הנתונים נשמרים רק בטלפון הזה.</p>
       {busy && (
         <Banner kind="info">
           <span className="spinner" aria-hidden="true" /> {busy}
@@ -102,7 +102,7 @@ export function Devices({ back }: { back: () => void }) {
       <input ref={fileRef} type="file" accept=".zip,.xml,.csv,text/csv,application/zip,text/xml" multiple hidden onChange={(e) => importFile(e.target.files)} />
 
       <div className="providers">
-        {PROVIDERS.map((p) => {
+        {PROVIDERS.filter((p) => p.how !== 'bluetooth' || bt).map((p) => {
           const conn = s.devices.find((d) => d.id === p.id);
           const isOpen = open === p.id;
           return (
@@ -120,14 +120,10 @@ export function Devices({ back }: { back: () => void }) {
                     <strong>מה נקבל:</strong> {p.what}
                   </p>
                   <p className="muted">
-                    <strong>{p.how === 'bluetooth' ? 'איך:' : 'עכשיו:'}</strong> {p.exportHelp}
+                    <strong>איך:</strong> {p.exportHelp}
                   </p>
                   {p.how === 'bluetooth' ? (
-                    bt ? (
-                      <Button onClick={() => connectBt(p)}>התחברות ב-Bluetooth</Button>
-                    ) : (
-                      <Banner kind="warn">הדפדפן הזה לא תומך ב-Bluetooth. זה עובד בכרום באנדרואיד ובמחשב. באייפון החיבור יגיע באפליקציה.</Banner>
-                    )
+                    <Button onClick={() => connectBt(p)}>התחברות ב-Bluetooth</Button>
                   ) : (
                     <Button
                       onClick={() => {
@@ -138,7 +134,6 @@ export function Devices({ back }: { back: () => void }) {
                       ייבוא קובץ
                     </Button>
                   )}
-                  <p className="fineprint">חיבור אוטומטי ברקע (באפליקציה המלאה): {p.cloud}.</p>
                   {conn && (
                     <Button
                       kind="ghost"

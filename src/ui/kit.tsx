@@ -292,9 +292,6 @@ export function Empty(props: { title: string; text: string; action?: ReactNode }
   );
 }
 
-export function Pending({ what }: { what: string }) {
-  return <span className="pending" title="ממתין לאישור הוועדה המדעית">{what}: ממתין לאישור</span>;
-}
 
 export const fmt = (n: number, digits = 0) => n.toLocaleString('he-IL', { maximumFractionDigits: digits, minimumFractionDigits: digits });
 export { SOURCES };

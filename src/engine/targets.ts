@@ -1,4 +1,5 @@
 import { SAFETY_CONFIG, bmi, evaluateSafety } from './safety';
+import { planPace } from './pace';
 import type { ActivityLevel, Pace, Profile, Sex, Targets } from './types';
 
 export const KCAL_PER_KG_TISSUE = 7700; // common approximation for mixed tissue
@@ -42,7 +43,9 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
   const b = bmi(p.weightKg, p.heightCm);
   let goal = p.goal;
   if (goal === 'health') goal = b >= 25 ? 'fat_loss' : 'performance';
-  let pace = p.pace;
+  const pace = p.pace;
+  const plan = planPace(p, opts.now);
+  if (plan && p.goal !== 'performance') goal = plan.weeklyKg < 0 ? 'fat_loss' : 'muscle_gain';
 
   let weeklyChange = 0; // kg / week (negative = loss)
   let kcal = tdeeV;
@@ -50,6 +53,14 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
   if (noDeficit) {
     kcal = tdeeV;
     goalWhy = 'לפי תשובות שאלון ההתאמה, היעד נשאר ברמת תחזוקה, בלי גירעון קלורי.';
+  } else if (plan && goal === 'fat_loss') {
+    weeklyChange = plan.weeklyKg;
+    kcal = tdeeV + (weeklyChange * KCAL_PER_KG_TISSUE) / 7;
+    goalWhy = plan.insight;
+  } else if (plan && goal === 'muscle_gain') {
+    weeklyChange = plan.weeklyKg;
+    kcal = tdeeV + (weeklyChange * KCAL_PER_KG_TISSUE) / 7;
+    goalWhy = plan.insight;
   } else if (goal === 'fat_loss') {
     let pct = PACE_LOSS_PCT[pace];
     pct = Math.min(pct, SAFETY_CONFIG.maxWeeklyLossPctOfBodyweight);
@@ -148,6 +159,16 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
       sources: ['hall2011'],
     },
     floorApplied,
+    goalPlan: plan
+      ? {
+          targetKg: p.targetWeightKg!,
+          targetDate: p.targetDate,
+          etaISO: floorApplied ? null : plan.etaISO,
+          weeks: floorApplied ? null : plan.weeks,
+          feasible: plan.requestedFeasible,
+          insight: plan.insight,
+        }
+      : null,
     createdAt: (opts.now ?? new Date()).toISOString(),
   };
 }

@@ -64,7 +64,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     if (mode !== 'search' || fullReady) return;
     loadFullDb()
       .then(() => setFullReady(true))
-      .catch(() => setInfo('מאגר המזון המלא לא נטען. החיפוש כולל את 150 המזונות הנפוצים.'));
+      .catch(() => setInfo('חלק מהמאגר לא נטען. נסו שוב בעוד רגע.'));
   }, [mode, fullReady]);
 
   const addFood = (f: Food, grams: number, conf?: BasketItem['conf']) => setBasket((b) => [...b, { foodId: f.id, name: f.name, grams: Math.round(grams), conf }]);
@@ -86,11 +86,11 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       setPhoto(img.thumb);
       const provider = await availableProvider(s.settings.apiKey);
       if (!provider) {
-        setErr('זיהוי אוטומטי לא זמין כאן. באפליקציה ב-claude.ai הזיהוי עובד אחרי אישור חד־פעמי. אפשר גם לחבר מפתח API בהגדרות. בינתיים, בחרו את המנות מהרשימה.');
+        setErr('זיהוי מתמונה עדיין לא פעיל. אפשר להפעיל אותו בפרופיל (זיהוי תמונות), ובינתיים לבחור את המנות מהרשימה.');
         setMode('search');
         return;
       }
-      setBusy(provider === 'claude-app' ? 'Claude מזהה את הצלחת… (בפעם הראשונה תתבקשו לאשר)' : 'מזהה את הצלחת…');
+      setBusy('מזהה את הצלחת…');
       try {
         const r = await recognizeFood({ file: img.blob, apiKey: s.settings.apiKey });
         setRec(r);
@@ -127,7 +127,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         setInfo(
           hit.from === 'mine'
             ? `נמצא: ${f.name} (מתווית שצילמת בעבר).`
-            : `נמצא: ${f.name}. הערכים מ-Open Food Facts (מאגר קהילתי עולמי). בדקו אותם מול התווית.`,
+            : `נמצא: ${f.name}. כדאי לוודא שהערכים תואמים לתווית.`,
         );
       } else {
         setMissingCode(c);
@@ -198,7 +198,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         setInfo(labelLooksConsistent(r) ? `נקרא מהתווית: ${f.name}. בדקו שהמספרים נכונים.` : 'נקרא מהתווית, אבל הקלוריות לא מתיישבות עם החלבון, הפחמימה והשומן. בדקו את המספרים מול התווית.');
       } catch (e) {
         const msg = describeApiError(e);
-        setErr(msg === 'NO_PROVIDER' ? 'קריאת תווית דורשת את חיבור Claude (באפליקציה ב-claude.ai) או מפתח API בהגדרות.' : msg);
+        setErr(msg === 'NO_PROVIDER' ? 'קריאת תווית דורשת זיהוי תמונות פעיל (בפרופיל). בינתיים אפשר לחפש את המוצר ברשימה.' : msg);
       }
     } finally {
       setBusy(null);
@@ -271,11 +271,11 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
 
       {embedded && (mode === 'photo' || mode === 'barcode') && (
         <Banner kind="info">
-          המצלמה לא נפתחת? בתוך claude.ai הגישה למצלמה חסומה.{' '}
+          המצלמה לא נפתחת כאן?{' '}
           <a href={SITE} target="_blank" rel="noreferrer">
-            פתחו את PRIME כאתר
-          </a>{' '}
-          (מצלמה, סריקת ברקוד חיה, התקנה למסך הבית).
+            פתחו את PRIME בדפדפן
+          </a>
+          .
         </Banner>
       )}
       {saved && <Banner kind="info">נרשם. הטבעת במסך "היום" כבר מעודכנת.</Banner>}
@@ -284,7 +284,20 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           <span className="spinner" aria-hidden="true" /> {busy}
         </Banner>
       )}
-      {err && <Banner kind="warn">{err}</Banner>}
+      {err && (
+        <Banner
+          kind="warn"
+          action={
+            /פרופיל/.test(err) ? (
+              <Button kind="secondary" onClick={() => go('profile')}>
+                לפרופיל
+              </Button>
+            ) : undefined
+          }
+        >
+          {err}
+        </Banner>
+      )}
       {info && <Banner kind="info">{info}</Banner>}
 
       {mode === 'photo' && (
@@ -412,7 +425,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       {mode === 'search' && (
         <Card>
           <input className="search" placeholder="חפשו מאכל או מוצר: חומוס, קוטג׳, במבה…" value={q} onChange={(e) => setQ(e.target.value)} autoFocus aria-label="חיפוש מאכל" />
-          <p className="fineprint">{fullReady ? 'חיפוש בכל 4,500 המזונות של מאגר משרד הבריאות.' : 'טוען את מאגר משרד הבריאות…'}</p>
+          <p className="fineprint">{fullReady ? 'חיפוש בכל 4,500 המזונות של מאגר התזונה של משרד הבריאות.' : 'טוען את מאגר המזון…'}</p>
           <ul className="results">
             {results.map((f) => (
               <FoodRow key={f.id} food={f} onAdd={(g) => addFood(f, g)} />
@@ -537,22 +550,14 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           </div>
         </Card>
       )}
-      {mode === 'photo' && !s.settings.apiKey && (
-        <p className="fineprint">
-          הזיהוי עובד באפליקציה ב-claude.ai אחרי אישור חד־פעמי.{' '}
-          <button className="link" onClick={() => go('profile')}>
-            חלופה: מפתח API בהגדרות
-          </button>
-        </p>
-      )}
     </div>
   );
 }
 
 function SourceTag({ food }: { food: Food }) {
   if (food.source === 'moh') return <span className="src moh"> · משרד הבריאות{food.allergens.length === 0 && food.id.startsWith('moh:') ? ' · אלרגנים לא ידועים' : ''}</span>;
-  if (food.source === 'openfoodfacts') return <span className="src check"> · Open Food Facts · לבדוק מול התווית</span>;
-  return <span className="src check"> · מהתווית · לבדוק</span>;
+  if (food.source === 'openfoodfacts') return <span className="src check"> · כדאי לבדוק מול התווית</span>;
+  return <span className="src check"> · מהתווית שצילמת</span>;
 }
 
 function FoodRow({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }) {

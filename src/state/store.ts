@@ -1,3 +1,5 @@
+import type { Reminder } from '../engine/reminders';
+import type { TrainingState } from '../modules/training/types';
 import { useSyncExternalStore } from 'react';
 import { computeTargets } from '../engine/targets';
 import type { Nutrients, Profile, Targets } from '../engine/types';
@@ -82,6 +84,12 @@ export interface State {
   profilePhoto?: string;
   devices: ConnectedDevice[];
   deviceData: DeviceSample[];
+  /** undefined until the user first opens reminders (then filled with defaults). */
+  reminders?: Reminder[];
+  /** Feature modules. Nutrition is active; training is prepared for a later release. */
+  modules: { nutrition: true; training: boolean };
+  /** Training module storage (empty until the module launches). */
+  training?: TrainingState;
   settings: {
     apiKey?: string;
     hideAvatar: boolean;
@@ -89,6 +97,7 @@ export interface State {
     theme: 'system' | 'light' | 'dark';
     detailed: boolean;
     reminders: boolean;
+    notifyAsked?: boolean;
   };
 }
 
@@ -109,6 +118,7 @@ const initial: State = {
   learning: EMPTY_LEARNING,
   devices: [],
   deviceData: [],
+  modules: { nutrition: true, training: false },
   settings: { hideAvatar: false, trainingConsent: false, theme: 'system', detailed: false, reminders: true },
 };
 

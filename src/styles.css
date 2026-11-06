@@ -456,3 +456,31 @@ a { color: var(--accent); }
 .suggest { display: grid; gap: 6px; margin: 6px 0; }
 .suggest-item { text-align: right; background: var(--surface); border: 1.5px solid var(--line); border-radius: 12px; padding: 8px 10px; cursor: pointer; display: flex; justify-content: space-between; gap: 8px; }
 .suggest-item small { color: var(--muted); white-space: nowrap; }
+
+/* goal insight + body journey */
+.legend-swatch { display: inline-block; width: 14px; height: 3px; border-radius: 2px; background: #ffb35c; vertical-align: middle; margin-inline-end: 4px; }
+.insight { border: 1px solid var(--line); border-inline-start: 4px solid var(--accent); background: var(--accent-soft); border-radius: 12px; padding: 12px 14px; margin: 12px 0; }
+.insight.warn { border-inline-start-color: var(--warn); background: var(--warn-soft); }
+.insight strong { display: block; margin-bottom: 4px; }
+.insight p { margin: 0; line-height: 1.55; }
+.insight-nums { display: flex; flex-wrap: wrap; gap: 8px 18px; margin-top: 10px; font-size: 14px; }
+.insight-nums b { font-size: 17px; }
+.journey-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 10px; text-align: center; }
+.journey-stats div { display: flex; flex-direction: column; gap: 2px; background: var(--accent-soft); border-radius: 12px; padding: 8px 4px; }
+.journey-stats span { font-size: 12px; color: var(--muted); }
+.journey-stats b { font-size: 17px; }
+.journey-stats small { font-size: 12px; color: var(--muted); font-weight: 600; }
+.journey-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.journey-controls input[type='range'] { flex: 1; accent-color: var(--accent); height: 32px; }
+.journey-controls .play { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 16px; cursor: pointer; flex: none; }
+.journey-marks { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+/* reminders */
+.rem-list { list-style: none; padding: 0; margin: 8px 0; display: flex; flex-direction: column; gap: 8px; }
+.rem-list li { display: flex; align-items: center; gap: 10px; border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; }
+.rem-list li .rem-text { flex: 1; min-width: 0; }
+.rem-list li input[type='time'] { font: inherit; padding: 6px; border: 1px solid var(--line); border-radius: 8px; background: transparent; color: inherit; }
+.rem-days { display: flex; gap: 4px; flex-wrap: wrap; }
+.rem-days button { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: transparent; color: inherit; font: inherit; font-size: 13px; cursor: pointer; }
+.rem-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
+.toast-note { position: fixed; inset-inline: 12px; top: 12px; z-index: 60; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--accent); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.18); display: flex; gap: 10px; align-items: flex-start; max-width: 520px; margin: 0 auto; }
+.toast-note .grow { flex: 1; }

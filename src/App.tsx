@@ -9,13 +9,14 @@ import { Capture } from './screens/Capture';
 import { Progress } from './screens/Progress';
 import { Programs } from './screens/Programs';
 import { Profile } from './screens/Profile';
-import { Pro } from './screens/Pro';
 import { Devices } from './screens/Devices';
+import { Reminders } from './screens/Reminders';
+import { onToast, startReminders } from './state/notify';
 import { restoreMyProducts } from './engine/barcode';
 
 restoreMyProducts();
 
-export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'pro' | 'devices';
+export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'devices' | 'reminders';
 
 const TABS: { id: Tab; label: string; icon: string }[] = [
   { id: 'today', label: 'היום', icon: 'M3 11l9-8 9 8v9a1 1 0 01-1 1h-5v-6h-6v6H4a1 1 0 01-1-1z' },
@@ -41,6 +42,17 @@ export function App() {
   const name = useStore((s) => s.profile?.name);
   const [tab, setTab] = useState<Tab>('today');
   const [tour, setTour] = useState(false);
+  const [toast, setToast] = useState<{ title: string; body: string } | null>(null);
+
+  useEffect(() => {
+    if (!done) return;
+    const stop = startReminders();
+    const off = onToast((t) => setToast(t));
+    return () => {
+      stop();
+      off();
+    };
+  }, [done]);
 
   useEffect(() => {
     if (theme === 'system') document.documentElement.removeAttribute('data-theme');
@@ -95,8 +107,8 @@ export function App() {
               }}
             />
           )}
-          {tab === 'pro' && <Pro back={() => go('profile')} />}
           {tab === 'devices' && <Devices back={() => go('profile')} />}
+          {tab === 'reminders' && <Reminders back={() => go('profile')} />}
         </main>
         <nav className="tabbar" aria-label="ניווט ראשי">
           {TABS.map((t) => (
@@ -108,6 +120,18 @@ export function App() {
             </button>
           ))}
         </nav>
+        {toast && (
+          <div className="toast-note" role="status">
+            <span aria-hidden="true">🔔</span>
+            <div className="grow">
+              <b>{toast.title}</b>
+              {toast.body && <div className="muted">{toast.body}</div>}
+            </div>
+            <button className="link" onClick={() => setToast(null)} aria-label="סגירה">
+              ✕
+            </button>
+          </div>
+        )}
         {tour && (
           <Tour
             steps={MAIN_TOUR}

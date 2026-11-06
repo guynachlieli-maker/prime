@@ -1,13 +1,12 @@
 import { useMemo, useRef, useState } from 'react';
-import { Avatar3D } from '../ui/LazyAvatar';
+import { BodyJourney } from '../ui/BodyJourney';
 import { WeightChart } from '../ui/WeightChart';
-import { Banner, Button, Card, Empty, InfoDot, NumberField, Segmented, Sheet, WhyButton, fmt } from '../ui/kit';
+import { Banner, Button, Card, Empty, InfoDot, NumberField, Sheet, fmt } from '../ui/kit';
 import { setState, todayISO, useStore, type Measurement } from '../state/store';
-import { forecastBody, weeksToTarget } from '../engine/forecast';
+import { forecastBody } from '../engine/forecast';
 import { weightTrend } from '../engine/adaptive';
 import { dailyIntake, useAdaptive, useSafety } from '../state/derived';
 
-const WEEKS = [0, 4, 8, 12, 24] as const;
 const PHOTOS = 'prime.photos';
 
 function loadPhotos(): { date: string; src: string }[] {
@@ -22,12 +21,9 @@ export function Progress() {
   const s = useStore((x) => x);
   const safety = useSafety();
   const adaptive = useAdaptive();
-  const [week, setWeek] = useState<(typeof WEEKS)[number]>(12);
-  const [twin, setTwin] = useState(true);
   const [mOpen, setMOpen] = useState(false);
   const [m, setM] = useState<Measurement>({ date: todayISO() });
   const [photos, setPhotos] = useState(loadPhotos);
-  const [targetKg, setTargetKg] = useState<number | undefined>();
   const photoRef = useRef<HTMLInputElement>(null);
   const p = s.profile;
   const t = s.targets;
@@ -43,15 +39,12 @@ export function Progress() {
   );
   if (!p || !t) return null;
   const hide = s.settings.hideAvatar || safety?.flags.includes('hide_avatar');
-  const at = fc[week] ?? fc[0];
   const startIso = trend.length ? trend[trend.length - 1].date : todayISO();
   const fcBand = fc.slice(0, 7).map((f) => {
     const d = new Date(startIso + 'T12:00:00');
     d.setDate(d.getDate() + f.week * 7);
     return { date: todayISO(d), mid: f.weightKg, low: f.weightLowKg, high: f.weightHighKg };
   });
-  const eta = targetKg ? weeksToTarget({ sex: p.sex, age: p.age, heightCm: p.heightCm, weightKg: currentKg, bodyFatPct: p.bodyFatPct ?? 25, tdee: t.tdee.value, intakeKcal: t.kcal.value, strengthTraining: p.strengthTraining, weeks: 104 }, targetKg) : null;
-  const minHealthyKg = Math.round(18.5 * (p.heightCm / 100) ** 2 * 10) / 10;
 
   // Weekly report: last 7 days vs the 7 before
   const intake = dailyIntake(s);
@@ -70,52 +63,8 @@ export function Progress() {
       {hide ? (
         <Banner kind="info">התצוגה של הגוף כבויה. אפשר להפעיל אותה בהגדרות. המעקב ממשיך עם מספרים בלבד.</Banner>
       ) : (
-        <Card className="avatar-card">
-          <div className="row between">
-            <Segmented label="תצוגה" value={twin ? 'twin' : 'one'} onChange={(v) => setTwin(v === 'twin')} options={[{ value: 'twin', label: 'היום מול התחזית' }, { value: 'one', label: 'גוף אחד' }]} />
-          </div>
-          <Avatar3D
-            height={340}
-            bodies={
-              twin
-                ? [
-                    { sex: p.sex, heightCm: p.heightCm, weightKg: fc[0].weightKg, bodyFatPct: fc[0].bodyFatPct, label: 'היום', sub: `${fmt(fc[0].weightKg, 1)} ק"ג · ${fmt(fc[0].bodyFatPct, 1)}%`, color: '#4fd8ec' },
-                    { sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: week === 0 ? 'היום' : `בעוד ${week} שבועות`, sub: `כ-${fmt(at.weightKg, 1)} ק"ג · ${fmt(at.bodyFatPct, 1)}%`, color: '#a594ff' },
-                  ]
-                : [{ sex: p.sex, heightCm: p.heightCm, weightKg: at.weightKg, bodyFatPct: at.bodyFatPct, label: week === 0 ? 'היום' : `בעוד ${week} שבועות`, sub: `${fmt(at.weightKg, 1)} ק"ג · ${fmt(at.bodyFatPct, 1)}%`, color: week === 0 ? '#4fd8ec' : '#a594ff' }]
-            }
-          />
-          <div className="week-slider" role="radiogroup" aria-label="נקודת זמן">
-            {WEEKS.map((w) => (
-              <button key={w} role="radio" aria-checked={week === w} className={week === w ? 'on' : ''} onClick={() => setWeek(w)}>
-                {w === 0 ? 'היום' : `${w} ש׳`}
-              </button>
-            ))}
-          </div>
-          <div className="data-layer">
-            <div>
-              <span>משקל</span>
-              <b>
-                {week === 0 ? fmt(at.weightKg, 1) : `${fmt(at.weightLowKg, 1)}-${fmt(at.weightHighKg, 1)}`} ק"ג
-              </b>
-            </div>
-            <div>
-              <span>אחוז שומן</span>
-              <b>{fmt(at.bodyFatPct, 1)}%</b>
-            </div>
-            <div>
-              <span>מסת שומן</span>
-              <b>{fmt(at.fatKg, 1)} ק"ג</b>
-            </div>
-            <div>
-              <span>מסה רזה</span>
-              <b>{fmt(at.leanKg, 1)} ק"ג</b>
-            </div>
-          </div>
-          <p className="fineprint">
-            {week === 0 ? 'המצב היום לפי המגמה שלך.' : 'הערכה לפי היעד הנוכחי. כל גוף מגיב אחרת.'} {p.bodyFatSource === 'estimate' && 'אחוז השומן ההתחלתי הוא הערכה לפי BMI.'}{' '}
-            <WhyButton title="איך מחושבת התחזית" e={{ why: 'מודל יומי של מאזן אנרגיה. השינוי מתחלק בין שומן לשריר לפי היחס של Forbes, ואימוני כוח מקטינים את חלק השריר שיורד. הטווח מבטא אי־ודאות של 10% בהוצאה היומית. כל שבוע התחזית מתעדכנת לפי המדידות שלך.', sources: ['hall2011', 'forbes'] }} />
-          </p>
+        <Card className="avatar-card" title={t.goalPlan ? `הדרך ל-${fmt(t.goalPlan.targetKg, 1)} ק"ג` : 'הגוף שלך לאורך הזמן'}>
+          <BodyJourney profile={{ ...p, weightKg: currentKg }} targets={t} startISO={startIso + 'T12:00:00'} />
         </Card>
       )}
 
@@ -138,14 +87,10 @@ export function Progress() {
             </span>
           )}
         </div>
-        {!hide && (
-          <div className="eta">
-            <NumberField label="יעד משקל (לא חובה)" value={targetKg} onChange={setTargetKg} unit='ק"ג' min={minHealthyKg} max={250} hint={`מינימום ${fmt(minHealthyKg, 1)} ק"ג (BMI 18.5)`} />
-            {eta && targetKg && targetKg >= minHealthyKg && (
-              <p>
-                {eta.earliest === null ? 'בקצב הנוכחי היעד לא מתקרב. שנו קצב או מטרה.' : `בקצב הנוכחי: בין שבוע ${eta.earliest} לשבוע ${eta.latest ?? 'מאוחר יותר'}.`}
-              </p>
-            )}
+        {t.goalPlan && (
+          <div className="insight">
+            <strong>היעד: {fmt(t.goalPlan.targetKg, 1)} ק"ג</strong>
+            <p>{t.goalPlan.insight}</p>
           </div>
         )}
       </Card>

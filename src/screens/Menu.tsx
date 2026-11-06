@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import { Banner, Button, Card, Pending, Sheet, fmt } from '../ui/kit';
+import { Banner, Button, Card, Sheet, fmt } from '../ui/kit';
 import { setState, todayISO, useStore, addLog, nowTime, learn } from '../state/store';
 import { preferences, recordRecipe } from '../engine/learning';
 import { menuTargets, planFor } from '../state/derived';
@@ -61,7 +61,7 @@ export function Menu() {
           <p className="fineprint">
             {profile.mealsPerDay < 5 && plan.deviation.kcalPct < 0
               ? 'היעד גבוה ביחס למספר הארוחות: המנות כבר בגודל המקסימלי הסביר. מומלץ להוסיף ארוחת ביניים (בפרופיל: ארוחות ביום).'
-              : 'עם ההעדפות שבחרת, אין מספיק מתכונים כדי לעמוד ביעד בדיוק. הספרייה תגדל לקראת ההשקה.'}
+              : 'עם ההעדפות שבחרת אין מספיק מנות מתאימות כדי לעמוד ביעד בדיוק. אפשר להרחיב את ההעדפות בפרופיל.'}
           </p>
         )}
       </Card>
@@ -93,8 +93,7 @@ export function Menu() {
                     <li key={st}>{st}</li>
                   ))}
                 </ol>
-                <p className="fineprint">הכמויות מותאמות ליעדים שלך. הערכים מחושבים ממאגר התזונה של משרד הבריאות.</p>
-                {!r.approvedBy && <Pending what="אישור דיאטנית למתכון" />}
+                <p className="fineprint">הכמויות מותאמות ליעדים שלך. הערכים התזונתיים לפי מאגר התזונה של משרד הבריאות.</p>
               </div>
             )}
             <div className="row">

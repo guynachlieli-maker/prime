@@ -75,7 +75,7 @@ const PHOTO = path.join(__dirname, 'plate.jpg');
 
   // devices: Whoop CSV import
   await page.getByRole('button', { name: 'פרופיל והגדרות' }).click();
-  await page.getByRole('button', { name: 'ניהול' }).click();
+  await page.locator('.card', { hasText: 'נתונים מהשעון' }).getByRole('button', { name: 'ייבוא' }).click();
   await page.getByRole('button', { name: /Whoop/ }).click();
   const [chooser] = await Promise.all([page.waitForEvent('filechooser'), page.getByRole('button', { name: 'ייבוא קובץ' }).click()]);
   await chooser.setFiles(WHOOP);

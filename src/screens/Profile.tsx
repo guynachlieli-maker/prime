@@ -2,15 +2,17 @@ import { useRef, useState } from 'react';
 import { summarize, EMPTY_LEARNING } from '../engine/learning';
 import { RECIPES } from '../data/recipes';
 import { Banner, Button, Card, ChoiceCards, NumberField, Segmented, Toggle, fmt } from '../ui/kit';
-import { deleteAllData, exportData, loadDemoData, saveProfile, setState, useStore } from '../state/store';
-import { SAFETY_CONFIG } from '../engine/safety';
+import { deleteAllData, exportData, saveProfile, setState, useStore } from '../state/store';
 import { ACTIVITY_FACTORS } from '../engine/targets';
+import { minHealthyWeight } from '../engine/pace';
 import type { Profile as P } from '../engine/types';
 import type { Tab } from '../App';
 
 export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: () => void }) {
   const s = useStore((x) => x);
   const [key, setKey] = useState(s.settings.apiKey ?? '');
+  const [keyState, setKeyState] = useState<null | 'checking' | 'ok' | 'no_credit' | 'invalid' | 'error'>(null);
+  const inClaude = typeof window !== 'undefined' && window.top !== window.self;
   const [confirmDelete, setConfirmDelete] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
   const learned = summarize(s.learning, (id) => RECIPES.find((r) => r.id === id)?.name ?? id);
@@ -63,8 +65,12 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         <p className="fineprint">התמונה נשמרת רק במכשיר הזה.</p>
       </Card>
 
-      <Card title="מכשירים ונתוני בריאות" action={<Button kind="secondary" onClick={() => go('devices')}>ניהול</Button>}>
-        <p className="muted">{s.devices.length ? `מחובר: ${s.devices.map((d) => d.name).join(', ')}` : 'Garmin, Whoop, Apple Watch, Samsung, Oura, משקלים ורצועות דופק.'}</p>
+      <Card title="תזכורות והתראות" action={<Button kind="secondary" onClick={() => go('reminders')}>ניהול</Button>}>
+        <p className="muted">{s.settings.reminders ? 'שעות ארוחה, שקילה, הודעת עידוד ותזכורות משלך.' : 'התזכורות כבויות.'}</p>
+      </Card>
+
+      <Card title="נתונים מהשעון או מהמשקל" action={<Button kind="secondary" onClick={() => go('devices')}>ייבוא</Button>}>
+        <p className="muted">{s.devices.length ? `יובא מ: ${s.devices.map((d) => d.name).join(', ')}` : 'ייבוא צעדים, שינה, דופק ומשקל מקובץ הייצוא של השעון.'}</p>
       </Card>
 
       <Card title="מה המערכת למדה עליך">
@@ -101,16 +107,31 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
             { value: 'health', label: 'בריאות כללית' },
           ]}
         />
-        <Segmented
-          label="קצב"
-          value={p.pace}
-          onChange={(pace) => upd({ pace })}
-          options={[
-            { value: 'gentle', label: 'רגוע' },
-            { value: 'balanced', label: 'מאוזן' },
-            { value: 'fast', label: 'מהיר' },
-          ]}
-        />
+        <div className="grid2">
+          <NumberField label="משקל יעד" value={p.targetWeightKg} onChange={(v) => (v === undefined ? upd({ targetWeightKg: undefined, targetDate: undefined }) : v >= minHealthyWeight(p.heightCm) && v <= 250 && upd({ targetWeightKg: v }))} unit='ק"ג' min={minHealthyWeight(p.heightCm)} max={250} step={0.5} hint="לא חובה" />
+          <label className="field">
+            <span className="field-label">תאריך יעד</span>
+            <span className="field-input">
+              <input type="date" value={p.targetDate ?? ''} min={new Date(Date.now() + 14 * 864e5).toISOString().slice(0, 10)} onChange={(e) => upd({ targetDate: e.target.value || undefined })} disabled={!p.targetWeightKg} />
+            </span>
+          </label>
+        </div>
+        {s.targets?.goalPlan ? (
+          <div className={`insight ${s.targets.goalPlan.feasible === false ? 'warn' : ''}`}>
+            <p>{s.targets.goalPlan.insight}</p>
+          </div>
+        ) : (
+          <Segmented
+            label="קצב"
+            value={p.pace}
+            onChange={(pace) => upd({ pace })}
+            options={[
+              { value: 'gentle', label: 'רגוע' },
+              { value: 'balanced', label: 'מאוזן' },
+              { value: 'fast', label: 'מהיר' },
+            ]}
+          />
+        )}
       </Card>
 
       <Card title="נתונים">
@@ -165,39 +186,50 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         </Button>
       </Card>
 
-      <Card title="זיהוי אוכל מתמונה">
-        <p className="muted">הזיהוי עובד דרך שירות AI חיצוני. באפליקציה המלאה, הקריאה עוברת דרך השרת שלנו. בגרסה הזו אפשר לחבר מפתח API אישי של Anthropic, והוא נשמר רק במכשיר.</p>
-        <label className="field">
-          <span className="field-label">מפתח API</span>
-          <span className="field-input">
-            <input type="password" dir="ltr" value={key} onChange={(e) => setKey(e.target.value)} placeholder="sk-ant-..." autoComplete="off" />
-          </span>
-        </label>
-        <div className="row">
-          <Button kind="secondary" onClick={() => setSettings({ apiKey: key.trim() || undefined })}>
-            שמירה
-          </Button>
-          {s.settings.apiKey && (
+      {!inClaude && (
+        <Card title="זיהוי תמונות">
+          <p className="muted">כדי שהאפליקציה תזהה אוכל ותוויות מתמונה, מזינים פעם אחת קוד גישה אישי. הקוד נשמר רק בטלפון הזה.</p>
+          <label className="field">
+            <span className="field-label">קוד גישה</span>
+            <span className="field-input">
+              <input type="password" dir="ltr" value={key} onChange={(e) => setKey(e.target.value)} autoComplete="off" aria-label="קוד גישה לזיהוי תמונות" />
+            </span>
+          </label>
+          <div className="row wrap">
             <Button
-              kind="ghost"
-              onClick={() => {
-                setKey('');
-                setSettings({ apiKey: undefined });
+              kind="secondary"
+              disabled={!key.trim() || keyState === 'checking'}
+              onClick={async () => {
+                setKeyState('checking');
+                const { checkKey } = await import('../engine/vision');
+                const r = await checkKey(key.trim());
+                setKeyState(r);
+                if (r === 'ok') setSettings({ apiKey: key.trim() });
               }}
             >
-              ניתוק
+              {keyState === 'checking' ? 'בודק…' : 'שמירה והפעלה'}
             </Button>
+            {s.settings.apiKey && (
+              <Button
+                kind="ghost"
+                onClick={() => {
+                  setKey('');
+                  setKeyState(null);
+                  setSettings({ apiKey: undefined });
+                }}
+              >
+                ביטול
+              </Button>
+            )}
+          </div>
+          {keyState && keyState !== 'checking' && (
+            <Banner kind={keyState === 'ok' ? 'info' : 'warn'}>
+              {keyState === 'ok' ? 'זיהוי התמונות פעיל.' : keyState === 'no_credit' ? 'הקוד תקין, אבל אין יתרה בחשבון. אחרי טעינת יתרה, לחצו שוב "שמירה והפעלה".' : keyState === 'invalid' ? 'הקוד לא תקין. בדקו שהעתקתם אותו במלואו.' : 'לא הצלחנו לבדוק עכשיו. נסו שוב בעוד רגע.'}
+            </Banner>
           )}
-        </div>
-        <Toggle label="לאפשר שימוש בתמונות לשיפור הזיהוי" desc="כבוי כברירת מחדל. בגרסה הזו אין שליחה כזו בכלל." checked={s.settings.trainingConsent} onChange={(trainingConsent) => setSettings({ trainingConsent })} />
-      </Card>
-
-      <Card title="מאמן או דיאטנית">
-        <p className="muted">פורטל המקצוענים מציג למאמן את המתאמנים שלו. בגרסה הזו יש תצוגת הדגמה.</p>
-        <Button kind="secondary" onClick={() => go('pro')}>
-          לפורטל המקצוענים (הדגמה)
-        </Button>
-      </Card>
+          {s.settings.apiKey && !keyState && <p className="fineprint">זיהוי התמונות פעיל.</p>}
+        </Card>
+      )}
 
       <Card title="פרטיות ומידע">
         <ul className="plain">
@@ -207,9 +239,6 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         <div className="row wrap">
           <Button kind="secondary" onClick={download}>
             הורדת כל המידע
-          </Button>
-          <Button kind="secondary" onClick={loadDemoData}>
-            טעינת נתוני הדגמה (3 שבועות)
           </Button>
           {!confirmDelete ? (
             <Button kind="danger" onClick={() => setConfirmDelete(true)}>
@@ -245,12 +274,8 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         </div>
       </Card>
 
-      <Card title="על האפליקציה">
-        <p className="muted">PRIME היא אפליקציה לאורח חיים בריא. היא לא מאבחנת ולא מטפלת במחלות, והמידע בה לא מחליף ייעוץ רפואי.</p>
-        <p className="fineprint">
-          ערכי הבטיחות (רצפת קלוריות {SAFETY_CONFIG.absoluteKcalFloor.male}/{SAFETY_CONFIG.absoluteKcalFloor.female}, קצב ירידה עד {SAFETY_CONFIG.maxWeeklyLossPctOfBodyweight}% בשבוע):{' '}
-          {SAFETY_CONFIG.approvedByClinician ? 'אושרו קלינית.' : 'ערכים שמרניים זמניים, ממתינים לאישור היועץ הקליני.'} ערכי המזון בגרסה הזו הם ערכים משוערים לפיתוח, ויוחלפו בערכי המאגר הרשמי.
-        </p>
+      <Card title="הצהרה">
+        <p className="muted">PRIME היא אפליקציה לאורח חיים בריא. המידע וההמלצות בה הם כלליים, ואינם מחליפים ייעוץ, אבחון או טיפול של רופא, דיאטנית או איש מקצוע מוסמך. במצב רפואי, בהריון, בהנקה או בנטילת תרופות, התייעצו עם איש מקצוע לפני שינוי תזונה.</p>
       </Card>
     </div>
   );

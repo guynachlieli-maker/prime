@@ -5,46 +5,9 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import type { Sex } from '../engine/types';
 
-export interface BodyParams {
-  sex: Sex;
-  heightCm: number;
-  weightKg: number;
-  bodyFatPct: number;
-}
-
-/**
- * Shape coefficients derived from height, weight and body fat (and from them, lean mass).
- * The shape follows the numbers; it does not exaggerate change. Exported for tests.
- */
-export function bodyShape(p: BodyParams) {
-  const H = p.heightCm / 100;
-  const bmi = p.weightKg / (H * H);
-  const lean = p.weightKg * (1 - p.bodyFatPct / 100);
-  const ffmi = lean / (H * H);
-  const male = p.sex === 'male';
-  const refBf = male ? 15 : 25;
-  const refFfmi = male ? 19 : 15.5;
-  const girth = Math.pow(bmi / 22, 0.45);
-  const fat = (p.bodyFatPct - refBf) / 100;
-  const muscle = Math.max(0.9, 1 + (ffmi - refFfmi) * 0.03);
-  const s = H / 1.75;
-  return {
-    H,
-    fat,
-    muscle,
-    shoulder: (male ? 0.205 : 0.178) * s * girth * muscle,
-    chest: (male ? 0.165 : 0.152) * s * girth * (1 + fat * 0.6) * Math.max(0.92, muscle),
-    waist: (male ? 0.136 : 0.12) * s * girth * (1 + fat * (male ? 2.4 : 1.6)),
-    belly: (male ? 0.14 : 0.126) * s * girth * (1 + fat * (male ? 2.8 : 1.9)),
-    hip: (male ? 0.156 : 0.176) * s * girth * (1 + fat * (male ? 1.1 : 1.7)),
-    thigh: (male ? 0.074 : 0.08) * s * girth * (1 + fat * 1.2) * muscle,
-    calf: (male ? 0.05 : 0.048) * s * girth * (1 + fat * 0.6) * muscle,
-    arm: (male ? 0.047 : 0.041) * s * girth * (1 + fat * 1.0) * muscle,
-    neck: (male ? 0.056 : 0.048) * s * Math.max(0.9, girth * 0.95),
-  };
-}
+import { bodyShape, type BodyParams } from '../engine/bodyshape';
+export { bodyShape, type BodyParams };
 
 /* ---------- hologram shading ---------- */
 
@@ -259,10 +222,10 @@ const ease = (t: number) => (t < 0.5 ? 2 * t * t : 1 - (-2 * t + 2) ** 2 / 2);
  * outline of the first, so the change is visible without exaggerating it. Changing the
  * forecast morphs smoothly between shapes.
  */
-export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?: boolean }) {
+export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?: boolean; compareTo?: BodyParams }) {
   const mount = useRef<HTMLDivElement>(null);
   const [ok] = useState(webglAvailable);
-  const api = useRef<{ setBodies: (b: AvatarBody[]) => void } | null>(null);
+  const api = useRef<{ setBodies: (b: AvatarBody[]) => void; setGhost: (g: BodyParams | undefined) => void } | null>(null);
   const n = props.bodies.length;
   const colorsKey = props.bodies.map((b) => b.color).join();
 
@@ -291,7 +254,7 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
 
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
-    const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.55, 0.35, 0.2);
+    const bloom = new UnrealBloomPass(new THREE.Vector2(w, h), 0.42, 0.3, 0.25);
     composer.addPass(bloom);
     composer.addPass(new OutputPass());
 
@@ -314,10 +277,12 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
       scene.add(holder);
       return holder;
     });
-    const ghostMat = holoMaterial('#dff6ff', '#ffffff', 0.16, 1.75);
+    const ghostMat = holoMaterial('#ffb35c', '#ffd9a8', 0.8, 1.75);
     mats.push(ghostMat);
     const ghostHolder = new THREE.Group();
-    if (n > 1) {
+    const showGhost = props.ghost !== false && (n > 1 || !!props.compareTo);
+    let ghostOf: BodyParams | undefined = props.compareTo;
+    if (showGhost) {
       ghostHolder.position.x = xs[n - 1];
       scene.add(ghostHolder);
     }
@@ -327,22 +292,29 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
     let to: BodyParams[] = current;
     let t0 = 0;
     const MORPH = 900;
+    let ghostBuilt = false;
     const rebuild = (params: BodyParams[]) => {
       holders.forEach((holder, i) => {
         holder.children.forEach((c) => (c as THREE.Mesh).geometry?.dispose());
         holder.clear();
         holder.add(buildBody(params[i], mats[i]));
       });
-      if (n > 1 && props.ghost !== false) {
+      if (showGhost && !ghostBuilt) {
+        ghostBuilt = true;
         ghostHolder.children.forEach((c) => (c as THREE.Mesh).geometry?.dispose());
         ghostHolder.clear();
-        const ghost = buildBody(params[0], ghostMat);
-        ghost.scale.setScalar(1.002);
+        const ghost = buildBody(ghostOf ?? params[0], ghostMat);
+        ghost.scale.setScalar(1.004);
         ghostHolder.add(ghost);
       }
     };
     rebuild(current);
     api.current = {
+      setGhost: (g) => {
+        ghostOf = g;
+        ghostBuilt = false;
+        rebuild(current);
+      },
       setBodies: (b) => {
         from = current;
         to = b.map((x) => ({ sex: x.sex, heightCm: x.heightCm, weightKg: x.weightKg, bodyFatPct: x.bodyFatPct }));
@@ -414,7 +386,7 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
       api.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ok, n, colorsKey, props.height, props.ghost]);
+  }, [ok, n, colorsKey, props.height, props.ghost, !!props.compareTo]);
 
   // shape changes morph instead of rebuilding the scene
   const shapeKey = JSON.stringify(props.bodies.map((b) => [b.weightKg, b.bodyFatPct, b.heightCm, b.sex]));
@@ -422,6 +394,12 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
     api.current?.setBodies(props.bodies);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [shapeKey]);
+
+  const ghostKey = props.compareTo ? JSON.stringify([props.compareTo.weightKg, props.compareTo.bodyFatPct, props.compareTo.heightCm, props.compareTo.sex]) : '';
+  useEffect(() => {
+    if (ghostKey) api.current?.setGhost(props.compareTo);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ghostKey]);
 
   if (!ok) return <div className="avatar-fallback">התצוגה התלת־ממדית לא נתמכת במכשיר הזה. הנתונים מוצגים למטה.</div>;
   return (
@@ -435,7 +413,11 @@ export function Avatar3D(props: { bodies: AvatarBody[]; height?: number; ghost?:
           </span>
         ))}
       </div>
-      {n > 1 && props.ghost !== false && <div className="avatar-legend">קו המתאר הלבן = הגוף של היום, לשם השוואה</div>}
+      {(n > 1 || props.compareTo) && props.ghost !== false && (
+        <div className="avatar-legend">
+          <i className="legend-swatch" aria-hidden="true" /> קו המתאר הכתום = הגוף שלך היום
+        </div>
+      )}
     </div>
   );
 }

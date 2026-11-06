@@ -121,3 +121,57 @@ export function navyBodyFat(args: { sex: Sex; heightCm: number; waistCm: number;
   const v = 495 / (1.29579 - 0.35004 * Math.log10(waistCm + hipCm - neckCm) + 0.221 * Math.log10(heightCm)) - 450;
   return Math.round(v * 10) / 10;
 }
+
+export interface JourneyPoint {
+  week: number;
+  weightKg: number;
+  bodyFatPct: number;
+  reached: boolean;
+}
+
+/**
+ * The path to the target the way the app actually runs it: each week the calorie target is
+ * re-computed from the current weight, so the pace stays close to the planned weekly change until
+ * the target is reached, then intake returns to maintenance. Fat / lean split follows Forbes.
+ */
+export function simulateJourney(inp: Omit<ForecastInput, 'intakeKcal' | 'weeks'> & { weeklyKg: number; targetKg?: number; maxWeeks?: number; kcalFloor?: number }): JourneyPoint[] {
+  let fm = inp.weightKg * (inp.bodyFatPct / 100);
+  let ffm = inp.weightKg - fm;
+  const bmr0 = mifflinStJeor(inp.sex, inp.weightKg, inp.heightCm, inp.age);
+  const actFactor = inp.tdee / bmr0;
+  const maxWeeks = inp.maxWeeks ?? 104;
+  const losing = inp.weeklyKg < 0;
+  const target = inp.targetKg;
+  const hit = (w: number) => target !== undefined && (losing ? w <= target : w >= target);
+  const out: JourneyPoint[] = [{ week: 0, weightKg: inp.weightKg, bodyFatPct: inp.bodyFatPct, reached: false }];
+  let reached = false;
+  for (let day = 1; day <= maxWeeks * 7; day++) {
+    const w = fm + ffm;
+    const tdee = mifflinStJeor(inp.sex, w, inp.heightCm, inp.age) * actFactor;
+    if (!reached && hit(w)) reached = true;
+    let intake = reached ? tdee : tdee + (inp.weeklyKg * 7700) / 7;
+    if (inp.kcalFloor) intake = Math.max(intake, inp.kcalFloor);
+    const eb = intake - tdee;
+    let dF: number;
+    let dL: number;
+    if (eb < 0) {
+      const k = inp.strengthTraining ? 0.5 : 1;
+      const ratio = (k * FORBES_C) / Math.max(fm, 2);
+      dF = eb / (RHO_F + RHO_L * ratio);
+      dL = ratio * dF;
+    } else {
+      const leanShare = inp.strengthTraining ? 0.5 : FORBES_C / (FORBES_C + Math.max(fm, 2));
+      const dm = eb / (leanShare * RHO_L + (1 - leanShare) * RHO_F);
+      dL = leanShare * dm;
+      dF = (1 - leanShare) * dm;
+    }
+    fm = Math.max(fm + dF, 1);
+    ffm += dL;
+    if (day % 7 === 0) {
+      const wk = fm + ffm;
+      out.push({ week: day / 7, weightKg: Math.round(wk * 10) / 10, bodyFatPct: Math.round((fm / wk) * 1000) / 10, reached });
+      if (reached) break;
+    }
+  }
+  return out;
+}

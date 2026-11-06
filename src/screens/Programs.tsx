@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Banner, Button, Card, Pending, Sheet, WhyContent } from '../ui/kit';
+import { Banner, Button, Card, Sheet, WhyContent } from '../ui/kit';
 import { saveProfile, setState, useStore } from '../state/store';
 import { useSafety } from '../state/derived';
 import { PROGRAMS, type Program } from '../data/programs';
@@ -77,7 +77,6 @@ export function Programs() {
               <p key={b}>{b}</p>
             ))}
             <WhyContent why="" sources={article.sources} />
-            {!article.reviewedBy && <Pending what="בדיקת הוועדה המדעית" />}
           </>
         )}
       </Sheet>
@@ -96,7 +95,6 @@ export function Programs() {
             </ul>
             <h3 className="sub">מה צפוי</h3>
             <p>{prog.expect}</p>
-            {!prog.author && <Pending what="כותב/ת מוסמך/ת" />}
             <WhyContent why="" sources={prog.sources} />
             {fit(prog, p, safety).ok ? (
               <Button

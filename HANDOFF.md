@@ -107,3 +107,11 @@ tests/e2e/    בדיקות דפדפן
 
 - **מאגר התזונה הלאומי (משרד הבריאות)**: data.gov.il, רישיון "Other (Open)". יש לציין את המקור במוצר (כבר מוצג במסכי הרישום).
 - **Open Food Facts**: רישיון ODbL. נדרש ייחוס, ושיתוף השינויים במסד הנתונים (share-alike) אם מפיצים אותו. יש לבדוק עם היועץ המשפטי לפני שימוש מסחרי.
+
+## Update 4 — goal weight, body journey, reminders, module infrastructure
+
+- **Goal weight + date** (`src/engine/pace.ts`): onboarding step 7 asks for target weight and an optional date. `planPace` derives the weekly change: inside the person's safe cap (≤1%/week; 0.5% when lean, 0.75% typical, 1% only with high body fat / BMI ≥ 32) the date sets the pace; beyond it the cap applies and the insight says when the target is realistically reached. Targets below BMI 18.5 are lifted to it. `computeTargets` exposes `goalPlan` (insight, ETA, feasibility).
+- **Body journey** (`src/ui/BodyJourney.tsx`, `simulateJourney` in forecast.ts): today vs. the selected week side by side, play button + slider + milestones (month, 3 months, half year, goal). The future body carries an orange outline of today's body. Shape sensitivity raised in `src/engine/bodyshape.ts`.
+- **Reminders** (`src/engine/reminders.ts`, `src/state/notify.ts`, `src/screens/Reminders.tsx`): meal times (learned from logging times), weigh-in, water, a daily motivation message written from the day's data, and custom fixed-time reminders. Delivery: in-app card when open; system notification via the service worker when in background; Notification Triggers where supported; `.ics` calendar export for alerts with the app closed on any phone. True push with the app closed on all phones needs a push server (Web Push + VAPID) — not built.
+- **Removed**: coach portal, dietitian-approval badges, device step in onboarding, cloud-connection notes, developer notes in the UI. Only the medical disclaimer remains (Profile → הצהרה).
+- **Modules** (`src/modules/registry.ts`, `src/modules/training/types.ts`): nutrition active; training data model + storage slot (`state.training`, `state.modules.training`, reminder kind `training`) ready for a later release.

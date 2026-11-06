@@ -359,3 +359,63 @@ describe('barcode', () => {
     expect(n.verified).toBe(false);
   });
 });
+
+describe('target weight pace', () => {
+  const base = { name: '', sex: 'male' as const, age: 35, heightCm: 178, weightKg: 92, bodyFatPct: 27, bodyFatSource: 'estimate' as const, activity: 'moderate' as const, trainingDaysPerWeek: 3, strengthTraining: true, sleepHours: 7, goal: 'fat_loss' as const, pace: 'balanced' as const, diet: 'omnivore' as const, kosher: false, allergies: [], dislikes: [], mealsPerDay: 4, maxPrepMinutes: 30, screening: { ...EMPTY_SCREENING } };
+  const now = new Date('2026-01-01T12:00:00');
+  it('without a date picks a safe default and an ETA', async () => {
+    const { planPace } = await import('./pace');
+    const p = planPace({ ...base, targetWeightKg: 82 }, now)!;
+    expect(p.weeklyKg).toBeLessThan(0);
+    expect(p.pctPerWeek).toBeLessThanOrEqual(1);
+    expect(p.weeks).toBeGreaterThan(10);
+    expect(p.requestedFeasible).toBeNull();
+  });
+  it('a feasible date sets the pace to reach it', async () => {
+    const { planPace } = await import('./pace');
+    const p = planPace({ ...base, targetWeightKg: 86, targetDate: '2026-06-01' }, now)!;
+    expect(p.requestedFeasible).toBe(true);
+    expect(p.etaISO! <= '2026-06-02').toBe(true);
+  });
+  it('an unsafe date is capped at the safe maximum and explained', async () => {
+    const { planPace } = await import('./pace');
+    const p = planPace({ ...base, targetWeightKg: 75, targetDate: '2026-02-15' }, now)!;
+    expect(p.requestedFeasible).toBe(false);
+    expect(p.pctPerWeek).toBeLessThanOrEqual(1.0001);
+    expect(p.insight).toContain('הקצב הבטוח');
+  });
+  it('targets follow the plan and the journey reaches the target', async () => {
+    const { simulateJourney } = await import('./forecast');
+    const t = computeTargets({ ...base, targetWeightKg: 84 }, { now });
+    expect(t.goalPlan?.targetKg).toBe(84);
+    const j = simulateJourney({ sex: 'male', age: 35, heightCm: 178, weightKg: 92, bodyFatPct: 27, tdee: t.tdee.value, strengthTraining: true, weeklyKg: t.weeklyChangeKg.value, targetKg: 84 });
+    expect(j[j.length - 1].reached).toBe(true);
+    expect(j[j.length - 1].weightKg).toBeLessThanOrEqual(84.3);
+    expect(j[j.length - 1].bodyFatPct).toBeLessThan(27);
+  });
+  it('a target below healthy BMI is lifted to BMI 18.5', async () => {
+    const { planPace, minHealthyWeight } = await import('./pace');
+    const p = planPace({ ...base, weightKg: 70, bodyFatPct: 18, targetWeightKg: 50 }, now)!;
+    expect(Math.abs(p.weeklyKg) * p.weeks!).toBeLessThanOrEqual(70 - minHealthyWeight(178) + 1);
+  });
+});
+
+describe('reminders', () => {
+  it('defaults cover meals, weigh-in and motivation, and upcoming() respects days', async () => {
+    const { defaultReminders, upcoming, toICS, motivation } = await import('./reminders');
+    const list = defaultReminders(4);
+    expect(list.filter((r) => r.kind === 'meal')).toHaveLength(4);
+    const from = new Date(2026, 0, 4, 6, 0); // Sunday 06:00
+    const next = upcoming(list, from, 864e5);
+    expect(next[0].r.id).toBe('weigh'); // Sunday 07:30
+    expect(next.map((x) => x.r.id)).toContain('meal-breakfast');
+    const weigh = upcoming([list.find((r) => r.id === 'weigh')!], from, 7 * 864e5);
+    expect(weigh.map((x) => x.at.getDay())).toEqual([0, 3]);
+    const ics = toICS(list, from);
+    expect(ics).toContain('RRULE:FREQ=WEEKLY;BYDAY=SU,WE');
+    expect(ics).toContain('BEGIN:VALARM');
+    expect(ics).not.toContain('הודעת עידוד');
+    const m = motivation({ kcalToday: 900, kcalTarget: 2000, proteinToday: 120, proteinTarget: 140, loggedDaysLast7: 3, trendChangeKg: null, goalLosing: true, kgToGoal: null, weeksToGoal: null, loggedToday: true });
+    expect(m.body).toContain('פחות מהיעד');
+  });
+});
