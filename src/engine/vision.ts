@@ -1,5 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
-import { FOODS, FOOD_BY_ID } from '../data/foods';
+import { FOODS, FOOD_BY_ID, loadFullDb, searchAll } from '../data/foods';
 import { getSample, isSampleError, describeSampleError } from './claude-runtime';
 
 /**
@@ -15,6 +15,10 @@ export interface RecognizedItem {
   foodId: string;
   grams: number;
   confidence: 'high' | 'medium' | 'low';
+  /** What the model actually saw, in specific Hebrew (e.g. "פתיתים מבושלים"). */
+  name?: string;
+  /** Other foodIds that look similar, for one-tap correction. */
+  alternatives?: string[];
 }
 
 export interface Recognition {
@@ -37,7 +41,12 @@ const MODEL = 'claude-opus-5-5';
 const FOOD_LIST = FOODS.map((f) => `${f.id}: ${f.name}`).join('\n');
 
 const INSTRUCTIONS = `You identify the foods on a plate photographed by a user of an Israeli nutrition app.
-Return only components you can see. Map each component to the closest foodId from this list (id: Hebrew name):
+Return only components you can see. For each component:
+- "name": the specific dish/food in Hebrew as an Israeli would call it (e.g. "פתיתים מבושלים", "קוסקוס", "דייסת שיבולת שועל", "בורגול", "אורז לבן").
+- "foodId": the closest foodId from the list below. If none matches well, still pick the closest and lower the confidence; the app will look up "name" in the full national table.
+- "alternatives": up to 3 other foodIds that look similar in a photo.
+Look carefully at texture and shape before naming grains and small pasta: ptitim (פתיתים, smooth round/rice-shaped pasta pearls) are NOT oats (flat irregular flakes in a porridge), couscous is tiny grains, bulgur is broken cracked wheat, rice grains are elongated. Same for cheeses, spreads (hummus vs tahini vs labneh), and breads (pita vs laffa vs bread slice).
+Food list (id: Hebrew name):
 ${FOOD_LIST}
 Estimate grams of each component from plate size, utensils and typical Israeli portions. Do not estimate calories.
 Confidence: "high" when clearly visible and identifiable, "medium" when the type or amount is uncertain, "low" when guessing.
@@ -45,7 +54,7 @@ If one hidden factor would change the total the most (oil, sauce, rice type), as
 and give the foodId to add if the answer is yes (e.g. "olive_oil"); otherwise null for both.
 "notes" is one short Hebrew sentence on what you saw. If the image is not food, return no items and say so in notes.`;
 
-const JSON_SHAPE = `Reply with only a JSON object: {"items":[{"foodId":string,"grams":number,"confidence":"high"|"medium"|"low"}],"clarifyingQuestion":string|null,"clarifyingFoodId":string|null,"notes":string}`;
+const JSON_SHAPE = `Reply with only a JSON object: {"items":[{"name":string,"foodId":string,"alternatives":string[],"grams":number,"confidence":"high"|"medium"|"low"}],"clarifyingQuestion":string|null,"clarifyingFoodId":string|null,"notes":string}`;
 
 const SCHEMA = {
   type: 'object',
@@ -57,9 +66,11 @@ const SCHEMA = {
       items: {
         type: 'object',
         additionalProperties: false,
-        required: ['foodId', 'grams', 'confidence'],
+        required: ['name', 'foodId', 'alternatives', 'grams', 'confidence'],
         properties: {
+          name: { type: 'string' },
           foodId: { type: 'string', enum: FOODS.map((f) => f.id) },
+          alternatives: { type: 'array', items: { type: 'string', enum: FOODS.map((f) => f.id) } },
           grams: { type: 'number' },
           confidence: { type: 'string', enum: ['high', 'medium', 'low'] },
         },
@@ -74,7 +85,13 @@ const SCHEMA = {
 function clean(r: Omit<Recognition, 'provider'>, provider: Recognition['provider']): Recognition {
   const items = (Array.isArray(r.items) ? r.items : [])
     .filter((i) => FOOD_BY_ID[i.foodId] && Number(i.grams) > 0 && Number(i.grams) < 2000)
-    .map((i) => ({ foodId: i.foodId, grams: Math.round(Number(i.grams)), confidence: (['high', 'medium', 'low'] as const).includes(i.confidence) ? i.confidence : 'medium' }));
+    .map((i) => ({
+      foodId: i.foodId,
+      grams: Math.round(Number(i.grams)),
+      confidence: (['high', 'medium', 'low'] as const).includes(i.confidence) ? i.confidence : 'medium',
+      name: typeof i.name === 'string' ? i.name.trim().slice(0, 60) : undefined,
+      alternatives: Array.isArray(i.alternatives) ? i.alternatives.filter((a) => FOOD_BY_ID[a] && a !== i.foodId).slice(0, 3) : [],
+    }));
   return {
     items,
     clarifyingQuestion: typeof r.clarifyingQuestion === 'string' ? r.clarifyingQuestion : null,
@@ -85,6 +102,34 @@ function clean(r: Omit<Recognition, 'provider'>, provider: Recognition['provider
 }
 
 export class VisionError extends Error {}
+
+const words = (x: string) => x.replace(/[׳'"״,()]/g, ' ').split(/\s+/).filter((w) => w.length > 1);
+
+/**
+ * The model's own Hebrew name decides when the closest list item is wrong: if the chosen food
+ * shares no word with what the model said it saw, look the name up in the full national table
+ * (4,500 foods) and use that instead. Example: "פתיתים מבושלים" never ends up as oats.
+ */
+export async function resolveByName(r: Recognition): Promise<Recognition> {
+  const needs = r.items.some((i) => i.name && !sharesWord(i.name, FOOD_BY_ID[i.foodId]?.name ?? ''));
+  if (!needs) return r;
+  try {
+    await loadFullDb();
+  } catch {
+    /* core list only */
+  }
+  const items = r.items.map((i) => {
+    if (!i.name || sharesWord(i.name, FOOD_BY_ID[i.foodId]?.name ?? '')) return i;
+    const hit = searchAll(i.name, 5).find((f) => sharesWord(i.name!, f.name)) ?? searchAll(words(i.name)[0] ?? '', 5).find((f) => sharesWord(i.name!, f.name));
+    return hit ? { ...i, foodId: hit.id, alternatives: [i.foodId, ...(i.alternatives ?? [])].filter((a) => a !== hit.id).slice(0, 3) } : i;
+  });
+  return { ...r, items };
+}
+
+function sharesWord(a: string, b: string): boolean {
+  const wb = new Set(words(b).map((w) => w.slice(0, 4)));
+  return words(a).some((w) => wb.has(w.slice(0, 4)));
+}
 
 export async function availableProvider(apiKey?: string): Promise<'claude-app' | 'api-key' | null> {
   const s = await getSample();
@@ -104,7 +149,7 @@ export async function recognizeFood(args: { file: Blob; apiKey?: string }): Prom
     const sample = (await getSample())!;
     try {
       const r = await sample.json<Omit<Recognition, 'provider'>>(`${INSTRUCTIONS}\n\nThe attached image is the user's plate.\n${JSON_SHAPE}`, { images: [args.file], modelTier: 'default' });
-      return clean(r, 'claude-app');
+      return resolveByName(clean(r, 'claude-app'));
     } catch (e) {
       throw new VisionError(isSampleError(e) ? describeSampleError(e) : 'תקלה בזיהוי. נסו שוב.');
     }
@@ -123,7 +168,7 @@ export async function recognizeFood(args: { file: Blob; apiKey?: string }): Prom
       if (res.stop_reason === 'refusal') throw new VisionError('הבקשה נדחתה. נסו תמונה אחרת או רישום ידני.');
       const text = res.content.find((b) => b.type === 'text');
       if (!text || text.type !== 'text') throw new VisionError('לא התקבלה תשובה.');
-      return clean(JSON.parse(text.text), 'api-key');
+      return await resolveByName(clean(JSON.parse(text.text), 'api-key'));
     } catch (e) {
       throw new VisionError(describeApiError(e));
     }

@@ -5,6 +5,7 @@ import { Banner, Button, Card, ChoiceCards, NumberField, Segmented, Toggle, fmt 
 import { deleteAllData, exportData, saveProfile, setState, useStore } from '../state/store';
 import { ACTIVITY_FACTORS } from '../engine/targets';
 import { minHealthyWeight } from '../engine/pace';
+import { SupplementPicker } from '../ui/SupplementPicker';
 import type { Profile as P } from '../engine/types';
 import type { Tab } from '../App';
 
@@ -132,6 +133,18 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
             ]}
           />
         )}
+      </Card>
+
+      <Card title="תוספי תזונה">
+        <SupplementPicker
+          value={p.supplements ?? []}
+          vegan={p.diet === 'vegan'}
+          onChange={(supplements) => {
+            upd({ supplements });
+            setState((x) => (x.reminders ? { reminders: x.reminders.filter((r) => !r.id.startsWith('supp-')) } : {}));
+          }}
+        />
+        <p className="fineprint">המידע כללי. בהריון, במחלה כרונית או בנטילת תרופות, כדאי לבדוק תוספים עם רופא או רוקח.</p>
       </Card>
 
       <Card title="נתונים">

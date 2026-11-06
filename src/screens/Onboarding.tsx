@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { BodyJourney } from '../ui/BodyJourney';
+import { SupplementPicker } from '../ui/SupplementPicker';
 import { Banner, Button, ChoiceCards, InfoDot, NumberField, Segmented, Toggle, WhyButton, YesNo, fmt } from '../ui/kit';
 import { evaluateSafety, bmi } from '../engine/safety';
 import { computeTargets, ACTIVITY_FACTORS } from '../engine/targets';
@@ -72,6 +73,7 @@ function toProfile(d: Draft): Profile | null {
     screening: d.screening ?? { ...EMPTY_SCREENING },
     targetWeightKg: d.targetWeightKg,
     targetDate: d.targetDate,
+    supplements: d.supplements ?? [],
   };
 }
 
@@ -324,6 +326,9 @@ export function Onboarding() {
             <span className="field-label">מאכלים שאתה לא אוהב (מופרדים בפסיק)</span>
             <input value={(d.dislikes ?? []).join(', ')} onChange={(e) => up({ dislikes: e.target.value.split(',').map((x) => x.trim()) })} placeholder="למשל: טונה, חציל" />
           </label>
+          <h3 className="sub">תוספי תזונה</h3>
+          <p className="fineprint">אילו תוספים אתה לוקח, או מתכנן לקחת? אבקת חלבון, חטיפי חלבון וגיינר נספרים בתפריט. לכל השאר נוסיף תזכורת.</p>
+          <SupplementPicker value={d.supplements ?? []} onChange={(supplements) => up({ supplements })} vegan={d.diet === 'vegan'} />
         </>
       )}
 
@@ -376,7 +381,7 @@ export function Onboarding() {
             <Banner kind="safety">בחרנו לא להציג תחזית גוף בשלב הזה. נתמקד באכילה מסודרת ובהרגשה שלך.</Banner>
           ) : (
             <>
-              <p className="lead">{targets.goalPlan ? `ככה הגוף שלך משתנה בדרך ל-${fmt(targets.goalPlan.targetKg, 1)} ק"ג. לחצו ▶ כדי לראות את השינוי, או גררו את הסרגל.` : 'ככה הגוף שלך צפוי להשתנות בחצי השנה הקרובה. לחצו ▶ כדי לראות את השינוי.'}</p>
+              <p className="lead">{targets.goalPlan ? `ככה הגוף שלך משתנה בדרך ל-${fmt(targets.goalPlan.targetKg, 1)} ק"ג. לחצו ▶ או בחרו זמן כדי לראות את השינוי.` : 'ככה הגוף שלך צפוי להשתנות בחצי השנה הקרובה. לחצו ▶ כדי לראות את השינוי.'}</p>
               {!targets.goalPlan && (
                 <Segmented
                   label="קצב"

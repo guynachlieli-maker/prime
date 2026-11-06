@@ -484,3 +484,30 @@ a { color: var(--accent); }
 .rem-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 700; }
 .toast-note { position: fixed; inset-inline: 12px; top: 12px; z-index: 60; background: var(--surface); border: 1px solid var(--line); border-inline-start: 4px solid var(--accent); border-radius: 14px; padding: 12px 14px; box-shadow: 0 8px 30px rgba(0,0,0,.18); display: flex; gap: 10px; align-items: flex-start; max-width: 520px; margin: 0 auto; }
 .toast-note .grow { flex: 1; }
+.swap { display: flex; flex-direction: column; gap: 8px; margin: 6px 0 8px; padding: 10px; border-radius: 12px; background: var(--surface2); }
+
+/* 2D hologram journey */
+.holo-stage { display: grid; grid-template-columns: 1fr auto 1fr; align-items: end; gap: 4px; background: radial-gradient(120% 90% at 50% 100%, #0e3340 0%, #071216 70%); border-radius: 18px; padding: 14px 8px 10px; }
+.holo-stage.single { grid-template-columns: 1fr; justify-items: center; }
+.holo-stage figure { margin: 0; display: flex; flex-direction: column; align-items: center; }
+.holo-fig { width: 100%; max-width: 170px; height: auto; display: block; }
+.holo-stage figcaption { display: flex; flex-direction: column; align-items: center; gap: 2px; margin-top: 6px; color: #e8f6fa; text-align: center; }
+.holo-stage figcaption b { font-size: 16px; }
+.holo-stage figcaption .cap-kg { font-size: 22px; font-weight: 800; }
+.holo-stage figcaption em { font-style: normal; font-size: 15px; color: #34d399; }
+.holo-stage figcaption small { color: #9fc3cc; font-size: 13px; }
+.holo-arrow { color: #9fc3cc; font-size: 26px; align-self: center; padding-bottom: 60px; }
+.holo-legend { list-style: none; padding: 0; margin: 10px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: 14px; }
+.holo-legend i { display: inline-block; width: 18px; height: 10px; border-radius: 3px; vertical-align: middle; margin-inline-end: 6px; }
+.holo-legend i.dash { background: transparent !important; border-top: 3px dashed; height: 0; border-radius: 0; }
+.journey-times { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 12px; }
+.journey-times .play { width: 44px; height: 44px; border-radius: 50%; border: 0; background: var(--accent); color: #fff; font-size: 16px; cursor: pointer; flex: none; }
+.supp-group { margin: 10px 0 6px; font-size: 14px; color: var(--muted); }
+.supp-notes { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 8px; }
+.supp-notes li { border: 1px solid var(--line); border-radius: 12px; padding: 8px 10px; font-size: 14px; line-height: 1.5; }
+.supp-notes .badge { display: inline-block; margin-inline-start: 6px; font-size: 12px; background: var(--accent-soft); color: var(--accent); border-radius: 999px; padding: 1px 8px; font-weight: 700; }
+.supp-today { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.supp-today button { width: 100%; display: flex; align-items: center; gap: 10px; text-align: start; border: 1px solid var(--line); border-radius: 12px; padding: 10px; background: transparent; color: inherit; font: inherit; cursor: pointer; min-height: 48px; }
+.supp-today button .box { width: 24px; height: 24px; border-radius: 6px; border: 2px solid var(--muted); display: grid; place-items: center; flex: none; font-weight: 800; }
+.supp-today button.on { border-color: var(--accent); background: var(--accent-soft); }
+.supp-today button.on .box { background: var(--accent); border-color: var(--accent); color: #fff; }

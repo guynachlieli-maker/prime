@@ -1,12 +1,13 @@
+import { SUPP_BY_ID } from '../data/supplements';
 import { useEffect, useState } from 'react';
 import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt } from '../ui/kit';
 import { WEEK_TIPS } from '../ui/Tour';
 import { recordRecipe } from '../engine/learning';
-import { addLog, addWeighIn, learn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, setState, todayISO, useStore } from '../state/store';
+import { addLog, addWeighIn, getState, learn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, setState, todayISO, useStore } from '../state/store';
 import { eatenOn, useAdaptive, useAlerts, usePlan, useSafety } from '../state/derived';
 import { RECIPES } from '../data/recipes';
 import { SLOT_LABEL } from '../engine/menu';
-import { FOOD_BY_ID } from '../data/foods';
+import { FOOD_BY_ID, nutrientsFor } from '../data/foods';
 import type { Tab } from '../App';
 
 const DAY_MISSION: Record<string, string> = {
@@ -152,6 +153,54 @@ export function Today({ go }: { go: (t: Tab) => void }) {
               אכלתי בדיוק את זה
             </Button>
           </div>
+        </Card>
+      )}
+
+      {(s.profile?.supplements?.length ?? 0) > 0 && (
+        <Card title="התוספים שלי היום">
+          <ul className="supp-today">
+            {s.profile!.supplements!.map((id) => SUPP_BY_ID[id]).filter(Boolean).map((sp) => {
+              const taken = s.suppTaken?.[date]?.[sp.id];
+              const on = taken !== undefined;
+              const f = sp.foodId ? FOOD_BY_ID[sp.foodId] : undefined;
+              return (
+                <li key={sp.id}>
+                  <button
+                    className={on ? 'on' : ''}
+                    aria-pressed={on}
+                    onClick={() => {
+                      if (on) {
+                        if (taken) removeLog(taken);
+                        setState((x) => {
+                          const day = { ...(x.suppTaken?.[date] ?? {}) };
+                          delete day[sp.id];
+                          return { suppTaken: { ...x.suppTaken, [date]: day } };
+                        });
+                        return;
+                      }
+                      let logId = '';
+                      if (f && sp.serving) {
+                        const n = nutrientsFor(f.id, sp.serving.grams);
+                        addLog({ date, time: nowTime(), slot: 'snack', items: [{ foodId: f.id, name: f.name, grams: sp.serving.grams }], method: 'plan', nutrients: sp.id === 'collagen' ? { ...n, protein: 0 } : n });
+                        logId = getState().logs[getState().logs.length - 1].id;
+                      }
+                      setState((x) => ({ suppTaken: { ...x.suppTaken, [date]: { ...(x.suppTaken?.[date] ?? {}), [sp.id]: logId } } }));
+                    }}
+                  >
+                    <span className="box" aria-hidden="true">{on ? '✓' : ''}</span>
+                    <span>
+                      <b>{sp.name}</b>
+                      <br />
+                      <small className="muted">
+                        {sp.when}
+                        {f && sp.serving ? ` · ${sp.serving.label}, ${fmt(nutrientsFor(f.id, sp.serving.grams).kcal)} קק"ל` : ''}
+                      </small>
+                    </span>
+                  </button>
+                </li>
+              );
+            })}
+          </ul>
         </Card>
       )}
 

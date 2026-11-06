@@ -419,3 +419,53 @@ describe('reminders', () => {
     expect(m.body).toContain('פחות מהיעד');
   });
 });
+
+describe('menu variety', () => {
+  it('rotates breakfasts over two weeks and differs between users', async () => {
+    const { RECIPES: R } = await import('../data/recipes');
+    const omnivore = { diet: 'omnivore' as const, kosher: false, allergies: [], dislikes: [], mealsPerDay: 4, maxPrepMinutes: 30 };
+    const target = { kcal: 2200, protein: 150, fat: 65, carbs: 245 };
+    const run = (seed: string) => {
+      const hist: string[][] = [];
+      const breakfasts: string[] = [];
+      for (let d = 1; d <= 14; d++) {
+        const avoid = hist.slice(-3).reverse().flat();
+        const p = planDay({ date: `2026-12-${String(d).padStart(2, '0')}`, profile: omnivore, target, avoid, seed });
+        hist.push(p.meals.map((m) => m.recipeId));
+        breakfasts.push(p.meals[0].recipeId);
+      }
+      return breakfasts;
+    };
+    const a = run('user-a');
+    const b = run('user-b');
+    const oats = a.filter((id) => /oat|שיבולת/.test(id + (R.find((r) => r.id === id)?.name ?? ''))).length;
+    expect(new Set(a).size).toBeGreaterThanOrEqual(8);
+    expect(oats).toBeLessThanOrEqual(3);
+    expect(a.join()).not.toBe(b.join());
+  });
+});
+
+describe('supplements', () => {
+  it('caloric supplements are counted, others are not', async () => {
+    const { supplementNutrients } = await import('../data/supplements');
+    const z = supplementNutrients(['creatine', 'vitamin_d']);
+    expect(z.kcal).toBe(0);
+    const w = supplementNutrients(['whey']);
+    expect(w.protein).toBeGreaterThan(20);
+    expect(w.kcal).toBeGreaterThan(100);
+    const c = supplementNutrients(['collagen']);
+    expect(c.kcal).toBeGreaterThan(30);
+    expect(c.protein).toBe(0);
+  });
+});
+
+describe('photo naming', () => {
+  it("the model's own name overrides a wrong closest match (ptitim never becomes oats)", async () => {
+    const { resolveByName } = await import('./vision');
+    const r = await resolveByName({ items: [{ foodId: 'oats', grams: 180, confidence: 'medium', name: 'פתיתים מבושלים', alternatives: [] }], clarifyingQuestion: null, clarifyingFoodId: null, notes: '', provider: 'api-key' });
+    expect(r.items[0].foodId).toBe('ptitim');
+    expect(r.items[0].alternatives).toContain('oats');
+    const keep = await resolveByName({ items: [{ foodId: 'oats', grams: 60, confidence: 'high', name: 'דייסת שיבולת שועל', alternatives: [] }], clarifyingQuestion: null, clarifyingFoodId: null, notes: '', provider: 'api-key' });
+    expect(keep.items[0].foodId).toBe('oats');
+  });
+});

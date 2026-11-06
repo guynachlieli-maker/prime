@@ -86,6 +86,8 @@ export interface State {
   deviceData: DeviceSample[];
   /** undefined until the user first opens reminders (then filled with defaults). */
   reminders?: Reminder[];
+  /** date -> supplement id -> log id ('' when it has no calories) */
+  suppTaken?: Record<string, Record<string, string>>;
   /** Feature modules. Nutrition is active; training is prepared for a later release. */
   modules: { nutrition: true; training: boolean };
   /** Training module storage (empty until the module launches). */

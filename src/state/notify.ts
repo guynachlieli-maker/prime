@@ -1,6 +1,7 @@
 import { getState, setState, todayISO, type State } from './store';
 import { eatenOn } from './derived';
 import { weightTrend } from '../engine/adaptive';
+import { SUPP_BY_ID } from '../data/supplements';
 import { defaultReminders, motivation, upcoming, type Reminder } from '../engine/reminders';
 
 /**
@@ -29,7 +30,17 @@ export async function askNotifyPermission(): Promise<NotifyStatus> {
 }
 
 export function remindersOf(s: State): Reminder[] {
-  return s.reminders ?? defaultReminders(s.profile?.mealsPerDay ?? 4, s.learning);
+  const list = s.reminders ?? defaultReminders(s.profile?.mealsPerDay ?? 4, s.learning);
+  const supps = s.profile?.supplements ?? [];
+  if (!supps.length || list.some((r) => r.id.startsWith('supp-'))) return list;
+  // one reminder per time of day for the supplements the user takes
+  const byTime = new Map<string, string[]>();
+  for (const id of supps) {
+    const sp = SUPP_BY_ID[id];
+    if (sp) byTime.set(sp.time, [...(byTime.get(sp.time) ?? []), sp.name]);
+  }
+  const extra: Reminder[] = [...byTime.entries()].map(([time, names]) => ({ id: `supp-${time}`, kind: 'custom', title: `תוספים: ${names.join(', ')}`, body: 'סמנו במסך הבית אחרי שלקחתם.', time, days: [0, 1, 2, 3, 4, 5, 6], enabled: true, module: 'nutrition' }));
+  return [...list, ...extra];
 }
 
 export function setReminders(list: Reminder[]) {

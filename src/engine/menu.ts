@@ -179,17 +179,31 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
-export function planDay(args: {
+type PlanArgs = Parameters<typeof planDayOnce>[0];
+
+export function planDay(args: PlanArgs): DayPlan {
+  // varied first; if that day can't hit the targets, narrow to the best-fitting recipes
+  const varied = planDayOnce(args, 2);
+  if (varied.withinTolerance) return varied;
+  const tight = planDayOnce(args, 1);
+  if (tight.withinTolerance) return tight;
+  const best = planDayOnce(args, 0);
+  return Math.abs(best.deviation.kcalPct) < Math.abs(tight.deviation.kcalPct) ? best : tight;
+}
+
+function planDayOnce(args: {
   date: string;
   profile: MenuProfile;
   target: MenuTargets;
-  avoid?: string[]; // recipes used yesterday
+  avoid?: string[]; // recipes used in the last few days (most recent first)
+  /** Per-user variety seed, so two people never get the same rotation. */
+  seed?: string;
   fixed?: Partial<Record<number, string>>; // slot index -> recipe forced by the user
   preferences?: Record<string, number>; // learned: -1 (dislikes) .. +1 (loves)
-}): DayPlan {
+}, variety: 0 | 1 | 2): DayPlan {
   const slots = slotsFor(args.profile.mealsPerDay);
   const pool = eligibleRecipes(args.profile);
-  const seed = hash(args.date);
+  const seed = hash(args.date + '|' + (args.seed ?? ''));
   const perSlot = slotTargets(slots, args.target);
   const used = new Set<string>();
   const meals: PlannedMeal[] = [];
@@ -213,14 +227,16 @@ export function planDay(args: {
     const scored = candidates.map((r) => {
       const fit = fitRecipe(r, t);
       const pref = prefs[r.id] ?? 0;
-      const repeat = args.avoid?.includes(r.id) ? 0.004 : 0;
+      const ago = args.avoid ? args.avoid.indexOf(r.id) : -1;
+      const repeat = ago < 0 ? 0 : ago < 4 ? 0.02 : 0.006; // strongly avoid what was planned in the last days
       return { r, fit, rank: fit.s - pref * 0.003 + repeat };
     });
     scored.sort((a, b) => a.rank - b.rank);
     // variety: choose among the recipes that fit almost as well as the best one
-    const good = scored.filter((x) => x.fit.s <= Math.max(scored[0].fit.s * 1.5, 0.0012) && (prefs[x.r.id] ?? 0) > -0.5);
+    const [mult, floor, size] = variety === 2 ? [8, 0.015, 16] : variety === 1 ? [1.5, 0.0012, 6] : [1, 0, 1];
+    const good = scored.filter((x) => x.fit.s <= Math.max(scored[0].fit.s * mult, floor) && (prefs[x.r.id] ?? 0) > -0.5 && (variety === 0 || !(args.avoid ?? []).includes(x.r.id)));
     const liked = scored.filter((x) => (prefs[x.r.id] ?? 0) > -0.5);
-    const pick = forced ? scored[0] : good.length ? good[(seed + idx * 7) % Math.min(good.length, 5)] : (liked[0] ?? scored[0]);
+    const pick = forced ? scored[0] : good.length ? good[(seed + idx * 7) % Math.min(good.length, size)] : (liked[0] ?? scored[0]);
     used.add(pick.r.id);
     meals.push({ slot, recipeId: pick.r.id, items: pick.fit.items, nutrients: pick.fit.nutrients });
   });

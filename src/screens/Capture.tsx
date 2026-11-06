@@ -10,7 +10,7 @@ import type { Slot } from '../data/recipes';
 import type { Tab } from '../App';
 
 type Mode = 'photo' | 'barcode' | 'search' | 'text' | 'favorites';
-type BasketItem = LogItem & { conf?: 'high' | 'medium' | 'low' };
+type BasketItem = LogItem & { conf?: 'high' | 'medium' | 'low'; seen?: string; alts?: string[] };
 
 const CONF_RANGE = { high: 0.1, medium: 0.2, low: 0.35 } as const;
 const SITE = 'https://guynachlieli-maker.github.io/prime/';
@@ -48,6 +48,8 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   const [suggest, setSuggest] = useState<Food[]>([]);
   const [scanning, setScanning] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [swapIdx, setSwapIdx] = useState<number | null>(null);
+  const [swapQ, setSwapQ] = useState('');
   const fileRef = useRef<HTMLInputElement>(null);
   const galleryRef = useRef<HTMLInputElement>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
@@ -94,7 +96,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       try {
         const r = await recognizeFood({ file: img.blob, apiKey: s.settings.apiKey });
         setRec(r);
-        const items = r.items.map((i) => ({ foodId: i.foodId, name: FOOD_BY_ID[i.foodId].name, grams: Math.round(i.grams * factor), conf: i.confidence }));
+        const items = r.items.map((i) => ({ foodId: i.foodId, name: FOOD_BY_ID[i.foodId].name, grams: Math.round(i.grams * factor), conf: i.confidence, seen: i.name, alts: i.alternatives }));
         setBasket(items);
         setEstimateKcal(sumNutrients(items.map((i) => nutrientsFor(i.foodId, i.grams))).kcal);
         if (!items.length) setErr(r.notes || 'לא זיהינו אוכל בתמונה. נסו שוב או חפשו ידנית.');
@@ -504,10 +506,49 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                   <div className="b-top">
                     <strong>{f.name}</strong>
                     {i.conf && <span className={`conf ${i.conf}`}>{i.conf === 'high' ? 'זיהוי בטוח' : i.conf === 'medium' ? 'זיהוי סביר' : 'לא בטוח'}</span>}
+                    {method === 'photo' && (
+                      <button className="link" onClick={() => { setSwapIdx(swapIdx === idx ? null : idx); setSwapQ(''); loadFullDb().then(() => setFullReady(true)).catch(() => undefined); }} aria-expanded={swapIdx === idx}>
+                        לא זה?
+                      </button>
+                    )}
                     <button className="icon-btn" aria-label={`הסרת ${f.name}`} onClick={() => setBasket((b) => b.filter((_, j) => j !== idx))}>
                       ✕
                     </button>
                   </div>
+                  {swapIdx === idx && (
+                    <div className="swap">
+                      {(() => {
+                        const opts = [...new Set([...(i.alts ?? []), ...(i.seen ? searchAll(i.seen, 4).map((x) => x.id) : [])])].filter((id) => id !== i.foodId && FOOD_BY_ID[id]).slice(0, 5);
+                        const pick = (nf: Food) => {
+                          setBasket((b) => b.map((x, j) => (j === idx ? { ...x, foodId: nf.id, name: nf.name, conf: 'high' } : x)));
+                          setSwapIdx(null);
+                        };
+                        return (
+                          <>
+                            {opts.length > 0 && (
+                              <div className="chips">
+                                {opts.map((id) => (
+                                  <button key={id} className="chip" onClick={() => pick(FOOD_BY_ID[id])}>
+                                    {FOOD_BY_ID[id].name}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                            <input className="search" value={swapQ} onChange={(e) => setSwapQ(e.target.value)} placeholder="מה זה באמת? למשל: פתיתים" aria-label="חיפוש המאכל הנכון" autoFocus />
+                            {swapQ.trim().length > 1 && (
+                              <div className="chips">
+                                {searchAll(swapQ, 8).map((nf) => (
+                                  <button key={nf.id} className="chip" onClick={() => pick(nf)}>
+                                    {nf.name}
+                                  </button>
+                                ))}
+                              </div>
+                            )}
+                          </>
+                        );
+                      })()}
+                    </div>
+                  )}
                   <div className="b-amount">
                     <input type="range" min={5} max={Math.max(600, i.grams * 2)} step={5} value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Number(e.target.value) } : x)))} aria-label={`כמות ${f.name} בגרמים`} />
                     <input className="qty" inputMode="numeric" dir="ltr" value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Math.max(0, Number(e.target.value) || 0) } : x)))} aria-label={`גרמים של ${f.name}`} />

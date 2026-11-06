@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { planDay, type DayPlan, type MenuTargets } from '../engine/menu';
 import { sumNutrients } from '../data/foods';
+import { supplementNutrients } from '../data/supplements';
 import { estimateTdee } from '../engine/adaptive';
 import { detectBehavior } from '../engine/safety';
 import { SAFETY_CONFIG, evaluateSafety } from '../engine/safety';
@@ -10,7 +11,15 @@ import { preferences } from '../engine/learning';
 
 export function menuTargets(s: State): MenuTargets | null {
   if (!s.targets) return null;
-  return { kcal: s.targets.kcal.value, protein: s.targets.proteinG.value, fat: s.targets.fatG.value, carbs: s.targets.carbsG.value };
+  // caloric supplements (protein powder, bars…) are part of the day: the menu fills the rest
+  const sp = supplementNutrients(s.profile?.supplements);
+  const t = s.targets;
+  return {
+    kcal: Math.max(t.kcal.value * 0.6, t.kcal.value - sp.kcal),
+    protein: Math.max(t.proteinG.value * 0.5, t.proteinG.value - sp.protein),
+    fat: Math.max(t.fatG.value * 0.6, t.fatG.value - sp.fat),
+    carbs: Math.max(t.carbsG.value * 0.5, t.carbsG.value - sp.carbs),
+  };
 }
 
 const cache = new Map<string, DayPlan>();
@@ -22,17 +31,27 @@ export function planFor(s: State, date: string): DayPlan | null {
   const key = JSON.stringify([date, t, s.profile.diet, s.profile.allergies, s.profile.kosher, s.profile.mealsPerDay, s.profile.maxPrepMinutes, s.profile.dislikes, s.planFixed[date] ?? {}, prefs]);
   const hit = cache.get(key);
   if (hit) return hit;
-  const y = new Date(date + 'T12:00:00');
-  y.setDate(y.getDate() - 1);
-  const yKey = todayISO(y);
-  const prev = yKey < date ? planDayNoCache(s, yKey, t) : null;
-  const plan = planDay({ date, profile: s.profile, target: t, avoid: prev?.meals.map((m) => m.recipeId), fixed: s.planFixed[date], preferences: prefs });
+  const seed = s.startedAt ?? s.profile.name ?? '';
+  // avoid what was planned on the previous 3 days (computed without their own history, to stay cheap)
+  const avoid: string[] = [];
+  for (let d = 1; d <= 3; d++) {
+    const y = new Date(date + 'T12:00:00');
+    y.setDate(y.getDate() - d);
+    const prev = planDayNoCache(s, todayISO(y), t, seed);
+    avoid.push(...prev.meals.map((m) => m.recipeId));
+  }
+  const plan = planDay({ date, profile: s.profile, target: t, avoid, fixed: s.planFixed[date], preferences: prefs, seed });
   cache.set(key, plan);
   return plan;
 }
 
-function planDayNoCache(s: State, date: string, t: MenuTargets): DayPlan {
-  return planDay({ date, profile: s.profile!, target: t, fixed: s.planFixed[date], preferences: preferences(s.learning) });
+function planDayNoCache(s: State, date: string, t: MenuTargets, seed: string): DayPlan {
+  const k = `nc|${date}|${seed}|${JSON.stringify(t)}|${s.profile!.diet}|${s.profile!.mealsPerDay}|${s.profile!.allergies}|${s.profile!.kosher}`;
+  const hit = cache.get(k);
+  if (hit) return hit;
+  const p = planDay({ date, profile: s.profile!, target: t, fixed: s.planFixed[date], preferences: preferences(s.learning), seed });
+  cache.set(k, p);
+  return p;
 }
 
 export function usePlan(date: string) {

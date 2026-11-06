@@ -65,6 +65,8 @@ export interface Profile {
   targetWeightKg?: number;
   /** Optional ISO date (YYYY-MM-DD) to reach the target weight by. */
   targetDate?: string;
+  /** Supplement ids the user takes (see data/supplements.ts). */
+  supplements?: string[];
   diet: DietStyle;
   kosher: boolean;
   allergies: Allergen[];

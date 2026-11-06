@@ -1,16 +1,20 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
-import { Avatar3D } from './LazyAvatar';
+import { useEffect, useMemo, useState } from 'react';
 import { simulateJourney } from '../engine/forecast';
+import { HoloFigure, figureWidths, lerpWidths } from './HoloFigure';
 import { fmt } from './kit';
 import type { Profile, Targets } from '../engine/types';
 
 const DAY = 864e5;
+const TODAY_COLOR = '#38bdf8'; // blue
+const FUTURE_COLOR = '#34d399'; // green
+const OUTLINE = '#ff9f43'; // orange, dashed
+const EMPHASIS = 2.2;
 
 /**
- * One hologram that walks from today's body to the target body. A slider (and a play button)
- * moves through the weeks; today's body stays as an orange outline so the change is obvious.
+ * Today vs. a chosen point in time, side by side. Time is picked with buttons (and a play
+ * button that steps through them). Each body has a large caption under it.
  */
-export function BodyJourney({ profile, targets, height = 340, startISO }: { profile: Profile; targets: Targets; height?: number; startISO?: string }) {
+export function BodyJourney({ profile, targets, startISO }: { profile: Profile; targets: Targets; height?: number; startISO?: string }) {
   const plan = targets.goalPlan;
   const path = useMemo(
     () =>
@@ -24,107 +28,157 @@ export function BodyJourney({ profile, targets, height = 340, startISO }: { prof
         strengthTraining: profile.strengthTraining,
         weeklyKg: targets.weeklyChangeKg.value,
         targetKg: plan?.targetKg,
-        maxWeeks: plan ? 104 : 24,
+        maxWeeks: plan ? 104 : 26,
       }),
     [profile.sex, profile.age, profile.heightCm, profile.weightKg, profile.bodyFatPct, profile.strengthTraining, targets.tdee.value, targets.weeklyChangeKg.value, plan?.targetKg],
   );
   const last = path.length - 1;
-  const [week, setWeek] = useState(last);
-  const [playing, setPlaying] = useState(false);
-  const timer = useRef<number | null>(null);
+  const marks = useMemo(() => {
+    const m = [
+      { w: 4, label: 'חודש' },
+      { w: 13, label: '3 חודשים' },
+      { w: 26, label: 'חצי שנה' },
+      { w: 52, label: 'שנה' },
+    ].filter((x) => x.w < last - 1);
+    m.push({ w: last, label: path[last]?.reached ? 'ביעד' : `${Math.round(last / 4.3)} חודשים` });
+    return m;
+  }, [last, path]);
 
-  useEffect(() => setWeek(last), [last]);
+  const [sel, setSel] = useState(marks.length - 1);
+  const [playing, setPlaying] = useState(false);
+  useEffect(() => setSel(marks.length - 1), [marks.length]);
+
+  // play: step through the time buttons
   useEffect(() => {
     if (!playing) return;
-    const stepMs = Math.max(60, Math.min(260, 4500 / Math.max(1, last)));
-    timer.current = window.setInterval(() => {
-      setWeek((w) => {
-        if (w >= last) {
+    const id = window.setInterval(() => {
+      setSel((i) => {
+        if (i >= marks.length - 1) {
           setPlaying(false);
-          return last;
+          return i;
         }
-        return w + 1;
+        return i + 1;
       });
-    }, stepMs);
-    return () => {
-      if (timer.current) window.clearInterval(timer.current);
+    }, 1300);
+    return () => window.clearInterval(id);
+  }, [playing, marks.length]);
+
+  const start = path[0];
+  const week = marks[Math.min(sel, marks.length - 1)]?.w ?? last;
+  const pt = path[Math.min(week, last)] ?? start;
+  const todayBody = { sex: profile.sex, heightCm: profile.heightCm, weightKg: start.weightKg, bodyFatPct: start.bodyFatPct };
+  const todayW = useMemo(() => figureWidths(todayBody), [todayBody.weightKg, todayBody.bodyFatPct, todayBody.heightCm, todayBody.sex]); // eslint-disable-line react-hooks/exhaustive-deps
+  const targetW = figureWidths({ ...todayBody, weightKg: pt.weightKg, bodyFatPct: pt.bodyFatPct }, todayBody, EMPHASIS);
+
+  // animate the future body between selections
+  const [shown, setShown] = useState(targetW);
+  const key = `${pt.weightKg}|${pt.bodyFatPct}`;
+  useEffect(() => {
+    const from = shown;
+    const reduce = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (reduce) {
+      setShown(targetW);
+      return;
+    }
+    let raf = 0;
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const k = Math.min(1, (now - t0) / 700);
+      const e = k < 0.5 ? 2 * k * k : 1 - (-2 * k + 2) ** 2 / 2;
+      setShown(lerpWidths(from, targetW, e));
+      if (k < 1) raf = requestAnimationFrame(step);
     };
-  }, [playing, last]);
+    raf = requestAnimationFrame(step);
+    return () => cancelAnimationFrame(raf);
+  }, [key]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const flat = Math.abs(targets.weeklyChangeKg.value) < 0.05 || last === 0;
-  const start = path[0];
-  const pt = path[Math.min(week, last)];
   const base = startISO ? Date.parse(startISO) : Date.now();
-  const dateOf = (w: number) => new Date(base + w * 7 * DAY).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: w > 40 ? 'numeric' : undefined });
-  const fatNow = (start.weightKg * start.bodyFatPct) / 100;
-  const fatThen = (pt.weightKg * pt.bodyFatPct) / 100;
+  const dateOf = (w: number) => new Date(base + w * 7 * DAY).toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: w > 40 ? 'numeric' : undefined });
   const dKg = pt.weightKg - start.weightKg;
+  const fatLost = (start.weightKg * start.bodyFatPct) / 100 - (pt.weightKg * pt.bodyFatPct) / 100;
   const losing = targets.weeklyChangeKg.value < 0;
-
-  const marks = [
-    { w: 0, label: 'היום' },
-    { w: 4, label: 'חודש' },
-    { w: 13, label: '3 חודשים' },
-    { w: 26, label: 'חצי שנה' },
-  ].filter((m) => m.w === 0 || m.w < last - 2);
-  marks.push({ w: last, label: path[last].reached ? 'יעד' : `שבוע ${last}` });
 
   if (flat)
     return (
       <div className="journey">
-        <Avatar3D height={height} bodies={[{ sex: profile.sex, heightCm: profile.heightCm, weightKg: start.weightKg, bodyFatPct: start.bodyFatPct, label: 'היום', color: '#4fd8ec' }]} />
+        <div className="holo-stage single">
+          <figure>
+            <HoloFigure id="today" w={todayW} sex={profile.sex} color={TODAY_COLOR} />
+            <figcaption>
+              <b style={{ color: TODAY_COLOR }}>היום</b>
+              <span>{fmt(start.weightKg, 1)} ק"ג</span>
+            </figcaption>
+          </figure>
+        </div>
         <p className="fineprint">במטרה הנוכחית המשקל נשמר. הוסיפו משקל יעד בפרופיל כדי לראות את הדרך אליו.</p>
       </div>
     );
 
   return (
     <div className="journey">
-      <Avatar3D
-        height={height}
-        bodies={[
-          { sex: profile.sex, heightCm: profile.heightCm, weightKg: start.weightKg, bodyFatPct: start.bodyFatPct, label: 'היום', sub: `${fmt(start.weightKg, 1)} ק"ג`, color: '#4fd8ec' },
-          { sex: profile.sex, heightCm: profile.heightCm, weightKg: pt.weightKg, bodyFatPct: pt.bodyFatPct, label: week === 0 ? 'היום' : dateOf(week), sub: `${fmt(pt.weightKg, 1)} ק"ג`, color: '#7ef0b0' },
-        ]}
-      />
-      <div className="journey-stats" aria-live="polite">
-        <div>
-          <span>משקל</span>
-          <b>{fmt(pt.weightKg, 1)} ק"ג</b>
-          {week > 0 && <small dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)}</small>}
-        </div>
-        <div>
-          <span>{losing ? 'שומן שירד' : 'אחוז שומן'}</span>
-          <b>{losing ? `${fmt(Math.max(0, fatNow - fatThen), 1)} ק"ג` : `${fmt(pt.bodyFatPct, 1)}%`}</b>
-          {losing && <small>{fmt(pt.bodyFatPct, 1)}% שומן</small>}
-        </div>
-        <div>
-          <span>מתי</span>
-          <b>{week === 0 ? 'היום' : dateOf(week)}</b>
-          {week > 0 && <small>בעוד {week} שבועות</small>}
-        </div>
+      <div className="holo-stage" role="img" aria-label={`היום ${fmt(start.weightKg, 1)} ק"ג. בעוד ${week} שבועות בערך ${fmt(pt.weightKg, 1)} ק"ג.`}>
+        <figure>
+          <HoloFigure id="today" w={todayW} sex={profile.sex} color={TODAY_COLOR} />
+          <figcaption>
+            <b style={{ color: TODAY_COLOR }}>אתה היום</b>
+            <span className="cap-kg">{fmt(start.weightKg, 1)} ק"ג</span>
+            <small>{fmt(start.bodyFatPct, 0)}% שומן</small>
+          </figcaption>
+        </figure>
+        <div className="holo-arrow" aria-hidden="true">←</div>
+        <figure>
+          <HoloFigure id="future" w={shown} sex={profile.sex} color={FUTURE_COLOR} outline={todayW} outlineColor={OUTLINE} />
+          <figcaption>
+            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד' : `בעוד ${marks[sel]?.label}`}</b>
+            <span className="cap-kg">
+              {fmt(pt.weightKg, 1)} ק"ג <em><bdi dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)}</bdi></em>
+            </span>
+            <small>{dateOf(week)}</small>
+          </figcaption>
+        </figure>
       </div>
-      <div className="journey-controls">
-        <button
-          className="play"
-          onClick={() => {
-            if (week >= last) setWeek(0);
-            setPlaying((p) => !p);
-          }}
-          aria-label={playing ? 'עצירה' : 'הצגת השינוי לאורך הזמן'}
-        >
+
+      <ul className="holo-legend">
+        <li>
+          <i style={{ background: TODAY_COLOR }} /> כחול: הגוף שלך היום
+        </li>
+        <li>
+          <i style={{ background: FUTURE_COLOR }} /> ירוק: הגוף שלך בזמן שבחרת
+        </li>
+        <li>
+          <i className="dash" style={{ borderColor: OUTLINE }} /> קו כתום מקווקו: איפה היית היום, כדי לראות כמה ירד
+        </li>
+      </ul>
+
+      <div className="journey-times" role="group" aria-label="בחירת זמן">
+        <button className="play" onClick={() => { if (sel >= marks.length - 1) setSel(0); setPlaying((p) => !p); }} aria-label={playing ? 'עצירה' : 'להציג את השינוי לאורך הזמן'}>
           {playing ? '❚❚' : '▶'}
         </button>
-        <input type="range" min={0} max={last} value={week} onChange={(e) => { setPlaying(false); setWeek(Number(e.target.value)); }} aria-label="שבוע בתחזית" />
-      </div>
-      <div className="journey-marks">
-        {marks.map((m) => (
-          <button key={m.w} className={`chip ${week === m.w ? 'on' : ''}`} aria-pressed={week === m.w} onClick={() => { setPlaying(false); setWeek(m.w); }}>
+        {marks.map((m, i) => (
+          <button key={m.w} className={`chip ${sel === i ? 'on' : ''}`} aria-pressed={sel === i} onClick={() => { setPlaying(false); setSel(i); }}>
             {m.label}
           </button>
         ))}
       </div>
+
+      <div className="journey-stats">
+        <div>
+          <span>{losing ? 'ירידה במשקל' : 'שינוי במשקל'}</span>
+          <b dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)} ק"ג</b>
+        </div>
+        <div>
+          <span>{losing ? 'שומן שירד' : 'אחוז שומן'}</span>
+          <b>{losing ? `${fmt(Math.max(0, fatLost), 1)} ק"ג` : `${fmt(pt.bodyFatPct, 1)}%`}</b>
+        </div>
+        <div>
+          <span>מתי</span>
+          <b>{week} שבועות</b>
+        </div>
+      </div>
       <p className="fineprint">
-        התחזית מניחה שתעמוד ביעד הקלורי ותשקול את עצמך באופן קבוע. זו הערכה לפי מודל מחקרי, וכל גוף מגיב קצת אחרת. {profile.bodyFatSource === 'estimate' && 'אחוז השומן ההתחלתי הוא הערכה.'}
+        המספרים הם תחזית לפי מודל מחקרי, בהנחה שתעמוד ביעד הקלורי. הדמות מדגישה את השינוי כדי שיהיה קל לראות אותו, וכל גוף מגיב קצת אחרת.
+        {profile.bodyFatSource === 'estimate' && ' אחוז השומן ההתחלתי הוא הערכה.'}
       </p>
     </div>
   );
