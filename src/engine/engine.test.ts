@@ -338,3 +338,24 @@ describe('search', () => {
     for (const f of r) expect([f.name, ...f.aliases, f.officialName].join(' ')).toContain('במבה');
   });
 });
+
+import { foodFromOff, isValidEan } from './barcode';
+import nutella from './fixtures/off-nutella.json';
+import bamba from './fixtures/off-bamba.json';
+describe('barcode', () => {
+  it('validates EAN check digits', () => {
+    expect(isValidEan('7290000066318')).toBe(true);
+    expect(isValidEan('3017620422003')).toBe(true);
+    expect(isValidEan('7290000066319')).toBe(false);
+  });
+  it('reads real Open Food Facts records: an Israeli product and an imported one', () => {
+    const b = foodFromOff('7290000066318', bamba.product)!;
+    expect(b.name).toContain('במבה');
+    expect(b.per100g.kcal).toBe(535);
+    expect(b.allergens).toContain('peanuts');
+    const n = foodFromOff('3017620422003', nutella.product)!;
+    expect(n.name).toContain('Nutella');
+    expect(n.per100g.kcal).toBe(539);
+    expect(n.verified).toBe(false);
+  });
+});

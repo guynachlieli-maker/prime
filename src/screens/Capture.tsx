@@ -45,6 +45,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   const [scanning, setScanning] = useState(false);
   const [saved, setSaved] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
   const barcodeRef = useRef<HTMLInputElement>(null);
   const labelRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -111,12 +112,17 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     setBusy('מחפש את המוצר…');
     try {
       const { lookupBarcode } = await import('../engine/barcode');
-      const f = await lookupBarcode(c);
-      if (f) {
+      const hit = await lookupBarcode(c);
+      if (hit) {
+        const f = hit.food;
         setMethod('barcode');
         const serving = f.units.find((u) => u.label === 'מנה לפי האריזה');
         addFood(f, serving?.grams ?? 100);
-        setInfo(`נמצא: ${f.name}. הערכים מ-Open Food Facts (מאגר קהילתי). בדקו אותם מול התווית.`);
+        setInfo(
+          hit.from === 'mine'
+            ? `נמצא: ${f.name} (מתווית שצילמת בעבר).`
+            : `נמצא: ${f.name}. הערכים מ-Open Food Facts (מאגר קהילתי עולמי). בדקו אותם מול התווית.`,
+        );
       } else {
         setMissingCode(c);
       }
@@ -263,6 +269,10 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
             <Button full onClick={() => fileRef.current?.click()} disabled={!!busy}>
               {photo ? 'לצלם שוב' : 'לצלם ארוחה'}
             </Button>
+            <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
+            <Button full kind="secondary" onClick={() => galleryRef.current?.click()} disabled={!!busy}>
+              בחירת תמונה מהגלריה
+            </Button>
             {factor !== 1 && <p className="fineprint">ההערכה מכוילת לפי התיקונים שלך ({factor > 1 ? '+' : ''}{Math.round((factor - 1) * 100)}%).</p>}
           </div>
           {rec?.notes && <p className="muted">{rec.notes}</p>}
@@ -327,7 +337,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           </div>
           {missingCode && (
             <Banner kind="warn">
-              <strong>המוצר {missingCode} לא נמצא בטבלת המוצרים.</strong> צלמו את התווית התזונתית שעל האריזה, ונקרא ממנה את הערכים.
+              <strong>המוצר {missingCode} עוד לא במאגרים.</strong> צלמו פעם אחת את התווית התזונתית שעל האריזה. נקרא ממנה את הערכים, והמוצר יישמר לסריקות הבאות.
               <input ref={labelRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onLabel(e.target.files?.[0])} />
               <div className="row wrap" style={{ marginTop: 8 }}>
                 <Button onClick={() => labelRef.current?.click()}>צילום התווית</Button>

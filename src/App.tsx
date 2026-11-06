@@ -11,6 +11,9 @@ import { Programs } from './screens/Programs';
 import { Profile } from './screens/Profile';
 import { Pro } from './screens/Pro';
 import { Devices } from './screens/Devices';
+import { restoreMyProducts } from './engine/barcode';
+
+restoreMyProducts();
 
 export type Tab = 'today' | 'menu' | 'camera' | 'progress' | 'programs' | 'profile' | 'pro' | 'devices';
 

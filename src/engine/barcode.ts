@@ -1,4 +1,6 @@
-import { FOOD_BY_ID, registerFood, type Food } from '../data/foods';
+import { registerFood, type Food } from '../data/foods';
+
+const isAllergen = (a: Food['allergens'][number] | undefined): a is Food['allergens'][number] => Boolean(a);
 
 /**
  * Barcode reading and product lookup.
@@ -113,7 +115,7 @@ function loadProducts(): Promise<Map<string, ProductRow>> {
   return loading;
 }
 
-const ALLERGEN_MAP: Record<string, Food['allergens'][number]> = {
+const ALLERGEN_MAP: Record<string, Food['allergens'][number] | undefined> = {
   gluten: 'gluten',
   milk: 'dairy',
   eggs: 'egg',
@@ -132,10 +134,116 @@ const ALLERGEN_MAP: Record<string, Food['allergens'][number]> = {
   סויה: 'soy',
 };
 
-export async function lookupBarcode(code: string): Promise<Food | null> {
+/* ---------- products the user added from a label (remembered on this device) ---------- */
+
+const MY_PRODUCTS = 'prime.myProducts';
+
+function loadMine(): Food[] {
+  try {
+    return JSON.parse(localStorage.getItem(MY_PRODUCTS) ?? '[]') as Food[];
+  } catch {
+    return [];
+  }
+}
+
+export function rememberProduct(f: Food) {
+  try {
+    const all = loadMine().filter((x) => x.id !== f.id);
+    localStorage.setItem(MY_PRODUCTS, JSON.stringify([...all, f].slice(-300)));
+  } catch {
+    /* storage full: the product still works for this session */
+  }
+}
+
+/** Register remembered products so logs and favourites can find them after a reload. */
+export function restoreMyProducts() {
+  loadMine().forEach(registerFood);
+}
+
+/* ---------- live Open Food Facts lookup (world-wide, includes imported products) ---------- */
+
+interface OffProduct {
+  code?: string;
+  product_name?: string;
+  product_name_he?: string;
+  brands?: string;
+  serving_quantity?: number | string;
+  allergens_tags?: string[];
+  nutriments?: Record<string, number | string | undefined>;
+}
+
+export function foodFromOff(code: string, p: OffProduct): Food | null {
+  const n = p.nutriments ?? {};
+  const num = (k: string) => {
+    const v = Number(n[k]);
+    return Number.isFinite(v) && v >= 0 ? Math.round(v * 10) / 10 : 0;
+  };
+  let kcal = Number(n['energy-kcal_100g']);
+  if (!Number.isFinite(kcal) && Number.isFinite(Number(n['energy_100g']))) kcal = Number(n['energy_100g']) / 4.184;
+  const name = (p.product_name_he || p.product_name || '').trim();
+  if (!name || !Number.isFinite(kcal) || kcal < 0 || kcal > 950) return null;
+  const brand = (p.brands ?? '').split(',')[0].trim();
+  const serving = Number(p.serving_quantity);
+  return {
+    id: `bc:${code}`,
+    code: Number(code),
+    name: brand ? `${name} (${brand})` : name,
+    officialName: name,
+    aliases: [],
+    per100g: { kcal: Math.round(kcal), protein: num('proteins_100g'), fat: num('fat_100g'), carbs: num('carbohydrates_100g'), fiber: num('fiber_100g') },
+    units: [{ label: 'גרם', grams: 1 }, ...(serving > 0 && serving < 2000 ? [{ label: 'מנה לפי האריזה', grams: serving }] : [])],
+    allergens: (p.allergens_tags ?? []).map((a) => ALLERGEN_MAP[a.split(':').pop() ?? '']).filter(isAllergen),
+    vegan: false,
+    vegetarian: false,
+    category: 'other',
+    role: 'other',
+    source: 'openfoodfacts',
+    verified: false,
+  };
+}
+
+async function lookupOnline(code: string): Promise<Food | null | 'offline'> {
+  const ctl = new AbortController();
+  const timer = setTimeout(() => ctl.abort(), 6000);
+  try {
+    const r = await fetch(`https://world.openfoodfacts.org/api/v2/product/${code}.json?fields=code,product_name,product_name_he,brands,serving_quantity,allergens_tags,nutriments`, { signal: ctl.signal });
+    if (r.status === 404) return null;
+    if (!r.ok) return 'offline';
+    const d = (await r.json()) as { status?: number; product?: OffProduct };
+    if (!d.product || d.status === 0) return null;
+    return foodFromOff(code, d.product);
+  } catch {
+    return 'offline'; // no network, or the host blocks outside requests (e.g. inside claude.ai)
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+export type LookupSource = 'mine' | 'online' | 'bundled';
+
+/**
+ * Finds a product by barcode: 1) products the user added from a label, 2) Open Food Facts live
+ * (~3 million products world-wide, incl. imports sold in Israel), 3) the bundled Israeli table
+ * (works offline and where outside requests are blocked).
+ */
+export async function lookupBarcode(code: string): Promise<{ food: Food; from: LookupSource } | null> {
   const id = `bc:${code}`;
-  if (FOOD_BY_ID[id]) return FOOD_BY_ID[id];
-  const table = await loadProducts();
+  const mine = loadMine().find((f) => f.id === id);
+  if (mine) {
+    registerFood(mine);
+    return { food: mine, from: 'mine' };
+  }
+  const online = await lookupOnline(code);
+  if (online && online !== 'offline') {
+    registerFood(online);
+    return { food: online, from: 'online' };
+  }
+  let table: Map<string, ProductRow>;
+  try {
+    table = await loadProducts();
+  } catch {
+    return null;
+  }
   const p = table.get(code) ?? table.get(code.replace(/^0+/, ''));
   if (!p) return null;
   const [c, name, brand, kcal, protein, fat, carbs, fiber, serving, allergens] = p;
@@ -150,7 +258,7 @@ export async function lookupBarcode(code: string): Promise<Food | null> {
     allergens: allergens
       .split(',')
       .map((a) => ALLERGEN_MAP[a])
-      .filter(Boolean),
+      .filter(isAllergen),
     vegan: false,
     vegetarian: false,
     category: 'other',
@@ -159,7 +267,7 @@ export async function lookupBarcode(code: string): Promise<Food | null> {
     verified: false,
   };
   registerFood(f);
-  return f;
+  return { food: f, from: 'bundled' };
 }
 
 /** A product read from a photographed nutrition label. */
@@ -181,5 +289,6 @@ export function foodFromLabel(code: string | null, reading: { name: string; per1
     verified: false,
   };
   registerFood(f);
+  if (code) rememberProduct(f);
   return f;
 }
