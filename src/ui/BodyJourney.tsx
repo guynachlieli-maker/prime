@@ -33,7 +33,9 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
     [profile.sex, profile.age, profile.heightCm, profile.weightKg, profile.bodyFatPct, profile.strengthTraining, targets.tdee.value, targets.weeklyChangeKg.value, plan?.targetKg],
   );
   const last = path.length - 1;
-  const marks = useMemo(() => journeyMarks(path), [path]);
+  const goalWeeks = plan?.weeks ?? undefined;
+  const marks = useMemo(() => journeyMarks(path, goalWeeks), [path, goalWeeks]);
+  const calWeek = (w: number) => (goalWeeks && path[path.length - 1]?.reached ? Math.round((w * goalWeeks) / (path.length - 1)) : w);
 
   const [sel, setSel] = useState(marks.length - 1);
   const [playing, setPlaying] = useState(false);
@@ -108,7 +110,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
 
   return (
     <div className="journey">
-      <div className="holo-stage" role="img" aria-label={`היום ${fmt(start.weightKg, 1)} ק"ג. בעוד ${week} שבועות בערך ${fmt(pt.weightKg, 1)} ק"ג.`}>
+      <div className="holo-stage" role="img" aria-label={`היום ${fmt(start.weightKg, 1)} ק"ג. בעוד ${calWeek(week)} שבועות בערך ${fmt(pt.weightKg, 1)} ק"ג.`}>
         <figure>
           <HoloFigure id="today" w={todayW} sex={profile.sex} color={TODAY_COLOR} />
           <figcaption>
@@ -121,11 +123,11 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         <figure>
           <HoloFigure id="future" w={shown} sex={profile.sex} color={FUTURE_COLOR} outline={todayW} outlineColor={OUTLINE} />
           <figcaption>
-            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד' : marks[sel]?.label === 'היום' ? 'היום' : `בעוד ${marks[sel]?.label}`}</b>
+            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד'   : `בעוד ${marks[sel]?.label}`}</b>
             <span className="cap-kg">
               {fmt(pt.weightKg, 1)} ק"ג <em><bdi dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)}</bdi></em>
             </span>
-            <small>{dateOf(week)}</small>
+            <small>{week === last && plan?.etaISO && path[last]?.reached ? new Date(plan.etaISO + 'T12:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'long' }) : dateOf(calWeek(week))}</small>
           </figcaption>
         </figure>
       </div>
@@ -164,7 +166,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         </div>
         <div>
           <span>מתי</span>
-          <b>{week === 0 ? 'היום' : `${week} שבועות`}</b>
+          <b>{`${calWeek(week)} שבועות`}</b>
         </div>
       </div>
       <p className="fineprint">
@@ -176,12 +178,14 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
 }
 
 /**
- * Four buttons: today, two checkpoints, goal. The checkpoints sit at one third and two thirds of the
+ * Three buttons: two checkpoints and the goal date (the one the system set, which already respects a safe pace). The checkpoints sit at one third and two thirds of the
  * time to the goal (e.g. a 9-week goal gives 3 and 6 weeks), so every button shows more change than
  * the one before and none can land after the goal. Exported for tests.
  */
-export function journeyMarks(path: { weightKg: number; reached: boolean }[]): { w: number; label: string }[] {
+export function journeyMarks(path: { weightKg: number; reached: boolean }[], goalWeeks?: number): { w: number; label: string }[] {
   const last = path.length - 1;
+  // calendar weeks: the goal lands on the date the system set for it
+  const cal = (w: number) => (goalWeeks && path[last]?.reached ? Math.max(1, Math.round((w * goalWeeks) / last)) : w);
   const label = (w: number) => {
     if (w === 1) return 'שבוע';
     if (w === 2) return 'שבועיים';
@@ -189,10 +193,10 @@ export function journeyMarks(path: { weightKg: number; reached: boolean }[]): { 
     const m = Math.round(w / 4.33);
     return m === 6 ? 'חצי שנה' : m === 12 ? 'שנה' : `${m} חודשים`;
   };
-  const m: { w: number; label: string }[] = [{ w: 0, label: 'היום' }];
+  const m: { w: number; label: string }[] = [];
   const steps = [...new Set([Math.round(last / 3), Math.round((last * 2) / 3)])].filter((w) => w >= 1 && w < last);
-  steps.forEach((w) => m.push({ w, label: label(w) }));
-  if (m.length === 3 && m[1].label === m[2].label) m.forEach((x, i) => i > 0 && (x.label = `${x.w} שבועות`));
-  m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(last) });
+  steps.forEach((w) => m.push({ w, label: label(cal(w)) }));
+  if (m.length === 2 && m[0].label === m[1].label) m.forEach((x) => (x.label = `${cal(x.w)} שבועות`));
+  m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(cal(last)) });
   return m;
 }
