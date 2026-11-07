@@ -11,17 +11,32 @@ type W = Record<(typeof KEYS)[number], number>;
 
 const U = 230; // svg units per metre at the reference height
 
-export function figureWidths(p: BodyParams, reference?: BodyParams, emphasis = 1): W {
+/**
+ * Widths for a body. With a reference (today) and an emphasis > 1, the difference from today is
+ * magnified so progress is easy to see. `end` is the final body of the journey: the emphasis is scaled
+ * down per measurement so that the end body never passes a lean floor. Every point in between keeps
+ * its share of the change, so each step is visibly slimmer than the one before (no clamping plateau).
+ */
+export function figureWidths(p: BodyParams, reference?: BodyParams, emphasis = 1, end?: BodyParams): W {
   const norm = (sh: Shape): W => Object.fromEntries(KEYS.map((k) => [k, (sh[k] / (sh.H / 1.75)) * U])) as W;
   const a = norm(bodyShape(p));
   if (!reference || emphasis === 1) return a;
   const r = norm(bodyShape(reference));
+  const e = norm(bodyShape(end ?? p));
   const lean = norm(bodyShape({ ...p, weightKg: 21 * (p.heightCm / 100) ** 2, bodyFatPct: p.sex === 'male' ? 12 : 21 }));
   return Object.fromEntries(
     KEYS.map((k) => {
-      const v = r[k] + (a[k] - r[k]) * emphasis;
-      // never thinner than a lean reference body, never wider than 1.6x today
-      return [k, Math.min(r[k] * 1.6, Math.max(Math.min(lean[k], a[k]), v))];
+      const endDelta = (e[k] - r[k]) * emphasis; // magnified change at the end of the journey
+      let scale = emphasis;
+      if (endDelta < 0) {
+        // shrinking: the end may go down to the lean floor, or to its real width if that is thinner
+        const room = r[k] - Math.min(lean[k], e[k]);
+        if (-endDelta > room) scale = room / (r[k] - e[k] || 1);
+      } else if (endDelta > 0) {
+        const room = r[k] * 0.6;
+        if (endDelta > room) scale = room / (e[k] - r[k] || 1);
+      }
+      return [k, r[k] + (a[k] - r[k]) * Math.max(1, scale)];
     }),
   ) as W;
 }

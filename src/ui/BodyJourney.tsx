@@ -61,7 +61,8 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
   const pt = path[Math.min(week, last)] ?? start;
   const todayBody = { sex: profile.sex, heightCm: profile.heightCm, weightKg: start.weightKg, bodyFatPct: start.bodyFatPct };
   const todayW = useMemo(() => figureWidths(todayBody), [todayBody.weightKg, todayBody.bodyFatPct, todayBody.heightCm, todayBody.sex]); // eslint-disable-line react-hooks/exhaustive-deps
-  const targetW = figureWidths({ ...todayBody, weightKg: pt.weightKg, bodyFatPct: pt.bodyFatPct }, todayBody, EMPHASIS);
+  const endPt = path[last];
+  const targetW = figureWidths({ ...todayBody, weightKg: pt.weightKg, bodyFatPct: pt.bodyFatPct }, todayBody, EMPHASIS, { ...todayBody, weightKg: endPt.weightKg, bodyFatPct: endPt.bodyFatPct });
 
   // animate the future body between selections
   const [shown, setShown] = useState(targetW);
