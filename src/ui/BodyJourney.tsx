@@ -33,15 +33,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
     [profile.sex, profile.age, profile.heightCm, profile.weightKg, profile.bodyFatPct, profile.strengthTraining, targets.tdee.value, targets.weeklyChangeKg.value, plan?.targetKg],
   );
   const last = path.length - 1;
-  const marks = useMemo(() => {
-    const label = (w: number) => (w === 1 ? 'שבוע' : w === 4 ? 'חודש' : w < 8 ? `${w} שבועות` : w === 13 ? '3 חודשים' : w === 26 ? 'חצי שנה' : w === 52 ? 'שנה' : `${Math.round(w / 4.3)} חודשים`);
-    let steps = [4, 13, 26, 52].filter((w) => w < last - 1);
-    // always show at least two different points on the way to the goal
-    if (steps.length < 2 && last >= 3) steps = [...new Set([Math.max(1, Math.round(last / 3)), Math.max(2, Math.round((last * 2) / 3))])].filter((w) => w < last);
-    const m = steps.map((w) => ({ w, label: label(w) }));
-    m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(last) });
-    return m;
-  }, [last, path]);
+  const marks = useMemo(() => journeyMarks(path), [path]);
 
   const [sel, setSel] = useState(marks.length - 1);
   const [playing, setPlaying] = useState(false);
@@ -181,4 +173,32 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
       </p>
     </div>
   );
+}
+
+/** Today → two checkpoints → goal. Exported for tests. */
+export function journeyMarks(path: { weightKg: number; reached: boolean }[]): { w: number; label: string }[] {
+  const last = path.length - 1;
+  const months = (w: number) => Math.round(w / 4.33);
+  const label = (w: number) =>
+    w === 1 ? 'שבוע' : w === 2 ? 'שבועיים' : w < 4 ? `${w} שבועות` : w === 4 ? 'חודש' : w < 8 ? `${w} שבועות` : months(w) === 2 ? 'חודשיים' : months(w) === 6 ? 'חצי שנה' : months(w) === 12 ? 'שנה' : `${months(w)} חודשים`;
+  // two checkpoints between today and the goal, at one third and two thirds of the change in weight,
+  // so every button shows a visibly different body whatever the goal date
+  const total = Math.abs(path[last].weightKg - path[0].weightKg);
+  const at = (f: number) => path.findIndex((p) => Math.abs(p.weightKg - path[0].weightKg) >= total * f);
+  const snap = (w: number, lo: number, hi: number) => {
+    const nice = [4, 8, 13, 17, 26, 39, 52].find((n) => Math.abs(n - w) <= Math.max(1, w * 0.12) && n > lo && n < hi);
+    return nice ?? w;
+  };
+  let w1 = at(1 / 3);
+  let w2 = at(2 / 3);
+  if (w1 < 1) w1 = Math.max(1, Math.round(last / 3));
+  if (w2 <= w1) w2 = Math.max(w1 + 1, Math.round((last * 2) / 3));
+  w1 = snap(w1, 0, w2);
+  w2 = snap(w2, w1, last);
+  const steps = [w1, w2].filter((w, i, a) => w >= 1 && w < last && a.indexOf(w) === i);
+  const m = steps.map((w) => ({ w, label: label(w) }));
+  // labels must differ too (e.g. two "3 חודשים"): fall back to weeks
+  if (m.length === 2 && m[0].label === m[1].label) m.forEach((x) => (x.label = `${x.w} שבועות`));
+  m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(last) });
+  return m;
 }
