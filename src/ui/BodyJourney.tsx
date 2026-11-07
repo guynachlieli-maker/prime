@@ -121,7 +121,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         <figure>
           <HoloFigure id="future" w={shown} sex={profile.sex} color={FUTURE_COLOR} outline={todayW} outlineColor={OUTLINE} />
           <figcaption>
-            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד' : `בעוד ${marks[sel]?.label}`}</b>
+            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד' : marks[sel]?.label === 'היום' ? 'היום' : `בעוד ${marks[sel]?.label}`}</b>
             <span className="cap-kg">
               {fmt(pt.weightKg, 1)} ק"ג <em><bdi dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)}</bdi></em>
             </span>
@@ -164,7 +164,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         </div>
         <div>
           <span>מתי</span>
-          <b>{week} שבועות</b>
+          <b>{week === 0 ? 'היום' : `${week} שבועות`}</b>
         </div>
       </div>
       <p className="fineprint">
@@ -175,30 +175,24 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
   );
 }
 
-/** Today → two checkpoints → goal. Exported for tests. */
+/**
+ * Four buttons: today, two checkpoints, goal. The checkpoints sit at one third and two thirds of the
+ * time to the goal (e.g. a 9-week goal gives 3 and 6 weeks), so every button shows more change than
+ * the one before and none can land after the goal. Exported for tests.
+ */
 export function journeyMarks(path: { weightKg: number; reached: boolean }[]): { w: number; label: string }[] {
   const last = path.length - 1;
-  const months = (w: number) => Math.round(w / 4.33);
-  const label = (w: number) =>
-    w === 1 ? 'שבוע' : w === 2 ? 'שבועיים' : w < 4 ? `${w} שבועות` : w === 4 ? 'חודש' : w < 8 ? `${w} שבועות` : months(w) === 2 ? 'חודשיים' : months(w) === 6 ? 'חצי שנה' : months(w) === 12 ? 'שנה' : `${months(w)} חודשים`;
-  // two checkpoints between today and the goal, at one third and two thirds of the change in weight,
-  // so every button shows a visibly different body whatever the goal date
-  const total = Math.abs(path[last].weightKg - path[0].weightKg);
-  const at = (f: number) => path.findIndex((p) => Math.abs(p.weightKg - path[0].weightKg) >= total * f);
-  const snap = (w: number, lo: number, hi: number) => {
-    const nice = [4, 8, 13, 17, 26, 39, 52].find((n) => Math.abs(n - w) <= Math.max(1, w * 0.12) && n > lo && n < hi);
-    return nice ?? w;
+  const label = (w: number) => {
+    if (w === 1) return 'שבוע';
+    if (w === 2) return 'שבועיים';
+    if (w < 13) return `${w} שבועות`;
+    const m = Math.round(w / 4.33);
+    return m === 6 ? 'חצי שנה' : m === 12 ? 'שנה' : `${m} חודשים`;
   };
-  let w1 = at(1 / 3);
-  let w2 = at(2 / 3);
-  if (w1 < 1) w1 = Math.max(1, Math.round(last / 3));
-  if (w2 <= w1) w2 = Math.max(w1 + 1, Math.round((last * 2) / 3));
-  w1 = snap(w1, 0, w2);
-  w2 = snap(w2, w1, last);
-  const steps = [w1, w2].filter((w, i, a) => w >= 1 && w < last && a.indexOf(w) === i);
-  const m = steps.map((w) => ({ w, label: label(w) }));
-  // labels must differ too (e.g. two "3 חודשים"): fall back to weeks
-  if (m.length === 2 && m[0].label === m[1].label) m.forEach((x) => (x.label = `${x.w} שבועות`));
+  const m: { w: number; label: string }[] = [{ w: 0, label: 'היום' }];
+  const steps = [...new Set([Math.round(last / 3), Math.round((last * 2) / 3)])].filter((w) => w >= 1 && w < last);
+  steps.forEach((w) => m.push({ w, label: label(w) }));
+  if (m.length === 3 && m[1].label === m[2].label) m.forEach((x, i) => i > 0 && (x.label = `${x.w} שבועות`));
   m.push({ w: last, label: path[last]?.reached ? 'ביעד' : label(last) });
   return m;
 }

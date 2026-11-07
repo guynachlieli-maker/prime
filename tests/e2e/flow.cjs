@@ -45,7 +45,7 @@ const SHOTS = process.argv[2];
   await click('המשך');
   await page.waitForTimeout(1800);
   await shot('07-discovery');
-  await page.locator('.journey-times .chip').first().click();
+  await page.locator('.journey-times .chip').nth(1).click();
   await page.waitForTimeout(900);
   await shot('07b-journey-month');
   await page.getByRole('button', { name: 'ביעד', exact: true }).first().click();
