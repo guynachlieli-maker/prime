@@ -2,3 +2,4 @@ node_modules
 dist
 *.tsbuildinfo
 prime-source.zip
+marketing/out/
