@@ -8,11 +8,31 @@ import { estimateBodyFatFromBmi, forecastBody, navyBodyFat } from '../engine/for
 import { EMPTY_SCREENING, type Allergen, type Profile } from '../engine/types';
 import { saveProfile, setState } from '../state/store';
 import { minHealthyWeight } from '../engine/pace';
+import { CARDIO, generatePlan, phasePlan, type CardioType, type EquipChoice, type Level, type TrainingPrefs } from '../training/plan';
+import { createPlan, toTrainingGoal } from '../training/state';
+import type { Limit } from '../training/exercises';
+import { WEEKDAY } from './Training';
 
 const isoIn = (weeks: number) => new Date(Date.now() + weeks * 7 * 864e5).toISOString().slice(0, 10);
 
 const DRAFT = 'prime.draft';
-type Draft = Partial<Profile> & { step: number; bfMode?: 'unknown' | 'known' | 'tape'; waist?: number; neck?: number; hip?: number };
+type Draft = Partial<Profile> & {
+  step: number;
+  bfMode?: 'unknown' | 'known' | 'tape';
+  waist?: number;
+  neck?: number;
+  hip?: number;
+  // training answers (the same questionnaire builds the menu and the program)
+  tDays?: number;
+  tMinutes?: number;
+  tEquip?: EquipChoice;
+  tLevel?: Level;
+  tCardio?: TrainingPrefs['cardio'];
+  tCardioTypes?: CardioType[];
+  tLimits?: Limit[];
+  tTime?: string;
+  tFocus?: 'strength' | 'endurance';
+};
 
 const ALLERGENS: { value: Allergen; label: string }[] = [
   { value: 'gluten', label: 'גלוטן' },
@@ -25,7 +45,7 @@ const ALLERGENS: { value: Allergen; label: string }[] = [
   { value: 'soy', label: 'סויה' },
 ];
 
-const STEPS = ['פתיחה', 'מטרה', 'נתוני גוף', 'שאלון התאמה', 'פעילות והרגלים', 'העדפות', 'משקל יעד', 'רגע הגילוי', 'התוכנית שלך'];
+const STEPS = ['פתיחה', 'מטרה', 'נתוני גוף', 'שאלון התאמה', 'אימונים ושגרה', 'העדפות', 'משקל יעד', 'רגע הגילוי', 'התוכנית שלך'];
 
 function loadDraft(): Partial<Draft> {
   try {
@@ -58,9 +78,9 @@ function toProfile(d: Draft): Profile | null {
     weightKg: d.weightKg,
     bodyFatPct,
     bodyFatSource,
-    activity: d.activity ?? 'moderate',
-    trainingDaysPerWeek: d.trainingDaysPerWeek ?? 3,
-    strengthTraining: d.strengthTraining ?? true,
+    activity: d.activity ?? ((d.tDays ?? 3) >= 5 ? 'very' : (d.tDays ?? 3) >= 3 ? 'moderate' : (d.tDays ?? 3) >= 1 ? 'light' : 'sedentary'),
+    trainingDaysPerWeek: d.tDays ?? 3,
+    strengthTraining: (d.tDays ?? 3) > 0,
     sleepHours: d.sleepHours ?? 7,
     goal: d.goal,
     pace: d.pace ?? 'balanced',
@@ -78,6 +98,7 @@ function toProfile(d: Draft): Profile | null {
 }
 
 export function Onboarding() {
+  const tog = <T,>(list: T[] | undefined, v: T) => ((list ?? []).includes(v) ? (list ?? []).filter((x) => x !== v) : [...(list ?? []), v]);
   const [d, setD] = useState<Draft>(() => ({ step: 0, ...loadDraft() }));
   const up = (p: Partial<Draft>) => setD((x) => ({ ...x, ...p }));
   useEffect(() => {
@@ -97,7 +118,28 @@ export function Onboarding() {
 
   const profile = useMemo(() => toProfile(d), [d]);
   const safety = useMemo(() => (profile ? evaluateSafety(profile) : null), [profile]);
-  const targets = useMemo(() => (profile ? computeTargets(profile) : null), [profile]);
+  const tPrefs: TrainingPrefs | null = useMemo(
+    () =>
+      d.goal && (d.tDays ?? 3) > 0
+        ? {
+            goal: toTrainingGoal(d.goal, d.tFocus),
+            days: d.tDays ?? 3,
+            minutes: d.tMinutes ?? 60,
+            cardio: d.tCardio ?? 'balanced',
+            cardioTypes: d.tCardioTypes ?? ['walk', 'bike'],
+            equipment: d.tEquip ?? 'gym',
+            level: d.tLevel ?? 'beginner',
+            limits: d.tLimits ?? [],
+            time: d.tTime ?? '18:00',
+          }
+        : null,
+    [d.goal, d.tDays, d.tMinutes, d.tCardio, d.tCardioTypes, d.tEquip, d.tLevel, d.tLimits, d.tTime, d.tFocus],
+  );
+  const phases = useMemo(() => (profile && tPrefs ? phasePlan({ goal: tPrefs.goal, sex: profile.sex, bodyFatPct: profile.bodyFatPct ?? 25, level: tPrefs.level }) : null), [profile, tPrefs]);
+  const preview = useMemo(() => (tPrefs ? generatePlan(tPrefs) : null), [tPrefs]);
+  // the nutrition targets follow the first phase of the long-term plan (e.g. a cut before a bulk)
+  const effective = useMemo(() => (profile && phases && tPrefs && tPrefs.goal !== 'health' ? { ...profile, goal: phases[0].nutritionGoal } : profile), [profile, phases, tPrefs]);
+  const targets = useMemo(() => (effective ? computeTargets(effective) : null), [effective]);
 
   const canNext: Record<number, boolean> = {
     0: true,
@@ -112,8 +154,9 @@ export function Onboarding() {
   };
 
   const finish = () => {
-    if (!profile) return;
-    saveProfile(profile);
+    if (!profile || !effective) return;
+    saveProfile(effective);
+    if (tPrefs) createPlan(tPrefs);
     setState((x) => ({ onboardingDone: true, startedAt: x.startedAt ?? new Date().toISOString(), settings: { hideAvatar: safety?.flags.includes('hide_avatar') ?? false, trainingConsent: false, theme: x.settings.theme, detailed: x.settings.detailed, reminders: true, apiKey: x.settings.apiKey } }));
     try {
       localStorage.removeItem(DRAFT);
@@ -165,7 +208,7 @@ export function Onboarding() {
       {step === 1 && (
         <>
           <h1>מה המטרה שלך?</h1>
-          <p className="lead">אפשר לשנות אחר כך בכל רגע.</p>
+          <p className="lead">מטרה אחת לכל האפליקציה: לפיה נבנים גם התפריט וגם האימונים. אפשר לשנות בכל רגע.</p>
           <ChoiceCards
             value={d.goal}
             onChange={(goal) => up({ goal })}
@@ -275,10 +318,97 @@ export function Onboarding() {
 
       {step === 4 && (
         <>
-          <h1>פעילות והרגלים</h1>
+          <h1>אימונים ושגרה</h1>
+          <p className="lead">מהתשובות כאן נבנה תוכנית אימונים, והתפריט יתאים את עצמו אליה: מה אוכלים לפני אימון, מה אחריו, וכמה פחמימה בימי אימון ומנוחה.</p>
+          <h3 className="sub">כמה פעמים בשבוע תתאמן?</h3>
+          <Segmented
+            label="אימוני כוח בשבוע"
+            value={String(d.tDays ?? 3) as '3'}
+            onChange={(v) => up({ tDays: Number(v) })}
+            options={[{ value: '0' as '3', label: 'עדיין לא' }, ...['2', '3', '4', '5', '6'].map((v) => ({ value: v as '3', label: v }))]}
+          />
+          {(d.tDays ?? 3) > 0 && (
+            <>
+              {d.goal === 'performance' && (
+                <Segmented
+                  label="דגש"
+                  value={d.tFocus ?? 'strength'}
+                  onChange={(tFocus) => up({ tFocus })}
+                  options={[
+                    { value: 'strength', label: 'כוח' },
+                    { value: 'endurance', label: 'סיבולת ואירובי' },
+                  ]}
+                />
+              )}
+              <Segmented label="משך אימון" value={String(d.tMinutes ?? 60) as '60'} onChange={(v) => up({ tMinutes: Number(v) })} options={['30', '45', '60', '75', '90'].map((v) => ({ value: v as '60', label: `${v} דק׳` }))} />
+              <h3 className="sub">איפה?</h3>
+              <Segmented
+                label="ציוד"
+                value={d.tEquip ?? 'gym'}
+                onChange={(tEquip) => up({ tEquip })}
+                options={[
+                  { value: 'gym', label: 'חדר כושר' },
+                  { value: 'home_db', label: 'משקולות בבית' },
+                  { value: 'bands', label: 'גומיות' },
+                  { value: 'bodyweight', label: 'בלי ציוד' },
+                ]}
+              />
+              <Segmented
+                label="ניסיון"
+                value={d.tLevel ?? 'beginner'}
+                onChange={(tLevel) => up({ tLevel })}
+                options={[
+                  { value: 'beginner', label: 'מתחיל' },
+                  { value: 'intermediate', label: 'שנה ומעלה' },
+                  { value: 'advanced', label: '3 שנים ומעלה' },
+                ]}
+              />
+              <h3 className="sub">אירובי</h3>
+              <Segmented
+                label="כמה אירובי"
+                value={d.tCardio ?? 'balanced'}
+                onChange={(tCardio) => up({ tCardio })}
+                options={[
+                  { value: 'little', label: 'מעט' },
+                  { value: 'balanced', label: 'מאוזן' },
+                  { value: 'lots', label: 'הרבה' },
+                ]}
+              />
+              <div className="chips">
+                {(Object.keys(CARDIO) as CardioType[]).map((c) => {
+                  const list = d.tCardioTypes ?? ['walk', 'bike'];
+                  const on = list.includes(c);
+                  return (
+                    <button key={c} className={`chip ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => tog(list, c).length && up({ tCardioTypes: tog(list, c) })}>
+                      {CARDIO[c].name}
+                    </button>
+                  );
+                })}
+              </div>
+              <h3 className="sub">אזור רגיש?</h3>
+              <div className="chips">
+                {([['knee', 'ברכיים'], ['back', 'גב תחתון'], ['shoulder', 'כתפיים']] as [Limit, string][]).map(([v, l]) => {
+                  const on = (d.tLimits ?? []).includes(v);
+                  return (
+                    <button key={v} className={`chip ${on ? 'on' : ''}`} aria-pressed={on} onClick={() => up({ tLimits: tog(d.tLimits, v) })}>
+                      {l}
+                    </button>
+                  );
+                })}
+              </div>
+              <label className="field">
+                <span className="field-label">באיזו שעה אתה בדרך כלל מתאמן?</span>
+                <span className="field-input">
+                  <input type="time" value={d.tTime ?? '18:00'} onChange={(e) => e.target.value && up({ tTime: e.target.value })} />
+                </span>
+              </label>
+              <p className="fineprint">לפי השעה הזאת נבנות הארוחות שלפני ואחרי האימון.</p>
+            </>
+          )}
+          <h3 className="sub">שגרה</h3>
           <label className="field">
-            <span className="field-label">רמת פעילות כללית</span>
-            <select value={d.activity ?? 'moderate'} onChange={(e) => up({ activity: e.target.value as Profile['activity'] })}>
+            <span className="field-label">רמת פעילות כללית (כולל האימונים)</span>
+            <select value={d.activity ?? ((d.tDays ?? 3) >= 5 ? 'very' : (d.tDays ?? 3) >= 3 ? 'moderate' : (d.tDays ?? 3) >= 1 ? 'light' : 'sedentary')} onChange={(e) => up({ activity: e.target.value as Profile['activity'] })}>
               {Object.entries(ACTIVITY_FACTORS).map(([k, v]) => (
                 <option key={k} value={k}>
                   {v.label}
@@ -287,12 +417,10 @@ export function Onboarding() {
             </select>
           </label>
           <div className="grid2">
-            <NumberField label="אימונים בשבוע" value={d.trainingDaysPerWeek ?? 3} onChange={(v) => up({ trainingDaysPerWeek: v })} min={0} max={14} />
             <NumberField label="שעות שינה בלילה" value={d.sleepHours ?? 7} onChange={(v) => up({ sleepHours: v })} min={3} max={12} />
             <NumberField label="ארוחות ביום" value={d.mealsPerDay ?? 4} onChange={(v) => up({ mealsPerDay: v })} min={3} max={5} />
             <NumberField label="זמן הכנה מקסימלי" value={d.maxPrepMinutes ?? 30} onChange={(v) => up({ maxPrepMinutes: v })} unit="דקות" min={5} max={120} />
           </div>
-          <Toggle label="אני עושה אימוני כוח" desc="משפיע על יעד החלבון ועל התחזית" checked={d.strengthTraining ?? true} onChange={(strengthTraining) => up({ strengthTraining })} />
           {(d.sleepHours ?? 7) < 6 && <Banner>שינה קצרה מקשה על שמירת שריר ועל התיאבון. נבחר קצב שמרני יותר.</Banner>}
         </>
       )}
@@ -404,6 +532,7 @@ export function Onboarding() {
       {step === 8 && targets && (
         <>
           <h1>התוכנית שלך</h1>
+          <p className="lead">תפריט ואימונים, בנויים יחד מאותן תשובות.</p>
           {targets.floorApplied && <Banner kind="warn">היעד הועלה לרצפה הבטוחה. לא נוריד אותו מתחתיה.</Banner>}
           <div className="plan-summary">
             <div className="big-num">
@@ -440,6 +569,45 @@ export function Onboarding() {
               <b dir="ltr">{targets.weeklyChangeKg.value > 0 ? '+' : ''}{fmt(targets.weeklyChangeKg.value, 2)} ק"ג</b>
             </div>
           </div>
+          {phases && phases.length > 1 && (
+            <div className="insight">
+              <strong>התוכנית ארוכת הטווח</strong>
+              <ol className="phases">
+                {phases.map((x, i) => (
+                  <li key={i} className={i === 0 ? 'on' : ''}>
+                    <b>{x.title}</b>
+                    <small>{x.weeks} שבועות</small>
+                  </li>
+                ))}
+              </ol>
+              <p>{phases[0].why}</p>
+            </div>
+          )}
+          {preview ? (
+            <div className="plan-train">
+              <h3 className="sub">האימונים</h3>
+              <p className="muted">
+                {preview.split}. {preview.days.length} אימוני כוח בשבוע ({preview.days.map((x) => WEEKDAY[x.weekday]).join(', ')}), ועוד כ-{preview.weeklyCardioMin} דק׳ אירובי.
+              </p>
+              <ul className="plain">
+                {preview.days.map((x) => (
+                  <li key={x.id}>
+                    <b>{x.title}</b> · {x.focus} · כ-{x.estMinutes} דק׳
+                  </li>
+                ))}
+              </ul>
+              <h3 className="sub">איך התפריט והאימונים עובדים ביחד</h3>
+              <ul className="plain good">
+                <li>הארוחה שלפני האימון עשירה יותר בפחמימה ודלה בשומן, כדי שיהיה דלק בלי כבדות.</li>
+                <li>הארוחה שאחרי האימון מגיעה עם כ-{Math.round((effective?.weightKg ?? 75) * 0.35)} גרם חלבון ופחמימה, לבניית שריר ולמילוי המאגרים.</li>
+                <li>בימי אימון יש מעט יותר פחמימה, ובימי מנוחה מעט יותר שומן. סך הקלוריות זהה.</li>
+                <li>{targets.proteinG.value} גרם חלבון ביום, מחולקים על פני הארוחות, לפי עמדת ISSN.</li>
+              </ul>
+              <WhyButton title="על מה זה מבוסס" e={{ why: 'החלוקה סביב האימון מבוססת על עמדת ISSN לגבי תזמון תזונה (2017) ועל עמדת ACSM לתזונה וביצועים (2016). כמות החלבון בכל ארוחה מבוססת על Schoenfeld ו-Aragon (2018). נפח האימון ותדירותו מבוססים על מטא־אנליזות של Schoenfeld ועמיתים.', sources: ['kerksickTiming', 'acsmNutrition', 'schoenfeldProteinDist', 'schoenfeldVolume', 'schoenfeldFreq'] }} label="על מה זה מבוסס?" />
+            </div>
+          ) : (
+            <p className="fineprint">בלי תוכנית אימונים כרגע. אפשר לבנות אחת בכל רגע בלשונית "אימון", והתפריט יתאים את עצמו.</p>
+          )}
           {safety?.flags.includes('refer_dietitian') && <Banner kind="warn">מומלץ לעבור על התוכנית עם דיאטנית קלינית.</Banner>}
           {safety?.flags.includes('needs_doctor_for_training') && <Banner kind="warn">לפני תוכנית אימונים, מומלץ לקבל אישור רופא.</Banner>}
           <div className="insight">

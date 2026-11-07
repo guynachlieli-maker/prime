@@ -103,6 +103,7 @@ export function Progress() {
               {last7.length ? `ממוצע ${fmt(avgKcal)} קק"ל ביום ב-${last7.length} ימים עם רישום.` : 'השבוע לא נרשמו ארוחות.'}
               {weekChange !== null && ` המגמה זזה ${weekChange > 0 ? '+' : ''}${fmt(weekChange, 2)} ק"ג.`}
               {proteinDays ? ` רשמת אוכל ב-${proteinDays} ימים.` : ''}
+              {s.training?.plan ? ` התאמנת ${s.training.sessions.filter((x) => x.date >= todayISO(new Date(Date.now() - 7 * 864e5))).length} פעמים מתוך ${s.training.plan.days.length}.` : ''}
             </p>
           </div>
           <div>

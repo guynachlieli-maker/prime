@@ -6,6 +6,7 @@ import { deleteAllData, exportData, saveProfile, setState, useStore } from '../s
 import { ACTIVITY_FACTORS } from '../engine/targets';
 import { minHealthyWeight } from '../engine/pace';
 import { SupplementPicker } from '../ui/SupplementPicker';
+import { createPlan, currentPhase, toTrainingGoal } from '../training/state';
 import type { Profile as P } from '../engine/types';
 import type { Tab } from '../App';
 
@@ -96,10 +97,15 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         )}
       </Card>
 
-      <Card title="המטרה">
+      <Card title="המטרה (תזונה ואימונים)">
         <ChoiceCards
           value={p.goal}
-          onChange={(goal) => upd({ goal })}
+          onChange={(goal) => {
+            upd({ goal });
+            // one goal for the whole app: the training program follows it
+            const plan = s.training?.plan;
+            if (plan) createPlan({ ...plan.prefs, goal: toTrainingGoal(goal, plan.prefs.goal === 'endurance' ? 'endurance' : 'strength') });
+          }}
           options={[
             { value: 'fat_loss', label: 'ירידה בשומן' },
             { value: 'muscle_gain', label: 'בניית שריר' },
@@ -118,6 +124,14 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
             </span>
           </label>
         </div>
+        {s.training?.plan && (() => {
+          const ph = currentPhase(s.training);
+          return ph ? (
+            <p className="fineprint">
+              שלב נוכחי בתוכנית ארוכת הטווח: <b>{ph.phase.title}</b> (שבוע {ph.weekIn} מתוך {ph.phase.weeks}). {ph.phase.why}
+            </p>
+          ) : null;
+        })()}
         {s.targets?.goalPlan ? (
           <div className={`insight ${s.targets.goalPlan.feasible === false ? 'warn' : ''}`}>
             <p>{s.targets.goalPlan.insight}</p>

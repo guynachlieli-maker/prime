@@ -24,6 +24,8 @@ import type { Nutrients, Profile } from './types';
 
 export interface PlannedMeal {
   slot: Slot;
+  /** Meal around a workout (training days only). */
+  role?: 'pre' | 'post';
   recipeId: string;
   items: RecipeItem[]; // personalised grams
   nutrients: Nutrients;
@@ -56,11 +58,32 @@ export function slotsFor(mealsPerDay: number): Slot[] {
   return ['breakfast', 'snack', 'lunch', 'snack', 'dinner'];
 }
 
-function slotTargets(slots: Slot[], t: MenuTargets): MenuTargets[] {
-  const total = slots.reduce((a, s) => a + SHARE[s], 0);
-  return slots.map((s) => {
-    const k = SHARE[s] / total;
-    return { kcal: t.kcal * k, protein: t.protein * k, fat: t.fat * k, carbs: t.carbs * k };
+/** Meals around a workout: index of the meal before and after training on this day. */
+export interface WorkoutWindow {
+  pre: number | null;
+  post: number | null;
+}
+
+/**
+ * Splits the day's targets between meals. Around a workout (ISSN nutrient timing, Kerksick 2017;
+ * ACSM/AND/DC 2016): the meal before training gets more carbohydrate and less fat (fat slows
+ * digestion), the meal after training gets more protein (~0.3-0.4 g/kg) and carbohydrate to refill
+ * glycogen. Each macro is renormalised so the day's totals do not change.
+ */
+function slotTargets(slots: Slot[], t: MenuTargets, w?: WorkoutWindow): MenuTargets[] {
+  const weight = (i: number, macro: 'protein' | 'carbs' | 'fat') => {
+    let k = SHARE[slots[i]];
+    if (w?.pre === i) k *= macro === 'carbs' ? 1.35 : macro === 'fat' ? 0.55 : 1;
+    if (w?.post === i) k *= macro === 'protein' ? 1.45 : macro === 'carbs' ? 1.3 : macro === 'fat' ? 0.8 : 1;
+    return k;
+  };
+  const totals = { protein: 0, carbs: 0, fat: 0 };
+  slots.forEach((_, i) => (['protein', 'carbs', 'fat'] as const).forEach((m) => (totals[m] += weight(i, m))));
+  return slots.map((_, i) => {
+    const protein = (t.protein * weight(i, 'protein')) / totals.protein;
+    const carbs = (t.carbs * weight(i, 'carbs')) / totals.carbs;
+    const fat = (t.fat * weight(i, 'fat')) / totals.fat;
+    return { kcal: protein * 4 + carbs * 4 + fat * 9, protein, fat, carbs };
   });
 }
 
@@ -200,11 +223,12 @@ function planDayOnce(args: {
   seed?: string;
   fixed?: Partial<Record<number, string>>; // slot index -> recipe forced by the user
   preferences?: Record<string, number>; // learned: -1 (dislikes) .. +1 (loves)
+  workout?: WorkoutWindow;
 }, variety: 0 | 1 | 2): DayPlan {
   const slots = slotsFor(args.profile.mealsPerDay);
   const pool = eligibleRecipes(args.profile);
   const seed = hash(args.date + '|' + (args.seed ?? ''));
-  const perSlot = slotTargets(slots, args.target);
+  const perSlot = slotTargets(slots, args.target, args.workout);
   const used = new Set<string>();
   const meals: PlannedMeal[] = [];
   const prefs = args.preferences ?? {};
@@ -238,7 +262,8 @@ function planDayOnce(args: {
     const liked = scored.filter((x) => (prefs[x.r.id] ?? 0) > -0.5);
     const pick = forced ? scored[0] : good.length ? good[(seed + idx * 7) % Math.min(good.length, size)] : (liked[0] ?? scored[0]);
     used.add(pick.r.id);
-    meals.push({ slot, recipeId: pick.r.id, items: pick.fit.items, nutrients: pick.fit.nutrients });
+    const role = args.workout?.pre === idx ? 'pre' : args.workout?.post === idx ? 'post' : undefined;
+    meals.push({ slot, recipeId: pick.r.id, items: pick.fit.items, nutrients: pick.fit.nutrients, ...(role ? { role } : {}) });
   });
 
   // day-level pass: fine-tune every ingredient of every meal together against the day's targets

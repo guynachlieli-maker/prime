@@ -8,6 +8,8 @@ import { createPlan, currentPhase, saveSession, EMPTY_TRAINING } from '../traini
 import { loadLibrary, searchLibrary, type LibExercise, type Library } from '../training/library';
 import { TRAINING_ARTICLES } from '../training/articles';
 import type { Article } from '../data/articles';
+import { planFor } from '../state/derived';
+import { RECIPES } from '../data/recipes';
 
 export const WEEKDAY = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 type View = 'plan' | 'library' | 'progress' | 'learn';
@@ -231,6 +233,28 @@ function PlanView({ onOpen, onStart, onEdit }: { onOpen: (d: WorkoutDay) => void
             לפרטים
           </Button>
         </div>
+        {(() => {
+          const date = todayISO();
+          const meals = planFor(s, date)?.meals ?? [];
+          const pre = meals.find((m) => m.role === 'pre');
+          const post = meals.find((m) => m.role === 'post');
+          if (!todayDay || (!pre && !post)) return null;
+          const name = (id: string) => RECIPES.find((r) => r.id === id)?.name ?? '';
+          return (
+            <div className="fuel">
+              {pre && (
+                <span>
+                  <b>לפני:</b> {name(pre.recipeId)} · {fmt(pre.nutrients.carbs)} ג׳ פחמימה
+                </span>
+              )}
+              {post && (
+                <span>
+                  <b>אחרי:</b> {name(post.recipeId)} · {fmt(post.nutrients.protein)} ג׳ חלבון
+                </span>
+              )}
+            </div>
+          );
+        })()}
         {deload && <p className="fineprint">שבוע קל: עושים בערך 60% מהסטים באותם משקלים. זה חלק מהתוכנית, לא ויתור.</p>}
       </section>
 

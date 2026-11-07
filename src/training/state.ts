@@ -1,5 +1,6 @@
-import { getState, setState, todayISO, uid } from '../state/store';
-import { generatePlan, phasePlan, type Phase, type SessionLog, type TrainingPlan, type TrainingPrefs } from './plan';
+import { getState, recomputeTargets, saveProfile, setState, todayISO, uid } from '../state/store';
+import type { Goal } from '../engine/types';
+import { generatePlan, phasePlan, type Phase, type SessionLog, type TrainingGoal, type TrainingPlan, type TrainingPrefs } from './plan';
 
 export interface TrainingState {
   plan?: TrainingPlan;
@@ -16,11 +17,19 @@ export function training(): TrainingState {
   return getState().training ?? EMPTY_TRAINING;
 }
 
+/** One goal for the whole app: the nutrition goal and the training goal are two views of it. */
+export function toTrainingGoal(goal: Goal, focus: 'strength' | 'endurance' = 'strength'): TrainingGoal {
+  return goal === 'fat_loss' ? 'cut' : goal === 'muscle_gain' ? 'muscle' : goal === 'bulk' ? 'bulk' : goal === 'recomp' ? 'recomp' : goal === 'performance' ? focus : 'health';
+}
+
 export function createPlan(prefs: TrainingPrefs) {
   const s = getState();
   const p = s.profile;
   const plan = generatePlan(prefs);
   const phases = p ? phasePlan({ goal: prefs.goal, sex: p.sex, bodyFatPct: p.bodyFatPct ?? 25, level: prefs.level }) : undefined;
+  // the nutrition goal follows the current phase of the long-term plan (e.g. a cut before a bulk)
+  const nutritionGoal: Goal | undefined = prefs.goal === 'health' || !phases ? undefined : phases[0].nutritionGoal;
+  if (p && nutritionGoal && nutritionGoal !== p.goal) saveProfile({ ...p, goal: nutritionGoal });
   setState((x) => ({
     training: { ...(x.training ?? EMPTY_TRAINING), plan, phases, phaseStart: todayISO(), swaps: {} },
     modules: { ...x.modules, training: true },
@@ -28,6 +37,7 @@ export function createPlan(prefs: TrainingPrefs) {
     // training days take the place of the profile's training settings
     profile: x.profile ? { ...x.profile, trainingDaysPerWeek: prefs.days, strengthTraining: true } : x.profile,
   }));
+  recomputeTargets();
 }
 
 export function saveSession(log: Omit<SessionLog, 'id'>) {

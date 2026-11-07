@@ -8,11 +8,14 @@ export interface TourStep {
 
 export const MAIN_TOUR: TourStep[] = [
   { selector: '[data-tour="ring"]', title: 'הטבעת', text: 'כמה קלוריות נשארו לך להיום. היא מתמלאת עם כל ארוחה שנרשמת.' },
-  { selector: '[data-tour="macros"]', title: 'שלושה פסים', text: 'חלבון, פחמימה ושומן. ליד כל אחד יש כפתור "למה?" שמסביר מאיפה הגיע המספר.' },
-  { selector: '.tab-camera', title: 'כפתור המצלמה', text: 'מכל מסך: צילום, ברקוד, חיפוש או הקלדה במילים.' },
-  { selector: '[data-tour="habits"]', title: 'מים ושקילה', text: 'לחיצה אחת. שקילה אחת בבוקר מספיקה.' },
-  { selector: '.tab-training', title: 'אימון', text: 'תוכנית אימונים אישית לחדר הכושר ולאירובי, מאגר תרגילים עם הסבר ומפת שרירים.' },
-  { selector: '.tab-progress', title: 'התקדמות', text: 'הגוף שלך לאורך הזמן, מגמת המשקל והדוח השבועי.' },
+  { selector: '[data-tour="macros"]', title: 'חלבון, פחמימה ושומן', text: 'ליד כל אחד יש כפתור "למה?" שמסביר מאיפה הגיע המספר, עם המחקר שמאחוריו.' },
+  { selector: '[data-tour="day"]', title: 'היום שלך', text: 'הארוחות והאימון על ציר זמן אחד. ביום אימון, הארוחה שלפניו והארוחה שאחריו מותאמות לו אוטומטית.' },
+  { selector: '.tab-menu', title: 'תפריט', text: 'תפריט שבועי לפי היעד שלך, שמשתנה בין ימי אימון למנוחה. אפשר להחליף מנה, ולקבל רשימת קניות.' },
+  { selector: '.tab-camera', title: 'רישום אוכל', text: 'מצלמים צלחת, סורקים ברקוד, מחפשים או מקלידים במילים.' },
+  { selector: '.tab-training', title: 'אימון', text: 'תוכנית האימונים שנבנתה מאותן תשובות: האימון של היום, רישום סטים, שעון מנוחה, מאגר תרגילים עם מפת שרירים.' },
+  { selector: '.tab-progress', title: 'התקדמות', text: 'הגוף שלך לאורך הזמן, מגמת המשקל, והדוח השבועי של תזונה ואימונים.' },
+  { selector: '[data-tour="habits"]', title: 'מים ושקילה', text: 'לחיצה אחת. שקילה בבוקר מספיקה כדי שהיעדים יתעדכנו לפי הגוף שלך.' },
+  { selector: '.avatar-btn', title: 'פרופיל', text: 'המטרה, תוספי תזונה, תזכורות לארוחות ולאימונים, ונתונים מהשעון.' },
 ];
 
 export function Tour({ steps, onDone, onFinishAction }: { steps: TourStep[]; onDone: () => void; onFinishAction?: () => void }) {

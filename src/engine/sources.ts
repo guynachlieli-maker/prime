@@ -194,6 +194,20 @@ export const SOURCES: Record<string, Source> = {
     url: 'https://doi.org/10.1016/j.jshs.2023.10.010',
     level: 'strong',
   },
+  kerksickTiming: {
+    id: 'kerksickTiming',
+    title: 'עמדת ISSN: תזמון תזונה סביב האימון',
+    citation: 'Kerksick CM, Arent S, Schoenfeld BJ, et al. International society of sports nutrition position stand: nutrient timing. J Int Soc Sports Nutr. 2017;14:33.',
+    url: 'https://doi.org/10.1186/s12970-017-0189-4',
+    level: 'strong',
+  },
+  schoenfeldProteinDist: {
+    id: 'schoenfeldProteinDist',
+    title: 'כמה חלבון בכל ארוחה לבניית שריר',
+    citation: 'Schoenfeld BJ, Aragon AA. How much protein can the body use in a single meal for muscle-building? Implications for daily protein distribution. J Int Soc Sports Nutr. 2018;15:10.',
+    url: 'https://doi.org/10.1186/s12970-018-0215-1',
+    level: 'strong',
+  },
 };
 
 export function getSources(ids: string[]): Source[] {

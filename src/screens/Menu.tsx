@@ -1,8 +1,10 @@
 import { useMemo, useState } from 'react';
-import { Banner, Button, Card, Sheet, fmt } from '../ui/kit';
+import { Banner, Button, Card, Sheet, WhyButton, fmt } from '../ui/kit';
 import { setState, todayISO, useStore, addLog, nowTime, learn } from '../state/store';
 import { preferences, recordRecipe } from '../engine/learning';
-import { menuTargets, planFor } from '../state/derived';
+import { dayTargets, planFor } from '../state/derived';
+import { dayLink, fmtMin } from '../state/daylink';
+import { CARDIO } from '../training/plan';
 import { RECIPES } from '../data/recipes';
 import { FOOD_BY_ID } from '../data/foods';
 import { SLOT_LABEL, alternativesFor, describeAmount, shoppingList } from '../engine/menu';
@@ -25,7 +27,8 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
   const [swap, setSwap] = useState<number | null>(null);
   const [shop, setShop] = useState(false);
   const plan = planFor(s, date);
-  const target = menuTargets(s);
+  const target = dayTargets(s, date);
+  const link = dayLink(s, date);
   if (!plan || !target || !s.profile) return null;
   const profile = s.profile;
   const alts = swap !== null ? alternativesFor(plan, swap, { profile, target, preferences: preferences(s.learning) }) : [];
@@ -57,6 +60,17 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
         ))}
       </div>
 
+      {link.kind !== 'rest' && (
+        <div className="train-day">
+          <span className="eyebrow">{link.kind === 'lift' ? 'יום אימון' : 'יום אירובי'}</span>
+          <p>
+            <b>{link.workout?.title ?? (link.cardio ? CARDIO[link.cardio.type].name : '')}</b> בשעה {fmtMin(link.startMin!)}. התפריט מותאם: יותר פחמימה לפני האימון, חלבון ופחמימה אחריו
+            {link.kind === 'lift' ? ', ופחמימה מעט גבוהה יותר היום על חשבון שומן.' : '.'}{' '}
+            <WhyButton title="למה התפריט משתנה בימי אימון" e={{ why: 'הקלוריות היומיות נשארות זהות, כי מאזן האנרגיה השבועי הוא שקובע את השינוי במשקל. הפחמימה מותאמת לעומס האימון (עמדת ACSM 2016). ארוחה 1-4 שעות לפני אימון עם פחמימה ומעט שומן נותנת דלק בלי כבדות, וארוחה אחרי האימון עם כ-0.3-0.4 גרם חלבון לק"ג ופחמימה תומכת בבניית השריר ובמילוי מאגרי הגליקוגן (עמדת ISSN על תזמון תזונה, 2017).', sources: ['kerksickTiming', 'acsmNutrition', 'schoenfeldProteinDist'] }} />
+          </p>
+        </div>
+      )}
+
       <Card className="day-total">
         <div className="row between">
           <span>
@@ -77,7 +91,17 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
         const r = RECIPES.find((x) => x.id === m.recipeId)!;
         const isOpen = open === idx;
         return (
-          <Card key={idx} title={SLOT_LABEL[m.slot]} action={<span className="muted">{r.prepMinutes} דק׳ הכנה</span>}>
+          <Card
+            key={idx}
+            className={m.role ? `meal-${m.role}` : ''}
+            title={
+              <>
+                {SLOT_LABEL[m.slot]} <span className="meal-time">{fmtMin(link.mealTimes[idx] ?? 0)}</span>
+                {m.role && <span className={`role-tag ${m.role}`}>{m.role === 'pre' ? 'לפני אימון' : 'אחרי אימון'}</span>}
+              </>
+            }
+            action={<span className="muted">{r.prepMinutes} דק׳ הכנה</span>}
+          >
             <button className="meal-head" onClick={() => setOpen(isOpen ? null : idx)} aria-expanded={isOpen}>
               <strong>{r.name}</strong>
               <span className="muted">

@@ -8,6 +8,7 @@ import { SAFETY_CONFIG, evaluateSafety } from '../engine/safety';
 import { useStore, todayISO, type State } from './store';
 import type { Nutrients } from '../engine/types';
 import { preferences } from '../engine/learning';
+import { dayLink, periodize } from './daylink';
 
 export function menuTargets(s: State): MenuTargets | null {
   if (!s.targets) return null;
@@ -22,13 +23,23 @@ export function menuTargets(s: State): MenuTargets | null {
   };
 }
 
+/** The day's menu targets: supplements removed, carbohydrate matched to the training load. */
+export function dayTargets(s: State, date: string): MenuTargets | null {
+  const base = menuTargets(s);
+  if (!s.profile || !base) return null;
+  return periodize(base, dayLink(s, date), s.profile.weightKg);
+}
+
 const cache = new Map<string, DayPlan>();
 
 export function planFor(s: State, date: string): DayPlan | null {
-  const t = menuTargets(s);
-  if (!s.profile || !t) return null;
+  const base = menuTargets(s);
+  if (!s.profile || !base) return null;
+  const link = dayLink(s, date);
+  const t = periodize(base, link, s.profile.weightKg);
+  const workout = link.window;
   const prefs = preferences(s.learning);
-  const key = JSON.stringify([date, t, s.profile.diet, s.profile.allergies, s.profile.kosher, s.profile.mealsPerDay, s.profile.maxPrepMinutes, s.profile.dislikes, s.planFixed[date] ?? {}, prefs]);
+  const key = JSON.stringify([date, t, workout, s.profile.diet, s.profile.allergies, s.profile.kosher, s.profile.mealsPerDay, s.profile.maxPrepMinutes, s.profile.dislikes, s.planFixed[date] ?? {}, prefs]);
   const hit = cache.get(key);
   if (hit) return hit;
   const seed = s.startedAt ?? s.profile.name ?? '';
@@ -40,7 +51,7 @@ export function planFor(s: State, date: string): DayPlan | null {
     const prev = planDayNoCache(s, todayISO(y), t, seed);
     avoid.push(...prev.meals.map((m) => m.recipeId));
   }
-  const plan = planDay({ date, profile: s.profile, target: t, avoid, fixed: s.planFixed[date], preferences: prefs, seed });
+  const plan = planDay({ date, profile: s.profile, target: t, avoid, fixed: s.planFixed[date], preferences: prefs, seed, workout });
   cache.set(key, plan);
   return plan;
 }

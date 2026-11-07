@@ -134,3 +134,9 @@ tests/e2e/    בדיקות דפדפן
   - Session logging with rest timer, set check, swaps, exercise info; training progress (weekly sets per muscle, PRs, cardio minutes); 8 training articles with strong sources.
 - **Evidence**: only strong-evidence sources are shown/linked; moderate ones were removed from the UI.
 - **Journey**: always at least two distinct steps before the goal.
+
+## Update 7 — one app: nutrition and training linked
+
+- **One questionnaire**: onboarding step 5 ("אימונים ושגרה") asks the training questions; on finish both the menu targets and the training plan are built (`createPlan`). One goal for the whole app (`toTrainingGoal`); the nutrition goal follows the current long-term phase (e.g. a cut before a bulk). Changing the goal in Profile rebuilds the program; changing it in the training setup updates nutrition.
+- **Workout-aware menu** (`src/state/daylink.ts`, `slotTargets` in menu.ts): meals before (1-4 h) and after (≤3 h) training are found from meal times and training time; pre-workout meal gets more carbohydrate and less fat, post-workout more protein and carbohydrate (ISSN nutrient timing, Kerksick 2017; Schoenfeld & Aragon 2018). Day totals unchanged. Carbohydrate follows load: +10% on lifting days, +5% cardio days, −8% rest days, fat balances (floor 0.6 g/kg), calories equal (ACSM/AND/DC 2016).
+- **UI**: Today "היום שלך" timeline (meals + workout in time order), menu training-day banner and pre/post tags with times, training hero shows today's pre/post meals, weekly report includes workouts, new article "מה לאכול לפני ואחרי אימון", tour rewritten (9 steps across both halves).

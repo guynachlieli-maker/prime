@@ -3,6 +3,20 @@ import type { Article } from '../data/articles';
 /** Training articles. Every claim is backed by a strong source (meta-analysis or position stand). */
 export const TRAINING_ARTICLES: Article[] = [
   {
+    id: 't_fuel',
+    title: 'מה לאכול לפני ואחרי אימון',
+    minutes: 3,
+    level: 'strong',
+    body: [
+      'לפי עמדת ISSN על תזמון תזונה, ארוחה 1-4 שעות לפני אימון עם פחמימה וחלבון משפרת את הביצועים. כדאי שתהיה דלה יחסית בשומן ובסיבים, כי הם מאטים את העיכול.',
+      'אחרי אימון כוח, כ-0.3-0.4 גרם חלבון לק"ג משקל גוף בארוחה (בערך 20-40 גרם) מקסמים את בניית השריר. Schoenfeld ו-Aragon ממליצים לחלק את החלבון היומי ל-3-5 ארוחות כאלה.',
+      'הכמות היומית של חלבון וקלוריות חשובה יותר מהשעה המדויקת. "החלון" שאחרי האימון רחב יותר ממה שנהוג לחשוב, בעיקר אם אכלת לפני.',
+      'ACSM ממליצה להתאים את הפחמימה לעומס: בימי אימון יותר, בימי מנוחה פחות. לכן התפריט באפליקציה מעביר מעט פחמימה לימי האימון ולארוחות שסביבם, בלי לשנות את סך הקלוריות.',
+    ],
+    sources: ['kerksickTiming', 'schoenfeldProteinDist', 'acsmNutrition'],
+    reviewedBy: null,
+  },
+  {
     id: 't_volume',
     title: 'כמה סטים צריך כדי לבנות שריר?',
     minutes: 3,

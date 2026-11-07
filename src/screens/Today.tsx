@@ -1,5 +1,7 @@
 import { SUPP_BY_ID } from '../data/supplements';
 import { CARDIO } from '../training/plan';
+import { dayLink, fmtMin } from '../state/daylink';
+import { SLOT_LABEL as SLOTS } from '../engine/menu';
 import { useEffect, useState } from 'react';
 import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt } from '../ui/kit';
 import { WEEK_TIPS } from '../ui/Tour';
@@ -157,47 +159,7 @@ export function Today({ go }: { go: (t: Tab) => void }) {
         </Card>
       )}
 
-      {s.training?.plan ? (
-        (() => {
-          const plan = s.training!.plan!;
-          const wd = new Date().getDay();
-          const d = plan.days.find((x) => x.weekday === wd);
-          const c = plan.cardioDays.find((x) => x.weekday === wd);
-          const done = s.training!.sessions.some((x) => x.date === date);
-          return (
-            <Card className="workout-today" title="האימון היום" action={<button className="link" onClick={() => go('training')}>לתוכנית</button>}>
-              {done ? (
-                <p className="muted">✓ האימון של היום נשמר. כל הכבוד.</p>
-              ) : d ? (
-                <div className="next-meal">
-                  <div>
-                    <strong>{d.title}</strong>
-                    <div className="muted">
-                      {d.exercises.length} תרגילים · כ-{d.estMinutes} דק׳
-                    </div>
-                  </div>
-                  <Button onClick={() => go('training')}>להתחיל</Button>
-                </div>
-              ) : c ? (
-                <p className="muted">
-                  יום אירובי: {c.block.minutes} דק׳ {CARDIO[c.block.type].name}.
-                </p>
-              ) : (
-                <p className="muted">יום מנוחה. הליכה קלה ומתיחות יעזרו להתאושש.</p>
-              )}
-            </Card>
-          );
-        })()
-      ) : (
-        <Card className="workout-today" title="מאמן אישי">
-          <div className="next-meal">
-            <p className="muted">תוכנית אימונים לחדר הכושר ולאירובי, לפי המטרה והזמן שלך.</p>
-            <Button kind="secondary" onClick={() => go('training')}>
-              לבנות תוכנית
-            </Button>
-          </div>
-        </Card>
-      )}
+      <DayTimeline date={date} go={go} />
 
       {(s.profile?.supplements?.length ?? 0) > 0 && (
         <Card title="התוספים שלי היום">
@@ -343,5 +305,93 @@ export function Today({ go }: { go: (t: Tab) => void }) {
         </Button>
       </Sheet>
     </div>
+  );
+}
+
+/** The whole day in one line: meals and training in time order, linked to each other. */
+function DayTimeline({ date, go }: { date: string; go: (t: Tab) => void }) {
+  const s = useStore((x) => x);
+  const plan = usePlan(date);
+  if (!plan) return null;
+  const link = dayLink(s, date);
+  const logged = new Set(s.logs.filter((l) => l.date === date).map((l) => l.slot));
+  const trained = s.training?.sessions.some((x) => x.date === date);
+  type Row = { t: number; key: string; node: JSX.Element };
+  const rows: Row[] = plan.meals.map((m, i) => {
+    const r = RECIPES.find((x) => x.id === m.recipeId);
+    const done = logged.has(m.slot);
+    return {
+      t: link.mealTimes[i] ?? 0,
+      key: 'm' + i,
+      node: (
+        <li key={'m' + i} className={done ? 'done' : ''}>
+          <span className="tl-time">{fmtMin(link.mealTimes[i] ?? 0)}</span>
+          <span className="tl-dot" aria-hidden="true" />
+          <span className="tl-main">
+            <b>
+              {SLOTS[m.slot]}
+              {m.role && <span className={`role-tag ${m.role}`}>{m.role === 'pre' ? 'לפני אימון' : 'אחרי אימון'}</span>}
+            </b>
+            <small>
+              {r?.name} · {fmt(m.nutrients.kcal)} קק"ל · {fmt(m.nutrients.protein)} ג׳ חלבון
+            </small>
+          </span>
+          {done && <span className="tl-act muted">✓</span>}
+        </li>
+      ),
+    };
+  });
+  if (link.kind !== 'rest' && link.startMin !== undefined) {
+    const title = link.workout?.title ?? (link.cardio ? CARDIO[link.cardio.type].name : 'אימון');
+    rows.push({
+      t: link.startMin,
+      key: 'w',
+      node: (
+        <li key="w" className={`workout ${trained ? 'done' : ''}`}>
+          <span className="tl-time">{fmtMin(link.startMin)}</span>
+          <span className="tl-dot" aria-hidden="true" />
+          <span className="tl-main">
+            <b>{title}</b>
+            <small>
+              {link.workout ? `${link.workout.exercises.length} תרגילים · כ-${link.workout.estMinutes} דק׳` : `${link.cardio?.minutes ?? 0} דק׳ אירובי`}
+            </small>
+          </span>
+          {trained ? (
+            <span className="tl-act muted">✓</span>
+          ) : (
+            <button className="link tl-act" onClick={() => go('training')}>
+              להתחיל
+            </button>
+          )}
+        </li>
+      ),
+    });
+  }
+  rows.sort((a, b) => a.t - b.t);
+  return (
+    <Card
+      title={link.kind === 'lift' ? 'היום שלך · יום אימון' : link.kind === 'cardio' ? 'היום שלך · יום אירובי' : 'היום שלך · יום מנוחה'}
+      action={
+        <button className="link" onClick={() => go(s.training?.plan ? 'training' : 'menu')}>
+          {s.training?.plan ? 'לאימון' : 'לתפריט'}
+        </button>
+      }
+    >
+      <div data-tour="day">
+        <ol className="timeline">{rows.map((r) => r.node)}</ol>
+        {!s.training?.plan ? (
+          <div className="row between" style={{ marginTop: 8 }}>
+            <span className="muted">אין עדיין תוכנית אימונים. כשתהיה, התפריט יתאים את עצמו אליה.</span>
+            <Button kind="secondary" onClick={() => go('training')}>
+              לבנות
+            </Button>
+          </div>
+        ) : link.kind !== 'rest' ? (
+          <p className="fineprint">הארוחות לפני ואחרי האימון מותאמות אוטומטית: פחמימה לפני, חלבון ופחמימה אחרי.</p>
+        ) : (
+          <p className="fineprint">ביום מנוחה הפחמימה מעט נמוכה יותר והשומן מעט גבוה יותר. הקלוריות זהות.</p>
+        )}
+      </div>
+    </Card>
   );
 }
