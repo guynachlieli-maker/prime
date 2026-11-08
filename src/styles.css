@@ -774,3 +774,4 @@ h2.section { font-family: 'Frank Ruhl Libre', serif; font-weight: 700; font-size
 .journey-times { flex-wrap: nowrap; gap: 6px; }
 .journey-times .chip { flex: 1 1 0; min-width: 0; padding-inline: 6px; white-space: nowrap; font-size: 14px; justify-content: center; text-align: center; }
 .journey-times .play { width: 40px; height: 40px; }
+.frames.loading { background: linear-gradient(90deg, var(--surface2), var(--surface), var(--surface2)); background-size: 200% 100%; animation: shimmer 1.2s linear infinite; } @keyframes shimmer { to { background-position: -200% 0; } }

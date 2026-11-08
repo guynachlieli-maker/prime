@@ -293,4 +293,3 @@ export const MUSCLE_HE: Record<Muscle, string> = {
   calves: 'שוקיים', adductors: 'מקרבי ירך', abductors: 'מרחיקי ירך', neck: 'צוואר',
 };
 
-export const IMG_BASE = 'https://raw.githubusercontent.com/yuhonas/free-exercise-db/main/exercises/';

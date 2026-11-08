@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Banner, Button, Card, ChoiceCards, Segmented, Sheet, WhyContent, fmt } from '../ui/kit';
 import { saveProfile, todayISO, useStore } from '../state/store';
-import { CORE_BY_ID, CORE_BY_REF, IMG_BASE, MUSCLE_HE, type Limit } from '../training/exercises';
+import { CORE_BY_ID, CORE_BY_REF, MUSCLE_HE, type Limit } from '../training/exercises';
+import { useExerciseImages } from '../training/images';
 import { MuscleMap } from '../training/MuscleMap';
 import { CARDIO, GOAL_LABEL, e1rm, kcalForCardio, planWeek, suggestNext, weeklyVolume, type CardioType, type ExerciseLog, type PlannedExercise, type TrainingPrefs, type WorkoutDay } from '../training/plan';
 import { createPlan, currentPhase, saveSession, EMPTY_TRAINING } from '../training/state';
@@ -588,24 +589,27 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
 /* ---------------- exercise detail ---------------- */
 
 function Thumb({ refId, alt }: { refId: string; alt: string }) {
-  const [bad, setBad] = useState(false);
-  if (bad) return <span className="thumb ph" aria-hidden="true">◆</span>;
-  return <img className="thumb" src={`${IMG_BASE}${refId}/0.jpg`} alt={alt} loading="lazy" onError={() => setBad(true)} />;
+  const urls = useExerciseImages([`${refId}/0.jpg`]);
+  const src = urls?.[0];
+  if (!src) return <span className="thumb ph" aria-hidden="true">{urls ? '◆' : ''}</span>;
+  return <img className="thumb" src={src} alt={alt} />;
 }
 
 function Frames({ images, alt }: { images: string[]; alt: string }) {
   const [i, setI] = useState(0);
-  const [bad, setBad] = useState(false);
+  const urls = useExerciseImages(images);
+  const ok = (urls ?? []).filter(Boolean) as string[];
   useEffect(() => {
-    if (images.length < 2) return;
-    const id = window.setInterval(() => setI((x) => (x + 1) % images.length), 1100);
+    if (ok.length < 2) return;
+    const id = window.setInterval(() => setI((x) => (x + 1) % ok.length), 1100);
     return () => window.clearInterval(id);
-  }, [images.length]);
-  if (bad || !images.length) return null;
+  }, [ok.length]);
+  if (!urls) return <div className="frames loading" aria-hidden="true" />;
+  if (!ok.length) return null;
   return (
     <div className="frames" aria-label={`${alt}: תנוחת התחלה וסיום`} role="img">
-      {images.map((src, k) => (
-        <img key={src} src={IMG_BASE + src} alt="" className={k === i ? 'on' : ''} onError={() => setBad(true)} loading="lazy" />
+      {ok.map((src, k) => (
+        <img key={k} src={src} alt="" className={k === i ? 'on' : ''} />
       ))}
       <span className="frames-tag">{i === 0 ? 'התחלה' : 'סיום'}</span>
     </div>

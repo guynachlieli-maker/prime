@@ -1,0 +1,35 @@
+// Exercise photos must show even when external images are blocked (as in embedded viewers).
+const { chromium } = require('playwright');
+const SHOTS = process.argv[2];
+(async () => {
+  const b = await chromium.launch();
+  const p = await b.newPage({ viewport: { width: 400, height: 860 } });
+  const errors = [];
+  let external = 0;
+  await p.route(/raw\.githubusercontent\.com/, (r) => { external++; r.abort(); });
+  await p.goto('http://localhost:4173');
+  await p.evaluate(() => localStorage.setItem('prime.v1', JSON.stringify({ version: 1, onboardingDone: true, tourDone: true, profile: { name: 'בדיקה', sex: 'male', age: 30, heightCm: 178, weightKg: 80, bodyFatPct: 22, bodyFatSource: 'estimate', activity: 'moderate', trainingDaysPerWeek: 4, strengthTraining: true, sleepHours: 7, goal: 'muscle_gain', pace: 'balanced', diet: 'omnivore', kosher: false, allergies: [], dislikes: [], mealsPerDay: 4, maxPrepMinutes: 30, screening: {} }, settings: { theme: 'dark', hideAvatar: false, trainingConsent: false, detailed: false, reminders: false } })));
+  await p.reload();
+  await p.locator('.tab-training').click();
+  await p.getByRole('button', { name: 'בניית התוכנית' }).click();
+  await p.getByRole('button', { name: 'להתחיל אימון', exact: true }).first().click();
+  await p.waitForTimeout(2500);
+  const thumbs = await p.locator('img.thumb').evaluateAll((els) => els.filter((e) => e.src.startsWith('data:image') && e.naturalWidth > 0).length);
+  await p.screenshot({ path: `${SHOTS}/img-session.png` });
+  await p.locator('.ex-actions .icon-btn').first().click();
+  await p.waitForTimeout(2500);
+  const frames = await p.locator('.frames img').evaluateAll((els) => els.filter((e) => e.src.startsWith('data:image') && e.naturalWidth > 0).length);
+  await p.screenshot({ path: `${SHOTS}/img-detail.png` });
+  await p.keyboard.press('Escape');
+  await p.getByRole('button', { name: 'יציאה' }).click();
+  await p.getByRole('radio', { name: 'תרגילים' }).click();
+  await p.waitForTimeout(3500);
+  const lib = await p.locator('.lib-list img.thumb').evaluateAll((els) => els.filter((e) => e.src.startsWith('data:image') && e.naturalWidth > 0).length);
+  await p.screenshot({ path: `${SHOTS}/img-library.png` });
+  console.log('session thumbs', thumbs, '| detail frames', frames, '| library thumbs', lib, '| external requests (blocked)', external);
+  if (thumbs < 3) errors.push('session thumbnails missing');
+  if (frames < 2) errors.push('exercise photos missing');
+  if (lib < 10) errors.push('library thumbnails missing');
+  console.log('ERRORS', JSON.stringify(errors));
+  await b.close();
+})();
