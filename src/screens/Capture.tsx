@@ -33,6 +33,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   const [basket, setBasket] = useState<BasketItem[]>([]);
   const [method, setMethod] = useState<LogMethod>('search');
   const [photo, setPhoto] = useState<string | undefined>();
+  const [preview, setPreview] = useState<string | undefined>();
   const [estimateKcal, setEstimateKcal] = useState<number | null>(null);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
@@ -86,6 +87,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       const { prepareImage, recognizeFood, describeApiError, availableProvider } = await import('../engine/vision');
       const img = await prepareImage(file);
       setPhoto(img.thumb);
+      setPreview(img.preview);
       const provider = await availableProvider(s.settings.apiKey);
       if (!provider) {
         setErr('זיהוי מתמונה עדיין לא פעיל. אפשר להפעיל אותו בפרופיל (זיהוי תמונות), ובינתיים לבחור את המנות מהרשימה.');
@@ -231,6 +233,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     markHint('first-log');
     setBasket([]);
     setPhoto(undefined);
+    setPreview(undefined);
     setEstimateKcal(null);
     setRec(null);
     setInfo(null);
@@ -305,7 +308,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       {mode === 'photo' && (
         <Card>
           <div className="camera-box">
-            {photo ? <img src={photo} alt="התמונה שצילמת" className="preview" /> : <div className="frame-guide">צלחת שלמה בתוך המסגרת · מלמעלה · באור טוב</div>}
+            {photo ? <img src={preview ?? photo} alt="התמונה שצילמת" className="preview" /> : <div className="frame-guide">צלחת שלמה בתוך המסגרת · מלמעלה · באור טוב</div>}
             <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
             <Button full onClick={() => fileRef.current?.click()} disabled={!!busy}>
               {photo ? 'לצלם שוב' : 'לצלם ארוחה'}

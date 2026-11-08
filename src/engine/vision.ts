@@ -239,7 +239,7 @@ async function toBase64(b: Blob): Promise<string> {
 }
 
 /** Downscale a photo to keep requests small and fast. Returns a JPEG blob and a tiny thumbnail. */
-export async function prepareImage(file: File): Promise<{ blob: Blob; thumb: string }> {
+export async function prepareImage(file: File): Promise<{ blob: Blob; thumb: string; preview: string }> {
   const bmp = await createImageBitmap(file);
   const draw = (max: number) => {
     const s = Math.min(1, max / Math.max(bmp.width, bmp.height));
@@ -251,7 +251,8 @@ export async function prepareImage(file: File): Promise<{ blob: Blob; thumb: str
   };
   const big = draw(1280);
   const blob: Blob = await new Promise((res, rej) => big.toBlob((b) => (b ? res(b) : rej(new Error('encode'))), 'image/jpeg', 0.85));
-  return { blob, thumb: draw(160).toDataURL('image/jpeg', 0.7) };
+  // thumb is stored with the log (small); preview is only shown on screen (sharp)
+  return { blob, thumb: draw(160).toDataURL('image/jpeg', 0.7), preview: draw(720).toDataURL('image/jpeg', 0.85) };
 }
 
 /** Checks a personal access key with a tiny request. */

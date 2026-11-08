@@ -2,7 +2,7 @@
 const { chromium } = require('playwright');
 const path = require('path');
 const OUT = process.argv[2];
-const PLATE = path.join(__dirname, '..', 'tests', 'e2e', 'plate.jpg');
+const PLATE = path.join(__dirname, 'pasta.jpg'); // Unsplash photo KvOvh3ooWjI (Unsplash licence: free commercial use)
 (async () => {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, deviceScaleFactor: 3, colorScheme: 'dark', locale: 'he-IL' });
@@ -14,7 +14,7 @@ const PLATE = path.join(__dirname, '..', 'tests', 'e2e', 'plate.jpg');
   };
   await page.route('https://api.anthropic.com/**', (route) =>
     route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: 'm', type: 'message', role: 'assistant', model: 'x', stop_reason: 'end_turn', stop_sequence: null, usage: { input_tokens: 1, output_tokens: 1 },
-      content: [{ type: 'text', text: JSON.stringify({ items: [{ name: 'אורז לבן מבושל', foodId: 'rice_white', alternatives: [], grams: 180, confidence: 'high' }, { name: 'חזה עוף אפוי', foodId: 'chicken_breast', alternatives: [], grams: 150, confidence: 'high' }, { name: 'סלט ירקות', foodId: 'cucumber', alternatives: [], grams: 120, confidence: 'medium' }], clarifyingQuestion: null, clarifyingFoodId: null, notes: 'אורז, חזה עוף וסלט.' }) }] }) }),
+      content: [{ type: 'text', text: JSON.stringify({ items: [{ name: 'פסטה מבושלת', foodId: 'pasta', alternatives: [], grams: 260, confidence: 'high' }, { name: 'רוטב עגבניות', foodId: 'tomato', alternatives: [], grams: 90, confidence: 'medium' }, { name: 'גבינה מגורדת', foodId: 'yellow_cheese', alternatives: [], grams: 15, confidence: 'medium' }], clarifyingQuestion: null, clarifyingFoodId: null, notes: 'פסטה ברוטב עגבניות עם גבינה.' }) }] }) }),
   );
   const click = (t) => page.getByRole('button', { name: t, exact: true }).first().click();
 
