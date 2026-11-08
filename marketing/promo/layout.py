@@ -1,23 +1,25 @@
 import json, subprocess, sys, os
 W = sys.argv[1]
 d = json.load(open(f'{W}/vo/words.json'))
-GAP_BEFORE = {'hook': 0.5, 'why': 0.4, 'brand': 0.8, 'one': 0.55, 'camera': 0.35, 'menu': 0.35, 'train': 0.35, 'body': 0.4, 'trust': 0.4, 'cta': 0.65}
+GAP_BEFORE = {'hook': 0.45, 'why': 0.4, 'brand': 0.75, 'one': 0.55, 'camera': 0.35, 'menu': 0.35, 'train': 0.35, 'body': 0.4, 'trust': 0.4, 'cta': 0.6}
 TAIL = 2.3
 t = 0.0
 lines = []
 os.makedirs(f'{W}/vo/proc', exist_ok=True)
-R = 0.95  # pitch factor (deeper)
+R = 1.0  # natural pitch (the lowered voice sounded heavy)
 for x in d:
     s = max(0, x['words'][0]['t'] - 0.03)
     e = x['words'][-1]['t'] + x['words'][-1]['d'] + 0.14
     t += GAP_BEFORE[x['id']]
     out = f"{W}/vo/proc/{x['id']}.wav"
-    af = (f"atrim={s}:{e},asetpts=PTS-STARTPTS,aresample=48000,asetrate={48000*R:.0f},aresample=48000,atempo={1/R:.5f},"
-          "highpass=f=65,equalizer=f=115:t=q:w=1:g=3.5,equalizer=f=320:t=q:w=1:g=-1.5,equalizer=f=3300:t=q:w=1.2:g=2.2,"
-          "acompressor=threshold=-20dB:ratio=3:attack=8:release=120:makeup=4dB")
+    af = (f"atrim={s}:{e},asetpts=PTS-STARTPTS,aresample=48000,"
+          "highpass=f=80,equalizer=f=140:t=q:w=1:g=1.2,equalizer=f=350:t=q:w=1:g=-2,equalizer=f=3800:t=q:w=1.4:g=3,equalizer=f=9000:t=q:w=1:g=1.5,"
+          "acompressor=threshold=-22dB:ratio=2.5:attack=6:release=90:makeup=3dB")
     subprocess.run(['ffmpeg', '-y', '-v', 'error', '-i', f"{W}/vo/{x['id']}.mp3", '-af', af, '-ac', '1', out], check=True)
     dur = float(subprocess.check_output(['ffprobe', '-v', 'error', '-show_entries', 'format=duration', '-of', 'csv=p=0', out]))
-    words = [{'w': w['w'], 't': round(t + w['t'] - s, 3), 'e': round(t + w['t'] - s + w['d'], 3)} for w in x['words']]
+    toks = x['text'].split()
+    assert len(toks) == len(x['words']), (x['id'], len(toks), len(x['words']))
+    words = [{'w': toks[i], 't': round(t + w['t'] - s, 3), 'e': round(t + w['t'] - s + w['d'], 3)} for i, w in enumerate(x['words'])]
     lines.append({'id': x['id'], 'text': x['text'], 'start': round(t, 3), 'end': round(t + dur, 3), 'file': out, 'words': words})
     t += dur
 total = round(t + TAIL, 2)

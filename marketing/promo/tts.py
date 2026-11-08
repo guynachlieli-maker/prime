@@ -3,7 +3,7 @@ import edge_tts
 W = sys.argv[1]
 lines = json.load(open(os.path.join(W, 'script.json')))
 async def one(l):
-    c = edge_tts.Communicate(l['text'], 'he-IL-AvriNeural', rate='+3%', pitch='-14Hz', volume='+0%', proxy=os.environ.get('HTTPS_PROXY'), boundary='WordBoundary')
+    c = edge_tts.Communicate(l.get('say', l['text']), 'he-IL-AvriNeural', rate='+9%', pitch='+0Hz', volume='+0%', proxy=os.environ.get('HTTPS_PROXY'), boundary='WordBoundary')
     audio = bytearray(); words = []
     async for ch in c.stream():
         if ch['type'] == 'audio': audio += ch['data']
