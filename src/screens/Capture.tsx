@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Banner, Button, Card, Empty, NumInput, Segmented, fmt } from '../ui/kit';
+import { Banner, Button, Card, Empty, Floating, NumInput, Segmented, fmt } from '../ui/kit';
 import { FOOD_BY_ID, loadFullDb, nutrientsFor, searchAll, sumNutrients, type Food } from '../data/foods';
 import { addLog, learn, markHint, nowTime, setState, todayISO, useStore, uid, type LogItem, type LogMethod } from '../state/store';
 import type { Recognition } from '../engine/vision';
@@ -622,12 +622,14 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         </div>
       )}
       {basket.length > 0 && (mode === 'search' || mode === 'text' || mode === 'favorites') && (
+        <Floating>
         <button className="basket-bar" onClick={() => basketRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
           <span>
             {basket.length} {basket.length === 1 ? 'פריט' : 'פריטים'} · {fmt(total.kcal)} קק"ל
           </span>
           <b>לאישור הארוחה ↓</b>
         </button>
+        </Floating>
       )}
     </div>
   );

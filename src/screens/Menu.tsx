@@ -78,7 +78,7 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
       <Card className="day-total">
         <div className="row between">
           <span>
-            סה"כ ביום: <b>{fmt(plan.totals.kcal)}</b> / {fmt(target.kcal)} קק"ל · {fmt(plan.totals.protein)} / {target.protein} ג׳ חלבון
+            סה"כ ביום: <b>{fmt(plan.totals.kcal)}</b> / {fmt(target.kcal)} קק"ל · {fmt(plan.totals.protein)} / {fmt(target.protein)} ג׳ חלבון
           </span>
           <span className={`badge ${plan.withinTolerance ? 'good' : 'warn'}`}>{plan.withinTolerance ? 'ביעד' : `סטייה ${fmt(plan.deviation.kcalPct * 100)}%`}</span>
         </div>

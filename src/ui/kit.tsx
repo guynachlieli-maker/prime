@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
+import { createPortal } from 'react-dom';
 import { getSources, SOURCES } from '../engine/sources';
 import type { Explained } from '../engine/types';
 import { backQuietly, navState, onNav, pushNav } from './nav';
@@ -51,7 +52,8 @@ export function Sheet(props: { open: boolean; onClose: () => void; title: string
     };
   }, [props.open]);
   if (!props.open) return null;
-  return (
+  // rendered on the page itself: inside an animated screen a fixed layer would sit under the bars
+  return createPortal(
     <div className="sheet-backdrop" onClick={props.onClose}>
       <div className="sheet" role="dialog" aria-modal="true" aria-label={props.title} tabIndex={-1} ref={ref} onClick={(e) => e.stopPropagation()}>
         <div className="sheet-handle" />
@@ -63,8 +65,14 @@ export function Sheet(props: { open: boolean; onClose: () => void; title: string
         </div>
         <div className="sheet-body">{props.children}</div>
       </div>
-    </div>
+    </div>,
+    document.body,
   );
+}
+
+/** Puts floating UI (bars, toasts) on the page itself, above the tab bar. */
+export function Floating({ children }: { children: ReactNode }) {
+  return createPortal(children, document.body);
 }
 
 /* ---------- "Why?" explanations with sources ---------- */

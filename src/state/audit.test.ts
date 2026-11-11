@@ -202,3 +202,16 @@ describe('day plan for a saved state', () => {
     expect(planFor(s, '2026-11-10')).toBe(a);
   });
 });
+
+describe('aerobic work is spread over the week', () => {
+  it('reaches the weekly target without one very long day', () => {
+    for (const cardio of ['little', 'balanced', 'lots'] as const)
+      for (const days of [2, 3, 4, 5]) {
+        const plan = generatePlan({ goal: 'cut', days, minutes: 45, cardio, cardioTypes: ['walk'], equipment: 'gym', level: 'beginner', limits: [], time: '18:00' });
+        const total = plan.days.reduce((a, d) => a + (d.cardio?.minutes ?? 0), 0) + plan.cardioDays.reduce((a, c) => a + c.block.minutes, 0);
+        expect(total, `${cardio} ${days}`).toBe(plan.weeklyCardioMin);
+        const mins = plan.cardioDays.map((c) => c.block.minutes);
+        if (mins.length > 1) expect(Math.max(...mins) - Math.min(...mins), `${cardio} ${days} ${mins}`).toBeLessThanOrEqual(25);
+      }
+  });
+});

@@ -244,9 +244,16 @@ export function generatePlan(prefs: TrainingPrefs, now = new Date()): TrainingPl
     });
     remaining -= intervals ? Math.min(m, 25) : m;
   }
-  // whatever is left goes to the longest easy block
-  const easy = cardioDays.filter((c) => c.block.intensity !== 'intervals').sort((a, b) => b.block.minutes - a.block.minutes)[0];
-  if (remaining > 0 && easy) easy.block = { ...easy.block, minutes: easy.block.minutes + remaining };
+  // whatever is left is shared between the steady sessions, so no single day becomes a marathon
+  const steady = cardioDays.filter((c) => c.block.intensity !== 'intervals');
+  if (remaining > 0 && steady.length) {
+    const each = Math.floor(remaining / steady.length / 5) * 5;
+    steady.forEach((c, i) => {
+      const add = each + (i === 0 ? remaining - each * steady.length : 0);
+      const minutes = c.block.minutes + add;
+      c.block = { ...c.block, minutes, intensity: minutes >= 40 ? 'easy' : c.block.intensity };
+    });
+  }
 
   const notes: string[] = [];
   if (prefs.goal === 'cut') notes.push('בחיטוב לא מורידים משקלים: האימון הכבד הוא מה ששומר על השריר בזמן הגירעון.');

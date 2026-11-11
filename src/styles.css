@@ -789,3 +789,7 @@ h2.section { font-family: 'Frank Ruhl Libre', serif; font-weight: 700; font-size
 .skeleton.tall { height: 200px; }
 @keyframes shimmer { to { background-position: -220% 0; } }
 @media (prefers-reduced-motion: reduce) { .skeleton { animation: none; } }
+
+/* a set that is not done yet shows only a faint tick, so done sets stand out */
+.set-check:not(.on):not(.wide) { color: color-mix(in srgb, var(--muted) 30%, transparent); }
+.sheet { max-height: 88dvh; overscroll-behavior: contain; }

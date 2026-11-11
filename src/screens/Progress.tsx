@@ -120,7 +120,11 @@ export function Progress() {
             <h4>מה קרה</h4>
             <p>
               {last7.length ? `ממוצע ${fmt(avgKcal)} קק"ל ביום ב-${last7.length} ימים עם רישום.` : 'השבוע לא נרשמו ארוחות.'}
-              {weekChange !== null && ` המגמה זזה ${weekChange > 0 ? '+' : ''}${fmt(weekChange, 2)} ק"ג.`}
+              {weekChange !== null && (
+                <>
+                  {' '}המגמה זזה <bdi dir="ltr">{weekChange > 0 ? '+' : ''}{fmt(weekChange, 2)}</bdi> ק"ג.
+                </>
+              )}
               {loggedDays ? ` נרשם אוכל ב-${loggedDays} ימים.` : ''}
               {s.training?.plan ? ` ${weekSessions.filter((x) => x.exercises.length).length} אימוני כוח מתוך ${s.training.plan.days.length}${weekSessions.some((x) => !x.exercises.length) ? `, ועוד ${weekSessions.filter((x) => !x.exercises.length).length} אימוני אירובי` : ''}.` : ''}
             </p>
