@@ -2,6 +2,9 @@ import { SAFETY_CONFIG, bmi, evaluateSafety } from './safety';
 import { planPace } from './pace';
 import type { ActivityLevel, Pace, Profile, Sex, Targets } from './types';
 
+/** Goal names, written so they follow the letter ל ("מכוון ל..."). */
+export const GOAL_HE: Record<Profile['goal'], string> = { fat_loss: 'ירידה בשומן', muscle_gain: 'בניית שריר', bulk: 'מסה', recomp: 'ריקומפוזיציה', performance: 'תחזוקה וביצועים', health: 'בריאות כללית' };
+
 export const KCAL_PER_KG_TISSUE = 7700; // common approximation for mixed tissue
 
 export const ACTIVITY_FACTORS: Record<ActivityLevel, { factor: number; label: string }> = {
@@ -51,10 +54,7 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
   let weeklyChange = 0; // kg / week (negative = loss)
   let kcal = tdeeV;
   let goalWhy = '';
-  if (noDeficit) {
-    kcal = tdeeV;
-    goalWhy = 'לפי תשובות שאלון ההתאמה, היעד נשאר ברמת תחזוקה, בלי גירעון קלורי.';
-  } else if (plan && goal === 'fat_loss') {
+  if (plan && goal === 'fat_loss') {
     weeklyChange = plan.weeklyKg;
     kcal = tdeeV + (weeklyChange * KCAL_PER_KG_TISSUE) / 7;
     goalWhy = plan.insight;
@@ -85,6 +85,14 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
   } else {
     kcal = tdeeV;
     goalWhy = 'יעד ברמת תחזוקה, כדי שיהיה מספיק דלק לאימונים.';
+  }
+
+  // screening said "no deficit": eating at maintenance or above stays allowed (e.g. gaining from underweight)
+  const deficitBlocked = noDeficit && kcal < tdeeV;
+  if (deficitBlocked) {
+    kcal = tdeeV;
+    weeklyChange = 0;
+    goalWhy = 'לפי תשובות שאלון ההתאמה, היעד נשאר ברמת תחזוקה, בלי גירעון קלורי.';
   }
 
   const floor = Math.max(bmrV, SAFETY_CONFIG.absoluteKcalFloor[p.sex]);
@@ -133,7 +141,7 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
     tdee: {
       value: tdeeV,
       why: opts.tdeeOverride
-        ? 'עודכן לפי מה שקרה בפועל: השווינו את הקלוריות שרשמת לשינוי במגמת המשקל שלך.'
+        ? 'עודכן לפי מה שקרה בפועל: הקלוריות שנרשמו הושוו לשינוי במגמת המשקל שלך.'
         : `חילוף חומרים במנוחה × ${factor} (מקדם פעילות: ${ACTIVITY_FACTORS[p.activity].label}). אחרי שבועיים של רישום, נעדכן לפי הנתונים האמיתיים שלך.`,
       sources: opts.tdeeOverride ? ['hackersDiet', 'mifflin'] : ['mifflin'],
     },
@@ -165,9 +173,10 @@ export function computeTargets(p: Profile, opts: { tdeeOverride?: number; now?: 
       sources: ['hall2011'],
     },
     floorApplied,
-    goalPlan: plan
+    // the target-weight plan is reported only when it is really what drives the calories
+    goalPlan: plan && !deficitBlocked && p.goal !== 'performance'
       ? {
-          targetKg: p.targetWeightKg!,
+          targetKg: plan.targetKg,
           targetDate: p.targetDate,
           etaISO: floorApplied ? null : plan.etaISO,
           weeks: floorApplied ? null : plan.weeks,

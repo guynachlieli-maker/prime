@@ -2,7 +2,7 @@ import { useRef, useState } from 'react';
 import { summarize, EMPTY_LEARNING } from '../engine/learning';
 import { RECIPES } from '../data/recipes';
 import { Banner, Button, Card, ChoiceCards, NumberField, Segmented, Toggle, fmt } from '../ui/kit';
-import { deleteAllData, exportData, saveProfile, setState, useStore } from '../state/store';
+import { deleteAllData, exportData, importData, isStorageFull, saveProfile, setState, useStore } from '../state/store';
 import { ACTIVITY_FACTORS } from '../engine/targets';
 import { minHealthyWeight } from '../engine/pace';
 import { SupplementPicker } from '../ui/SupplementPicker';
@@ -17,10 +17,20 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
   const inClaude = typeof window !== 'undefined' && window.top !== window.self;
   const [confirmDelete, setConfirmDelete] = useState(false);
   const photoRef = useRef<HTMLInputElement>(null);
+  const importRef = useRef<HTMLInputElement>(null);
+  const [importMsg, setImportMsg] = useState<{ ok: boolean; text: string } | null>(null);
+  const [photoErr, setPhotoErr] = useState(false);
   const learned = summarize(s.learning, (id) => RECIPES.find((r) => r.id === id)?.name ?? id);
   const onPhoto = async (f: File | undefined) => {
     if (!f) return;
-    const bmp = await createImageBitmap(f);
+    let bmp: ImageBitmap;
+    try {
+      bmp = await createImageBitmap(f);
+    } catch {
+      setPhotoErr(true);
+      return;
+    }
+    setPhotoErr(false);
     const side = Math.min(bmp.width, bmp.height);
     const c = document.createElement('canvas');
     c.width = c.height = 256;
@@ -63,7 +73,18 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
             )}
           </div>
         </div>
-        <input ref={photoRef} type="file" accept="image/*" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
+        <input
+          ref={photoRef}
+          type="file"
+          accept="image/*"
+          hidden
+          onChange={(e) => {
+            const f = e.target.files?.[0];
+            e.target.value = '';
+            void onPhoto(f);
+          }}
+        />
+        {photoErr && <Banner kind="warn">לא הצלחנו לפתוח את התמונה. נסו קובץ JPG או PNG.</Banner>}
         <p className="fineprint">התמונה נשמרת רק במכשיר הזה.</p>
       </Card>
 
@@ -198,7 +219,7 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
 
       <Card title="תצוגה">
         <Toggle label="תצוגה מפורטת" desc="סיבים, BMR ועוד מספרים במסך הבית" checked={s.settings.detailed} onChange={(detailed) => setSettings({ detailed })} />
-        <Toggle label="להסתיר את הגוף התלת־ממדי" desc="לעבוד רק עם מספרים" checked={s.settings.hideAvatar} onChange={(hideAvatar) => setSettings({ hideAvatar })} />
+        <Toggle label="להסתיר את תצוגת הגוף" desc="לעבוד רק עם מספרים" checked={s.settings.hideAvatar} onChange={(hideAvatar) => setSettings({ hideAvatar })} />
         <Segmented
           label="ערכת צבעים"
           value={s.settings.theme}
@@ -263,10 +284,29 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
         <ul className="plain">
           <li>כל המידע נשמר רק בדפדפן הזה. אין שרת, ואין שיתוף עם צד שלישי.</li>
           <li>תמונות הגוף נשמרות במכשיר בלבד.</li>
+          <li>כדאי להוריד גיבוי מדי פעם: ניקוי נתוני הדפדפן מוחק גם את המידע כאן.</li>
         </ul>
+        {isStorageFull() && <Banner kind="warn">האחסון של הדפדפן מלא, ושינויים חדשים לא נשמרים. הורידו גיבוי, ואז מחקו תמונות התקדמות ישנות.</Banner>}
+        {importMsg && <Banner kind={importMsg.ok ? 'info' : 'warn'}>{importMsg.text}</Banner>}
+        <input
+          ref={importRef}
+          type="file"
+          accept="application/json,.json"
+          hidden
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = '';
+            if (!f) return;
+            const err = importData(await f.text());
+            setImportMsg(err ? { ok: false, text: err } : { ok: true, text: 'הגיבוי שוחזר.' });
+          }}
+        />
         <div className="row wrap">
           <Button kind="secondary" onClick={download}>
-            הורדת כל המידע
+            הורדת גיבוי
+          </Button>
+          <Button kind="secondary" onClick={() => importRef.current?.click()}>
+            שחזור מגיבוי
           </Button>
           {!confirmDelete ? (
             <Button kind="danger" onClick={() => setConfirmDelete(true)}>
@@ -280,11 +320,6 @@ export function Profile({ go, replayTour }: { go: (t: Tab) => void; replayTour: 
                   <Button
                     kind="danger"
                     onClick={() => {
-                      try {
-                        localStorage.removeItem('prime.photos');
-                      } catch {
-                        /* ignore */
-                      }
                       deleteAllData();
                     }}
                   >

@@ -11,7 +11,7 @@ const SHOTS = process.argv[2];
   await page.goto('http://localhost:4173');
   await page.fill('input', 'גיא');
   await shot('01-welcome');
-  await click('בוא נתחיל');
+  await click('מתחילים');
   await page.getByText('ירידה בשומן').first().click();
   await shot('02-goal');
   await click('המשך');

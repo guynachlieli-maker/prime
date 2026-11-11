@@ -2,12 +2,12 @@ import type { Reminder } from '../engine/reminders';
 import type { TrainingState } from '../training/state';
 import { useSyncExternalStore } from 'react';
 import { computeTargets } from '../engine/targets';
-import type { Nutrients, Profile, Targets } from '../engine/types';
+import { EMPTY_SCREENING, type Nutrients, type Profile, type Targets } from '../engine/types';
 import type { WeighIn } from '../engine/adaptive';
 import type { Slot } from '../data/recipes';
 import { EMPTY_LEARNING, recordMealTime, type LearningState } from '../engine/learning';
 
-export type LogMethod = 'photo' | 'barcode' | 'search' | 'voice' | 'plan' | 'favorite';
+export type LogMethod = 'photo' | 'barcode' | 'search' | 'voice' | 'plan' | 'favorite' | 'supplement';
 
 export interface LogItem {
   foodId: string;
@@ -124,13 +124,44 @@ const initial: State = {
   settings: { hideAvatar: false, trainingConsent: false, theme: 'system', detailed: false, reminders: true },
 };
 
+/** Brings saved data of any earlier build up to the current shape. Exported for tests. */
+export function migrate(parsed: Partial<State>): State {
+  const s: State = {
+    ...initial,
+    ...parsed,
+    version: 1,
+    learning: { ...EMPTY_LEARNING, ...(parsed.learning ?? {}) },
+    settings: { ...initial.settings, ...(parsed.settings ?? {}) },
+    modules: { ...initial.modules, ...(parsed.modules ?? {}) },
+  };
+  // arrays and maps that older builds did not have
+  for (const k of ['logs', 'weighIns', 'measurements', 'favorites', 'safetyEvents', 'devices', 'deviceData', 'seenHints'] as const) if (!Array.isArray(s[k])) (s as unknown as Record<string, unknown>)[k] = [];
+  for (const k of ['water', 'planFixed'] as const) if (!s[k] || typeof s[k] !== 'object') (s as unknown as Record<string, unknown>)[k] = {};
+  // supplements used to be logged as plan meals: mark them, so they never count as an eaten meal
+  const suppIds = new Set(Object.values(s.suppTaken ?? {}).flatMap((d) => Object.values(d)).filter(Boolean));
+  if (suppIds.size && s.logs.some((l) => suppIds.has(l.id) && l.method !== 'supplement')) s.logs = s.logs.map((l) => (suppIds.has(l.id) ? { ...l, method: 'supplement' } : l));
+  if (s.profile) {
+    const p = s.profile;
+    s.profile = {
+      ...p,
+      allergies: p.allergies ?? [],
+      dislikes: p.dislikes ?? [],
+      mealsPerDay: Math.min(5, Math.max(3, Math.round(p.mealsPerDay || 4))),
+      maxPrepMinutes: Math.max(5, p.maxPrepMinutes || 30),
+      screening: { ...EMPTY_SCREENING, ...(p.screening ?? {}) },
+    };
+  }
+  if (s.training && !Array.isArray(s.training.sessions)) s.training = { ...s.training, sessions: [] };
+  return s;
+}
+
 function load(): State {
   try {
     const raw = localStorage.getItem(KEY);
     if (!raw) return initial;
     const parsed = JSON.parse(raw) as State;
-    if (parsed.version !== 1) return initial;
-    return { ...initial, ...parsed, learning: { ...EMPTY_LEARNING, ...(parsed.learning ?? {}) }, settings: { ...initial.settings, ...parsed.settings } };
+    if (!parsed || typeof parsed !== 'object' || parsed.version !== 1) return initial;
+    return migrate(parsed);
   } catch {
     return initial;
   }
@@ -138,12 +169,29 @@ function load(): State {
 
 let state: State = typeof window === 'undefined' ? initial : load();
 const listeners = new Set<() => void>();
+let storageFull = false;
+/** True when the last save did not fit in the browser's storage (shown as a warning in the profile). */
+export const isStorageFull = () => storageFull;
 
 function persist() {
   try {
     localStorage.setItem(KEY, JSON.stringify(state));
+    storageFull = false;
   } catch {
-    /* storage full or blocked: the app keeps working in memory */
+    // Storage is full: meal photos are the only heavy part, so drop the oldest ones and try again.
+    const withPhoto = state.logs.filter((l) => l.photo);
+    for (let drop = Math.ceil(withPhoto.length / 2); drop > 0 && withPhoto.length; drop = withPhoto.length) {
+      const ids = new Set(withPhoto.splice(0, drop).map((l) => l.id));
+      state = { ...state, logs: state.logs.map((l) => (ids.has(l.id) ? { ...l, photo: undefined } : l)) };
+      try {
+        localStorage.setItem(KEY, JSON.stringify(state));
+        storageFull = false;
+        return;
+      } catch {
+        /* keep dropping */
+      }
+    }
+    storageFull = true; // the app keeps working in memory
   }
 }
 
@@ -242,9 +290,27 @@ export function exportData(): string {
   return JSON.stringify({ ...rest, settings: { ...settings, apiKey: settings.apiKey ? '[הוסר מהייצוא]' : undefined } }, null, 2);
 }
 
+/** Restores a backup made with "download my data". Returns an error message, or null on success. */
+export function importData(json: string): string | null {
+  try {
+    const parsed = JSON.parse(json) as Partial<State>;
+    if (!parsed || typeof parsed !== 'object' || parsed.version !== 1 || !parsed.profile || typeof parsed.profile.weightKg !== 'number') return 'הקובץ הזה אינו גיבוי של PRIME.';
+    const next = migrate(parsed);
+    // the access code is never part of a backup: keep the one on this device
+    next.settings = { ...next.settings, apiKey: state.settings.apiKey };
+    next.targets = computeTargets(next.profile!, { tdeeOverride: next.tdeeOverride });
+    state = next;
+    persist();
+    listeners.forEach((l) => l());
+    return null;
+  } catch {
+    return 'לא הצלחנו לקרוא את הקובץ.';
+  }
+}
+
 export function deleteAllData() {
   try {
-    localStorage.removeItem(KEY);
+    for (const k of Object.keys(localStorage)) if (k.startsWith('prime.')) localStorage.removeItem(k);
   } catch {
     /* ignore */
   }

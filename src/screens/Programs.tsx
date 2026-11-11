@@ -4,13 +4,14 @@ import { saveProfile, setState, useStore } from '../state/store';
 import { useSafety } from '../state/derived';
 import { PROGRAMS, type Program } from '../data/programs';
 import { ARTICLES, type Article } from '../data/articles';
+import { createPlan, toTrainingGoal } from '../training/state';
 import type { Profile } from '../engine/types';
 import type { SafetyResult } from '../engine/safety';
 
 function fit(pr: Program, p: Profile, safety: SafetyResult | null): { ok: boolean; reason: string; score: number } {
   if (safety?.flags.includes('no_deficit') && (pr.goal === 'fat_loss' || pr.goal === 'recomp'))
     return { ok: false, reason: 'נעולה: לפי שאלון ההתאמה, גירעון קלורי לא מתאים לך כרגע.', score: -1 };
-  if (pr.requires.strength && !p.strengthTraining) return { ok: false, reason: 'נעולה: התוכנית בנויה סביב אימוני כוח, ולפי הפרופיל אתה לא עושה אותם.', score: 0 };
+  if (pr.requires.strength && !p.strengthTraining) return { ok: false, reason: 'נעולה: התוכנית בנויה סביב אימוני כוח, ולפי הפרופיל אין כרגע אימוני כוח.', score: 0 };
   if (p.trainingDaysPerWeek < pr.requires.minTrainingDays) return { ok: false, reason: `נעולה: צריך לפחות ${pr.requires.minTrainingDays} אימונים בשבוע.`, score: 0 };
   let score = pr.goal === p.goal ? 3 : 1;
   if (pr.id === 'vegan_athlete' && p.diet !== 'omnivore') score += 3;
@@ -33,7 +34,7 @@ export function Programs() {
 
   return (
     <div className="screen">
-      <h1>תכניות</h1>
+      <h1>תוכניות ומאמרים</h1>
       {active ? (
         <Card title="התוכנית הפעילה" className="active-prog">
           <strong>{active.name}</strong>
@@ -43,7 +44,7 @@ export function Programs() {
           </Button>
         </Card>
       ) : (
-        <Banner>בחר תוכנית כדי שהתפריט והיעדים יתאימו לה.</Banner>
+        <Banner>בחירת תוכנית מכוונת את המטרה: התפריט, היעדים והאימונים מתעדכנים לפיה.</Banner>
       )}
 
       <h2 className="section">מומלצות בשבילך</h2>
@@ -51,7 +52,7 @@ export function Programs() {
         <ProgramCard key={pr.id} pr={pr} reason={f.reason} big={i === 0} onOpen={() => setProg(pr)} />
       ))}
 
-      <h2 className="section">כל התכניות</h2>
+      <h2 className="section">כל התוכניות</h2>
       {ranked
         .filter((x) => !recommended.some((r) => r.pr.id === x.pr.id))
         .map(({ pr, f }) => (
@@ -102,7 +103,12 @@ export function Programs() {
                 onClick={() => {
                   setState({ activeProgramId: prog.id });
                   const goal = prog.goal === 'health' ? p.goal : prog.goal;
-                  if (goal !== p.goal) saveProfile({ ...p, goal });
+                  if (goal !== p.goal) {
+                    saveProfile({ ...p, goal });
+                    // one goal for the whole app: the training program follows it
+                    const plan = s.training?.plan;
+                    if (plan) createPlan({ ...plan.prefs, goal: toTrainingGoal(goal, plan.prefs.goal === 'endurance' ? 'endurance' : 'strength') });
+                  }
                   setProg(null);
                 }}
               >

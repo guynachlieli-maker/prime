@@ -99,15 +99,15 @@ export function summarize(l: LearningState, recipeName: (id: string) => string):
   const prefs = Object.entries(preferences(l)).filter(([id]) => (l.recipes[id].eaten + l.recipes[id].swappedIn + l.recipes[id].swappedOut) >= 2);
   const liked = prefs.filter(([, v]) => v >= 0.4).sort((a, b) => b[1] - a[1]).slice(0, 4);
   const disliked = prefs.filter(([, v]) => v <= -0.3).sort((a, b) => a[1] - b[1]).slice(0, 4);
-  if (liked.length) facts.push({ title: 'מנות שאתה אוהב', detail: `${liked.map(([id]) => recipeName(id)).join(', ')}. הן יופיעו בתפריט קצת יותר.` });
-  if (disliked.length) facts.push({ title: 'מנות שאתה מחליף', detail: `${disliked.map(([id]) => recipeName(id)).join(', ')}. הן יופיעו פחות.` });
+  if (liked.length) facts.push({ title: 'מנות אהובות', detail: `${liked.map(([id]) => recipeName(id)).join(', ')}. הן יופיעו בתפריט קצת יותר.` });
+  if (disliked.length) facts.push({ title: 'מנות שמוחלפות הרבה', detail: `${disliked.map(([id]) => recipeName(id)).join(', ')}. הן יופיעו פחות.` });
   if (l.photo.n >= 3) {
     const pct = Math.round((photoFactor(l) - 1) * 100);
     facts.push({
       title: 'הכיול של הצילום',
       detail:
         Math.abs(pct) < 4
-          ? `אחרי ${l.photo.n} תיקונים, ההערכה מהתמונה קרובה למה שאתה מאשר. אין תיקון.`
+          ? `אחרי ${l.photo.n} תיקונים, ההערכה מהתמונה קרובה למה שאושר בפועל. אין תיקון.`
           : `אחרי ${l.photo.n} תיקונים, המנות שלך בדרך כלל ${pct > 0 ? 'גדולות' : 'קטנות'} ב-${Math.abs(pct)}% מההערכה מהתמונה. ההערכות הבאות מתוקנות בהתאם.`,
     });
   }

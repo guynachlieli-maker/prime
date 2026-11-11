@@ -3,11 +3,13 @@ import { CARDIO } from '../training/plan';
 import { dayLink, fmtMin } from '../state/daylink';
 import { SLOT_LABEL as SLOTS } from '../engine/menu';
 import { useEffect, useState } from 'react';
-import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt } from '../ui/kit';
+import { Banner, Button, Card, Empty, InfoDot, MacroBar, Ring, Sheet, WhyButton, fmt, parseNum } from '../ui/kit';
 import { WEEK_TIPS } from '../ui/Tour';
 import { recordRecipe } from '../engine/learning';
-import { addLog, addWeighIn, getState, learn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, setState, todayISO, useStore } from '../state/store';
-import { eatenOn, useAdaptive, useAlerts, usePlan, useSafety } from '../state/derived';
+import { addLog, addWeighIn, getState, learn, logSafetyEvent, markHint, nowTime, recomputeTargets, removeLog, saveProfile, setState, todayISO, useStore } from '../state/store';
+import { phaseMismatch } from '../training/state';
+import { GOAL_HE } from '../engine/targets';
+import { eatenOn, fullDayTargets, mealsDone, useAdaptive, useAlerts, usePlan, useSafety } from '../state/derived';
 import { RECIPES } from '../data/recipes';
 import { SLOT_LABEL } from '../engine/menu';
 import { FOOD_BY_ID, nutrientsFor } from '../data/foods';
@@ -16,6 +18,7 @@ import type { Tab } from '../App';
 const DAY_MISSION: Record<string, string> = {
   fat_loss: 'היום: להגיע ליעד החלבון. הוא שומר על השריר בזמן הירידה.',
   muscle_gain: 'היום: לאכול את כל הארוחות בתפריט. בבניית שריר, עקביות חשובה יותר משלמות.',
+  bulk: 'היום: לא לדלג על אף ארוחה. במסה, העודף הקלורי הוא שבונה.',
   recomp: 'היום: חלבון ביעד ואימון כוח. זה השילוב שעובד.',
   performance: 'היום: לאכול פחמימות לפני האימון ואחריו.',
   health: 'היום: חצי צלחת ירקות בארוחת הצהריים.',
@@ -38,8 +41,10 @@ export function Today({ go }: { go: (t: Tab) => void }) {
   const eaten = eatenOn(s, date);
   const left = t.kcal.value - eaten.kcal;
   const logsToday = s.logs.filter((l) => l.date === date).sort((a, b) => a.time.localeCompare(b.time));
-  const loggedSlots = new Set(logsToday.filter((l) => l.method === 'plan').map((l) => l.items[0]?.foodId));
-  const nextMeal = plan?.meals.find((m) => !loggedSlots.has(m.recipeId));
+  const done = plan ? mealsDone(plan, s.logs) : [];
+  const nextMeal = plan?.meals.find((_, i) => !done[i]);
+  const day = fullDayTargets(s, date) ?? { kcal: t.kcal.value, protein: t.proteinG.value, fat: t.fatG.value, carbs: t.carbsG.value };
+  const mismatch = phaseMismatch(s);
   const nextRecipe = nextMeal && RECIPES.find((r) => r.id === nextMeal.recipeId);
   const water = s.water[date] ?? 0;
   const cups = Math.round(t.waterMl.value / 250);
@@ -92,7 +97,20 @@ export function Today({ go }: { go: (t: Tab) => void }) {
             </div>
           }
         >
-          <strong>עדכון מוצע להוצאה היומית:</strong> לפי הנתונים שלך ({adaptive.reason}), נראה שאתה שורף בערך {fmt(adaptive.estimatedTdee!)} קק"ל ביום. אנחנו מציעים לעדכן ל-{fmt(adaptive.suggestedTdee!)} (שינוי הדרגתי).
+          <strong>עדכון מוצע להוצאה היומית:</strong> לפי הנתונים שלך ({adaptive.reason}), נראה שההוצאה היומית שלך היא בערך {fmt(adaptive.estimatedTdee!)} קק"ל. מוצע לעדכן ל-{fmt(adaptive.suggestedTdee!)} (שינוי הדרגתי).
+        </Banner>
+      )}
+
+      {mismatch && (
+        <Banner
+          kind="info"
+          action={
+            <Button kind="secondary" onClick={() => saveProfile({ ...s.profile!, goal: mismatch.goal, targetWeightKg: undefined, targetDate: undefined })}>
+              לעדכן את היעדים
+            </Button>
+          }
+        >
+          <strong>שלב חדש בתוכנית: {mismatch.phase.title}.</strong> {mismatch.phase.why} היעד התזונתי עדיין מכוון ל{GOAL_HE[s.profile.goal]}.
         </Banner>
       )}
 
@@ -116,8 +134,8 @@ export function Today({ go }: { go: (t: Tab) => void }) {
         </div>
         <div className="macros" data-tour="macros">
           <MacroBar name="חלבון" value={eaten.protein} target={t.proteinG.value} color="var(--protein)" why={<WhyButton title="יעד חלבון" e={t.proteinG} />} />
-          <MacroBar name="פחמימה" value={eaten.carbs} target={t.carbsG.value} color="var(--carbs)" why={<WhyButton title="יעד פחמימה" e={t.carbsG} />} />
-          <MacroBar name="שומן" value={eaten.fat} target={t.fatG.value} color="var(--fat)" why={<WhyButton title="יעד שומן" e={t.fatG} />} />
+          <MacroBar name="פחמימה" value={eaten.carbs} target={day.carbs} color="var(--carbs)" why={<WhyButton title="יעד פחמימה" e={t.carbsG} />} />
+          <MacroBar name="שומן" value={eaten.fat} target={day.fat} color="var(--fat)" why={<WhyButton title="יעד שומן" e={t.fatG} />} />
         </div>
         {s.settings.detailed && (
           <div className="detail-row">
@@ -186,7 +204,7 @@ export function Today({ go }: { go: (t: Tab) => void }) {
                       let logId = '';
                       if (f && sp.serving) {
                         const n = nutrientsFor(f.id, sp.serving.grams);
-                        addLog({ date, time: nowTime(), slot: 'snack', items: [{ foodId: f.id, name: f.name, grams: sp.serving.grams }], method: 'plan', nutrients: sp.id === 'collagen' ? { ...n, protein: 0 } : n });
+                        addLog({ date, time: nowTime(), slot: 'snack', items: [{ foodId: f.id, name: f.name, grams: sp.serving.grams }], method: 'supplement', nutrients: sp.id === 'collagen' ? { ...n, protein: 0 } : n });
                         logId = getState().logs[getState().logs.length - 1].id;
                       }
                       setState((x) => ({ suppTaken: { ...x.suppTaken, [date]: { ...(x.suppTaken?.[date] ?? {}), [sp.id]: logId } } }));
@@ -211,7 +229,7 @@ export function Today({ go }: { go: (t: Tab) => void }) {
 
       <Card title="מה אכלתי היום">
         {logsToday.length === 0 ? (
-          <Empty title="עוד לא נרשם כלום" text="צלם את הארוחה הראשונה, או סמן ארוחה מהתפריט." action={<Button onClick={() => go('camera')}>לצלם ארוחה</Button>} />
+          <Empty title="עוד לא נרשם כלום" text="צלמו את הארוחה הראשונה, או סמנו ארוחה מהתפריט." action={<Button onClick={() => go('camera')}>לצלם ארוחה</Button>} />
         ) : (
           <ul className="timeline">
             {logsToday.map((l) => (
@@ -222,7 +240,7 @@ export function Today({ go }: { go: (t: Tab) => void }) {
                     <strong>{l.items.map((i) => (i.grams ? `${FOOD_BY_ID[i.foodId]?.name ?? i.name} ${Math.round(i.grams)} ג׳` : i.name)).join(' · ')}</strong>
                   </div>
                   <div className="muted">
-                    {l.time} · {SLOT_LABEL[l.slot]} · {fmt(l.nutrients.kcal)} קק"ל · {fmt(l.nutrients.protein)} ג׳ חלבון
+                    {l.time} · {l.method === 'supplement' ? 'תוסף' : SLOT_LABEL[l.slot]} · {fmt(l.nutrients.kcal)} קק"ל · {fmt(l.nutrients.protein)} ג׳ חלבון
                   </div>
                 </div>
                 <button className="icon-btn" aria-label="מחיקה" onClick={() => removeLog(l.id)}>
@@ -289,14 +307,14 @@ export function Today({ go }: { go: (t: Tab) => void }) {
         <label className="field">
           <span className="field-label">משקל (ק"ג)</span>
           <span className="field-input">
-            <input inputMode="decimal" dir="ltr" value={kg} onChange={(e) => setKg(e.target.value)} autoFocus />
+            <input inputMode="decimal" dir="ltr" value={kg} onChange={(e) => setKg(e.target.value.replace(/[^\d.,]/g, ''))} autoFocus aria-label='משקל בק"ג' />
           </span>
         </label>
         <Button
           full
-          disabled={!(Number(kg) >= 30 && Number(kg) <= 300)}
+          disabled={!(parseNum(kg) >= 30 && parseNum(kg) <= 300)}
           onClick={() => {
-            addWeighIn(Math.round(Number(kg) * 10) / 10);
+            addWeighIn(Math.round(parseNum(kg) * 10) / 10);
             setKg('');
             setWeighOpen(false);
           }}
@@ -314,18 +332,18 @@ function DayTimeline({ date, go }: { date: string; go: (t: Tab) => void }) {
   const plan = usePlan(date);
   if (!plan) return null;
   const link = dayLink(s, date);
-  const logged = new Set(s.logs.filter((l) => l.date === date).map((l) => l.slot));
+  const doneMeals = mealsDone(plan, s.logs);
   const trained = s.training?.sessions.some((x) => x.date === date);
   type Row = { t: number; key: string; node: JSX.Element };
   const rows: Row[] = plan.meals.map((m, i) => {
     const r = RECIPES.find((x) => x.id === m.recipeId);
-    const done = logged.has(m.slot);
+    const done = doneMeals[i];
     return {
-      t: link.mealTimes[i] ?? 0,
+      t: link.mealTimes[m.slotIndex ?? i] ?? 0,
       key: 'm' + i,
       node: (
         <li key={'m' + i} className={done ? 'done' : ''}>
-          <span className="tl-time">{fmtMin(link.mealTimes[i] ?? 0)}</span>
+          <span className="tl-time">{fmtMin(link.mealTimes[m.slotIndex ?? i] ?? 0)}</span>
           <span className="tl-dot" aria-hidden="true" />
           <span className="tl-main">
             <b>

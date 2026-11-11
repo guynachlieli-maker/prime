@@ -2,7 +2,8 @@ import { useMemo, useState } from 'react';
 import { Banner, Button, Card, Sheet, WhyButton, fmt } from '../ui/kit';
 import { setState, todayISO, useStore, addLog, nowTime, learn } from '../state/store';
 import { preferences, recordRecipe } from '../engine/learning';
-import { dayTargets, planFor } from '../state/derived';
+import { dayTargets, mealsDone, planFor } from '../state/derived';
+import { supplementNutrients } from '../data/supplements';
 import { dayLink, fmtMin } from '../state/daylink';
 import { CARDIO } from '../training/plan';
 import { RECIPES } from '../data/recipes';
@@ -26,14 +27,17 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
   const [open, setOpen] = useState<number | null>(null);
   const [swap, setSwap] = useState<number | null>(null);
   const [shop, setShop] = useState(false);
+  const [copied, setCopied] = useState(false);
   const plan = planFor(s, date);
   const target = dayTargets(s, date);
   const link = dayLink(s, date);
   if (!plan || !target || !s.profile) return null;
   const profile = s.profile;
   const alts = swap !== null ? alternativesFor(plan, swap, { profile, target, preferences: preferences(s.learning) }) : [];
-  const week = dates.map((d) => planFor(s, d.iso)!).filter(Boolean);
-  const list = shop ? shoppingList(week) : [];
+  // the week is only planned when the shopping list is opened
+  const list = shop ? shoppingList(dates.map((d) => planFor(s, d.iso)!).filter(Boolean)) : [];
+  const done = mealsDone(plan, s.logs);
+  const supp = supplementNutrients(profile.supplements);
   const shopText = list.map((i) => `• ${FOOD_BY_ID[i.foodId].name}: ${i.grams >= 1000 ? fmt(i.grams / 1000, 1) + ' ק"ג' : i.grams + ' ג׳'}`).join('\n');
 
   return (
@@ -78,6 +82,11 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
           </span>
           <span className={`badge ${plan.withinTolerance ? 'good' : 'warn'}`}>{plan.withinTolerance ? 'ביעד' : `סטייה ${fmt(plan.deviation.kcalPct * 100)}%`}</span>
         </div>
+        {supp.kcal > 0 && s.targets && (
+          <p className="fineprint">
+            היעד היומי המלא הוא {fmt(s.targets.kcal.value)} קק"ל. כ-{fmt(supp.kcal)} קק"ל ו-{fmt(supp.protein)} ג׳ חלבון מגיעים מהתוספים שלך, ולכן התפריט בנוי על השאר.
+          </p>
+        )}
         {!plan.withinTolerance && (
           <p className="fineprint">
             {profile.mealsPerDay < 5 && plan.deviation.kcalPct < 0
@@ -96,7 +105,7 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
             className={m.role ? `meal-${m.role}` : ''}
             title={
               <>
-                {SLOT_LABEL[m.slot]} <span className="meal-time">{fmtMin(link.mealTimes[idx] ?? 0)}</span>
+                {SLOT_LABEL[m.slot]} <span className="meal-time">{fmtMin(link.mealTimes[m.slotIndex ?? idx] ?? 0)}</span>
                 {m.role && <span className={`role-tag ${m.role}`}>{m.role === 'pre' ? 'לפני אימון' : 'אחרי אימון'}</span>}
               </>
             }
@@ -112,8 +121,8 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
               <div className="recipe">
                 <h4>מצרכים</h4>
                 <ul>
-                  {m.items.map((it) => (
-                    <li key={it.foodId}>
+                  {m.items.map((it, k) => (
+                    <li key={it.foodId + k}>
                       {FOOD_BY_ID[it.foodId].name}: {describeAmount(it.foodId, it.grams)}
                     </li>
                   ))}
@@ -131,7 +140,8 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
               <Button kind="secondary" onClick={() => setSwap(idx)}>
                 החלפת מנה
               </Button>
-              {date === todayISO() && (
+              {date === todayISO() && done[idx] && <span className="done-tag">✓ נרשם</span>}
+              {date === todayISO() && !done[idx] && (
                 <Button
                   kind="ghost"
                   onClick={() => {
@@ -162,7 +172,7 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
                 onClick={() => {
                   const old = plan.meals[swap!].recipeId;
                   learn((l) => recordRecipe(recordRecipe(l, old, 'swappedOut'), a.recipe.id, 'swappedIn'));
-                  setState((x) => ({ planFixed: { ...x.planFixed, [date]: { ...(x.planFixed[date] ?? {}), [swap!]: a.recipe.id } } }));
+                  setState((x) => ({ planFixed: { ...x.planFixed, [date]: { ...(x.planFixed[date] ?? {}), [plan.meals[swap!].slotIndex ?? swap!]: a.recipe.id } } }));
                   setSwap(null);
                 }}
               >
@@ -187,8 +197,19 @@ export function Menu({ go }: { go?: (t: import('../App').Tab) => void }) {
           <a className="btn primary" href={`https://wa.me/?text=${encodeURIComponent('רשימת קניות לשבוע (PRIME)\n' + shopText)}`} target="_blank" rel="noreferrer">
             שיתוף בוואטסאפ
           </a>
-          <Button kind="secondary" onClick={() => navigator.clipboard?.writeText(shopText)}>
-            העתקה
+          <Button
+            kind="secondary"
+            onClick={() => {
+              navigator.clipboard
+                ?.writeText(shopText)
+                .then(() => {
+                  setCopied(true);
+                  setTimeout(() => setCopied(false), 2000);
+                })
+                .catch(() => undefined);
+            }}
+          >
+            {copied ? '✓ הועתק' : 'העתקה'}
           </Button>
         </div>
       </Sheet>

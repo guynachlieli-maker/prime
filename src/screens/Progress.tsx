@@ -25,6 +25,7 @@ export function Progress() {
   const [m, setM] = useState<Measurement>({ date: todayISO() });
   const [photos, setPhotos] = useState(loadPhotos);
   const photoRef = useRef<HTMLInputElement>(null);
+  const [photoErr, setPhotoErr] = useState(false);
   const p = s.profile;
   const t = s.targets;
 
@@ -52,7 +53,25 @@ export function Progress() {
   const avgKcal = last7.length ? last7.reduce((a, b) => a + b.kcal, 0) / last7.length : 0;
   const trendWeekAgo = trend.filter((x) => x.date <= todayISO(new Date(Date.now() - 7 * 864e5))).pop();
   const weekChange = trendWeekAgo && trend.length ? trend[trend.length - 1].trend - trendWeekAgo.trend : null;
-  const proteinDays = s.logs.length ? new Set(s.logs.filter((l) => l.date >= todayISO(new Date(Date.now() - 7 * 864e5))).map((l) => l.date)).size : 0;
+  const loggedDays = new Set(s.logs.filter((l) => l.method !== 'supplement' && l.date >= todayISO(new Date(Date.now() - 7 * 864e5))).map((l) => l.date)).size;
+  const weekSessions = (s.training?.sessions ?? []).filter((x) => x.date >= todayISO(new Date(Date.now() - 6 * 864e5)));
+  const planned = t.weeklyChangeKg.value;
+  const verdict =
+    weekChange === null
+      ? 'צריך עוד כמה שקילות כדי לדעת.'
+      : Math.abs(weekChange - planned) < 0.25
+        ? 'זה הקצב שתוכנן.'
+        : Math.abs(planned) < 0.05
+          ? weekChange < 0
+            ? 'המשקל יורד, למרות שהיעד הוא לשמור עליו. אם זה נמשך, כדאי לאכול קצת יותר.'
+            : 'המשקל עולה, למרות שהיעד הוא לשמור עליו. לפעמים זה מים; נבדוק שוב בשבוע הבא.'
+          : planned < 0
+            ? weekChange < planned
+              ? 'הירידה מהירה מהמתוכנן. חשוב לאכול מספיק.'
+              : 'הירידה איטית מהמתוכנן. לפעמים זה מים; נבדוק שוב בשבוע הבא.'
+            : weekChange > planned
+              ? 'העלייה מהירה מהמתוכנן. עלייה מהירה מדי היא בעיקר שומן.'
+              : 'העלייה איטית מהמתוכנן. אם זה נמשך שבועיים, כדאי להוסיף ארוחת ביניים.';
   const lastM = s.measurements[s.measurements.length - 1];
   const firstM = s.measurements[0];
 
@@ -61,7 +80,7 @@ export function Progress() {
       <h1>התקדמות</h1>
 
       {hide ? (
-        <Banner kind="info">התצוגה של הגוף כבויה. אפשר להפעיל אותה בהגדרות. המעקב ממשיך עם מספרים בלבד.</Banner>
+        <Banner kind="info">התצוגה של הגוף כבויה. {s.settings.hideAvatar ? 'אפשר להפעיל אותה בפרופיל. ' : ''}המעקב ממשיך עם מספרים בלבד.</Banner>
       ) : (
         <Card className="avatar-card" title={t.goalPlan ? `הדרך ל-${fmt(t.goalPlan.targetKg, 1)} ק"ג` : 'הגוף שלך לאורך הזמן'}>
           <BodyJourney profile={{ ...p, weightKg: currentKg }} targets={t} startISO={startIso + 'T12:00:00'} />
@@ -102,20 +121,14 @@ export function Progress() {
             <p>
               {last7.length ? `ממוצע ${fmt(avgKcal)} קק"ל ביום ב-${last7.length} ימים עם רישום.` : 'השבוע לא נרשמו ארוחות.'}
               {weekChange !== null && ` המגמה זזה ${weekChange > 0 ? '+' : ''}${fmt(weekChange, 2)} ק"ג.`}
-              {proteinDays ? ` רשמת אוכל ב-${proteinDays} ימים.` : ''}
-              {s.training?.plan ? ` התאמנת ${s.training.sessions.filter((x) => x.date >= todayISO(new Date(Date.now() - 7 * 864e5))).length} פעמים מתוך ${s.training.plan.days.length}.` : ''}
+              {loggedDays ? ` נרשם אוכל ב-${loggedDays} ימים.` : ''}
+              {s.training?.plan ? ` ${weekSessions.filter((x) => x.exercises.length).length} אימוני כוח מתוך ${s.training.plan.days.length}${weekSessions.some((x) => !x.exercises.length) ? `, ועוד ${weekSessions.filter((x) => !x.exercises.length).length} אימוני אירובי` : ''}.` : ''}
             </p>
           </div>
           <div>
             <h4>מה זה אומר</h4>
             <p>
-              {weekChange === null
-                ? 'צריך עוד כמה שקילות כדי לדעת.'
-                : Math.abs(weekChange - t.weeklyChangeKg.value) < 0.25
-                  ? 'אתה בקצב שתכננו.'
-                  : weekChange < t.weeklyChangeKg.value
-                    ? 'הירידה מהירה מהמתוכנן. חשוב לאכול מספיק.'
-                    : 'השינוי איטי מהמתוכנן. לפעמים זה מים; נבדוק שוב בשבוע הבא.'}
+              {verdict}
             </p>
           </div>
           <div>
@@ -177,8 +190,16 @@ export function Progress() {
           hidden
           onChange={async (e) => {
             const f = e.target.files?.[0];
+            e.target.value = ''; // the same file can be chosen again
             if (!f) return;
-            const bmp = await createImageBitmap(f);
+            let bmp: ImageBitmap;
+            try {
+              bmp = await createImageBitmap(f);
+            } catch {
+              setPhotoErr(true);
+              return;
+            }
+            setPhotoErr(false);
             const sc = Math.min(1, 360 / Math.max(bmp.width, bmp.height));
             const c = document.createElement('canvas');
             c.width = bmp.width * sc;
@@ -193,6 +214,7 @@ export function Progress() {
             }
           }}
         />
+        {photoErr && <Banner kind="warn">לא הצלחנו לפתוח את התמונה. נסו קובץ JPG או PNG.</Banner>}
         {photos.length === 0 ? (
           <Empty title="אין תמונות" text="תמונה כל שבועיים, באותה תאורה ובאותה תנוחה. התמונות נשמרות רק במכשיר הזה." />
         ) : (

@@ -8,6 +8,8 @@ import type { Profile } from './types';
  * 0.5% of bodyweight per week (beyond that most of the gain is fat).
  */
 export interface PacePlan {
+  /** The target actually used: never below the healthy minimum for the height. */
+  targetKg: number;
   weeklyKg: number; // negative = loss
   pctPerWeek: number; // of current bodyweight
   weeks: number | null; // to target
@@ -34,6 +36,8 @@ export function maxLossPct(p: Pick<Profile, 'bodyFatPct' | 'sex' | 'weightKg' | 
 }
 
 const fmtDate = (d: Date) => d.toLocaleDateString('he-IL', { day: 'numeric', month: 'long', year: 'numeric' });
+/** Calendar date in the user's own time zone (toISOString would give the UTC date). */
+const localISO = (d: Date) => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
 const r1 = (n: number) => Math.round(n * 10) / 10;
 const r2 = (n: number) => Math.round(n * 100) / 100;
 
@@ -75,10 +79,11 @@ export function planPace(p: Pick<Profile, 'weightKg' | 'heightCm' | 'sex' | 'bod
   const eta = new Date(now.getTime() + weeks * 7 * DAY);
   if (requestedFeasible === null) insight += ` צפי הגעה ליעד: ${fmtDate(eta)} (בערך ${Math.ceil(weeks)} שבועות).`;
   return {
+    targetKg: target,
     weeklyKg: losing ? -weeklyAbs : weeklyAbs,
     pctPerWeek: (weeklyAbs / p.weightKg) * 100,
     weeks: Math.ceil(weeks),
-    etaISO: eta.toISOString().slice(0, 10),
+    etaISO: localISO(eta),
     requestedFeasible,
     insight,
   };

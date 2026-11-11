@@ -1,17 +1,55 @@
 import { createContext, useContext, useEffect, useRef, useState, type ReactNode } from 'react';
 import { getSources, SOURCES } from '../engine/sources';
 import type { Explained } from '../engine/types';
+import { backQuietly, navState, onNav, pushNav } from './nav';
 
 /* ---------- Sheet (bottom modal) ---------- */
 export function Sheet(props: { open: boolean; onClose: () => void; title: string; children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
+  // the latest onClose, without re-running the open effect on every render (that would steal focus from inputs)
+  const close = useRef(props.onClose);
+  close.current = props.onClose;
   useEffect(() => {
     if (!props.open) return;
-    const onKey = (e: KeyboardEvent) => e.key === 'Escape' && props.onClose();
+    const prev = document.activeElement as HTMLElement | null;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') close.current();
+      if (e.key !== 'Tab' || !ref.current) return;
+      // keep keyboard focus inside the dialog
+      const f = ref.current.querySelectorAll<HTMLElement>('button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])');
+      if (!f.length) return;
+      const first = f[0];
+      const last = f[f.length - 1];
+      if (e.shiftKey && (document.activeElement === first || document.activeElement === ref.current)) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
+    };
     window.addEventListener('keydown', onKey);
-    ref.current?.focus();
-    return () => window.removeEventListener('keydown', onKey);
-  }, [props.open, props.onClose]);
+    // focus the dialog itself unless a field inside asked for focus (autoFocus)
+    if (!ref.current?.contains(document.activeElement)) ref.current?.focus();
+    const { overflow } = document.body.style;
+    document.body.style.overflow = 'hidden';
+    // the phone's back button closes the sheet
+    const marker = Date.now() + Math.random();
+    pushNav({ sheet: marker });
+    let popped = false;
+    const off = onNav((st) => {
+      if (st.sheet === marker) return; // an inner sheet closed; this one stays
+      popped = true;
+      close.current();
+    });
+    return () => {
+      window.removeEventListener('keydown', onKey);
+      off();
+      document.body.style.overflow = overflow;
+      if (!popped && navState().sheet === marker) backQuietly();
+      prev?.focus?.();
+    };
+  }, [props.open]);
   if (!props.open) return null;
   return (
     <div className="sheet-backdrop" onClick={props.onClose}>
@@ -97,7 +135,7 @@ export function WhyButton({ title, e, label = 'למה?' }: { title: string; e: P
 /* ---------- Glossary info dot ---------- */
 export const GLOSSARY: Record<string, { term: string; text: string; sources: string[] }> = {
   bmr: { term: 'BMR: חילוף חומרים במנוחה', text: 'כמה קלוריות הגוף שורף ביום של מנוחה מלאה, רק כדי לתפקד.', sources: ['mifflin'] },
-  tdee: { term: 'TDEE: הוצאה יומית', text: 'כמה קלוריות אתה שורף ביום כולל תנועה ואימונים. זו הנקודה שבה המשקל נשאר יציב.', sources: ['mifflin'] },
+  tdee: { term: 'TDEE: הוצאה יומית', text: 'כמה קלוריות הגוף שורף ביום, כולל תנועה ואימונים. זו הנקודה שבה המשקל נשאר יציב.', sources: ['mifflin'] },
   macros: { term: 'מאקרו', text: 'שלושת אבות המזון שנותנים אנרגיה: חלבון, פחמימה ושומן.', sources: ['dga'] },
   deficit: { term: 'גירעון קלורי', text: 'לאכול קצת פחות ממה שהגוף שורף, כדי שהגוף ישתמש באנרגיה מהשומן.', sources: ['hall2011'] },
   recomp: { term: 'ריקומפוזיציה', text: 'לרדת בשומן ולעלות בשריר בו־זמנית, כשהמשקל כמעט לא זז.', sources: ['forbes'] },
@@ -217,10 +255,53 @@ export function ChoiceCards<T extends string>(props: { value: T | undefined; onC
   );
 }
 
+/** Parses what a person types as a number: accepts a decimal comma, ignores spaces. */
+export function parseNum(txt: string): number {
+  const t = txt.trim().replace(',', '.');
+  return t === '' ? NaN : Number(t);
+}
+
+/**
+ * A numeric text input that keeps what the user typed ("62." or "1,5") while they type.
+ * The parent gets a number on every change; the text is only replaced when the parent's value
+ * changes to something other than what is typed.
+ */
+export function NumInput(props: { value: number; onChange: (v: number) => void; className?: string; placeholder?: string; 'aria-label'?: string; integer?: boolean; blankZero?: boolean }) {
+  const show = (v: number) => (props.blankZero && !v ? '' : String(v));
+  const [txt, setTxt] = useState(show(props.value));
+  useEffect(() => {
+    const cur = parseNum(txt);
+    if ((Number.isNaN(cur) ? 0 : cur) !== props.value) setTxt(show(props.value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.value]);
+  return (
+    <input
+      className={props.className}
+      inputMode={props.integer ? 'numeric' : 'decimal'}
+      dir="ltr"
+      value={txt}
+      placeholder={props.placeholder}
+      aria-label={props['aria-label']}
+      onFocus={(e) => e.target.select()}
+      onChange={(e) => {
+        const raw = e.target.value.replace(props.integer ? /[^\d]/g : /[^\d.,]/g, '');
+        setTxt(raw);
+        const n = parseNum(raw);
+        props.onChange(Number.isNaN(n) || n < 0 ? 0 : n);
+      }}
+    />
+  );
+}
+
 export function NumberField(props: { label: string; value: number | undefined; onChange: (v: number | undefined) => void; unit?: string; min?: number; max?: number; step?: number; hint?: string }) {
   const [txt, setTxt] = useState(props.value === undefined ? '' : String(props.value));
-  useEffect(() => setTxt(props.value === undefined ? '' : String(props.value)), [props.value]);
-  const invalid = txt !== '' && (Number.isNaN(Number(txt)) || (props.min !== undefined && Number(txt) < props.min) || (props.max !== undefined && Number(txt) > props.max));
+  useEffect(() => {
+    const cur = parseNum(txt);
+    if (props.value === undefined ? txt !== '' && !Number.isNaN(cur) : cur !== props.value) setTxt(props.value === undefined ? '' : String(props.value));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [props.value]);
+  const num = parseNum(txt);
+  const invalid = txt !== '' && (Number.isNaN(num) || (props.min !== undefined && num < props.min) || (props.max !== undefined && num > props.max));
   return (
     <label className={`field ${invalid ? 'invalid' : ''}`}>
       <span className="field-label">{props.label}</span>
@@ -230,8 +311,8 @@ export function NumberField(props: { label: string; value: number | undefined; o
           value={txt}
           onChange={(e) => {
             setTxt(e.target.value);
-            const n = Number(e.target.value);
-            props.onChange(e.target.value === '' || Number.isNaN(n) ? undefined : n);
+            const n = parseNum(e.target.value);
+            props.onChange(Number.isNaN(n) ? undefined : n);
           }}
           aria-invalid={invalid}
           dir="ltr"

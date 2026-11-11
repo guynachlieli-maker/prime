@@ -3,6 +3,7 @@ import { simulateJourney } from '../engine/forecast';
 import { HoloFigure, figureWidths, lerpWidths } from './HoloFigure';
 import { fmt } from './kit';
 import type { Profile, Targets } from '../engine/types';
+import { gx } from './he';
 
 const DAY = 864e5;
 const TODAY_COLOR = '#38bdf8'; // blue
@@ -115,7 +116,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         <figure>
           <HoloFigure id="today" w={todayW} sex={profile.sex} color={TODAY_COLOR} />
           <figcaption>
-            <b style={{ color: TODAY_COLOR }}>אתה היום</b>
+            <b style={{ color: TODAY_COLOR }}>{gx(profile.sex, 'אתה', 'את')} היום</b>
             <span className="cap-kg">{fmt(start.weightKg, 1)} ק"ג</span>
             <small>{fmt(start.bodyFatPct, 0)}% שומן</small>
           </figcaption>
@@ -124,7 +125,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         <figure>
           <HoloFigure id="future" w={shown} sex={profile.sex} color={FUTURE_COLOR} outline={todayW} outlineColor={OUTLINE} />
           <figcaption>
-            <b style={{ color: FUTURE_COLOR }}>אתה {marks[sel]?.label === 'ביעד' ? 'ביעד'   : `בעוד ${marks[sel]?.label}`}</b>
+            <b style={{ color: FUTURE_COLOR }}>{gx(profile.sex, 'אתה', 'את')} {marks[sel]?.label === 'ביעד' ? 'ביעד' : `בעוד ${marks[sel]?.label}`}</b>
             <span className="cap-kg">
               {fmt(pt.weightKg, 1)} ק"ג <em><bdi dir="ltr">{dKg > 0 ? '+' : ''}{fmt(dKg, 1)}</bdi></em>
             </span>
@@ -171,7 +172,7 @@ export function BodyJourney({ profile, targets, startISO }: { profile: Profile; 
         </div>
       </div>
       <p className="fineprint">
-        המספרים הם תחזית לפי מודל מחקרי, בהנחה שתעמוד ביעד הקלורי. הדמות מדגישה את השינוי כדי שיהיה קל לראות אותו, וכל גוף מגיב קצת אחרת.
+        המספרים הם תחזית לפי מודל מחקרי, בהנחה שעומדים ביעד הקלורי. הדמות מדגישה את השינוי כדי שיהיה קל לראות אותו, וכל גוף מגיב קצת אחרת.
         {profile.bodyFatSource === 'estimate' && ' אחוז השומן ההתחלתי הוא הערכה.'}
       </p>
     </div>

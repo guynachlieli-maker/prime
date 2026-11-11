@@ -8,10 +8,10 @@ import { estimateBodyFatFromBmi, forecastBody, navyBodyFat } from '../engine/for
 import { EMPTY_SCREENING, type Allergen, type Profile } from '../engine/types';
 import { saveProfile, setState } from '../state/store';
 import { minHealthyWeight } from '../engine/pace';
-import { CARDIO, generatePlan, phasePlan, type CardioType, type EquipChoice, type Level, type TrainingPrefs } from '../training/plan';
+import { CARDIO, WEEKDAY, generatePlan, phasePlan, type CardioType, type EquipChoice, type Level, type TrainingPrefs } from '../training/plan';
 import { createPlan, toTrainingGoal } from '../training/state';
 import type { Limit } from '../training/exercises';
-import { WEEKDAY } from './Training';
+import { gx } from '../ui/he';
 
 const isoIn = (weeks: number) => new Date(Date.now() + weeks * 7 * 864e5).toISOString().slice(0, 10);
 
@@ -32,7 +32,11 @@ type Draft = Partial<Profile> & {
   tLimits?: Limit[];
   tTime?: string;
   tFocus?: 'strength' | 'endurance';
+  /** what the user typed in the dislikes field, kept as typed */
+  dislikesText?: string;
 };
+
+const clamp = (v: number | undefined, lo: number, hi: number, fallback: number) => (v === undefined || !Number.isFinite(v) ? fallback : Math.min(hi, Math.max(lo, Math.round(v))));
 
 const ALLERGENS: { value: Allergen; label: string }[] = [
   { value: 'gluten', label: 'גלוטן' },
@@ -81,15 +85,15 @@ function toProfile(d: Draft): Profile | null {
     activity: d.activity ?? ((d.tDays ?? 3) >= 5 ? 'very' : (d.tDays ?? 3) >= 3 ? 'moderate' : (d.tDays ?? 3) >= 1 ? 'light' : 'sedentary'),
     trainingDaysPerWeek: d.tDays ?? 3,
     strengthTraining: (d.tDays ?? 3) > 0,
-    sleepHours: d.sleepHours ?? 7,
+    sleepHours: clamp(d.sleepHours, 3, 12, 7),
     goal: d.goal,
     pace: d.pace ?? 'balanced',
     diet: d.diet ?? 'omnivore',
     kosher: d.kosher ?? false,
     allergies: d.allergies ?? [],
-    dislikes: d.dislikes ?? [],
-    mealsPerDay: d.mealsPerDay ?? 4,
-    maxPrepMinutes: d.maxPrepMinutes ?? 30,
+    dislikes: (d.dislikes ?? []).filter((x) => x.length > 1),
+    mealsPerDay: clamp(d.mealsPerDay, 3, 5, 4),
+    maxPrepMinutes: clamp(d.maxPrepMinutes, 5, 120, 30),
     screening: d.screening ?? { ...EMPTY_SCREENING },
     targetWeightKg: d.targetWeightKg,
     targetDate: d.targetDate,
@@ -146,7 +150,7 @@ export function Onboarding() {
     1: !!d.goal,
     2: !!d.sex && !!d.age && d.age >= 10 && d.age <= 100 && !!d.heightCm && d.heightCm >= 120 && d.heightCm <= 230 && !!d.weightKg && d.weightKg >= 30 && d.weightKg <= 300,
     3: true,
-    4: true,
+    4: (d.mealsPerDay === undefined || (d.mealsPerDay >= 3 && d.mealsPerDay <= 5)) && (d.maxPrepMinutes === undefined || (d.maxPrepMinutes >= 5 && d.maxPrepMinutes <= 120)) && (d.sleepHours === undefined || (d.sleepHours >= 3 && d.sleepHours <= 12)),
     5: true,
     6: d.targetWeightKg === undefined || !profile || d.targetWeightKg >= minHealthyWeight(profile.heightCm),
     7: true,
@@ -157,7 +161,7 @@ export function Onboarding() {
     if (!profile || !effective) return;
     saveProfile(effective);
     if (tPrefs) createPlan(tPrefs);
-    setState((x) => ({ onboardingDone: true, startedAt: x.startedAt ?? new Date().toISOString(), settings: { hideAvatar: safety?.flags.includes('hide_avatar') ?? false, trainingConsent: false, theme: x.settings.theme, detailed: x.settings.detailed, reminders: true, apiKey: x.settings.apiKey } }));
+    setState((x) => ({ onboardingDone: true, startedAt: x.startedAt ?? new Date().toISOString(), settings: { ...x.settings, hideAvatar: safety?.flags.includes('hide_avatar') ?? false, reminders: true } }));
     try {
       localStorage.removeItem(DRAFT);
     } catch {
@@ -192,10 +196,11 @@ export function Onboarding() {
         <div className="onb-hero">
           <div className="logo-mark big">P</div>
           <h1>PRIME</h1>
-          <p className="lead">תגיד לי מה המטרה. אני אגיד לך מה לאכול, אראה לך איך תיראה בדרך, ואראה לך את המקור לכל המלצה.</p>
+          <p className="lead">מגדירים מטרה אחת. PRIME בונה ממנה תפריט ותוכנית אימונים שמתאימים זה לזה, מראה איך הגוף ישתנה בדרך, ומציגה את המקור לכל המלצה.</p>
           <ul className="promise">
             <li>כל המלצה מגיעה ממחקר מוסמך, עם קישור למקור.</li>
-            <li>צלם את הצלחת, ונעשה את החישוב.</li>
+            <li>תפריט ישראלי ואימונים שנבנים מאותן תשובות.</li>
+            <li>מצלמים את הצלחת, והחישוב נעשה לבד.</li>
             <li>המידע שלך נשמר אצלך במכשיר.</li>
           </ul>
           <label className="field">
@@ -249,8 +254,8 @@ export function Onboarding() {
             value={d.bfMode ?? 'unknown'}
             onChange={(bfMode) => up({ bfMode })}
             options={[
-              { value: 'unknown', label: 'לא יודע' },
-              { value: 'known', label: 'יודע' },
+              { value: 'unknown', label: gx(d.sex, 'לא יודע', 'לא יודעת') },
+              { value: 'known', label: gx(d.sex, 'יודע', 'יודעת') },
               { value: 'tape', label: 'אמדוד בסרט' },
             ]}
           />
@@ -288,7 +293,7 @@ export function Onboarding() {
           <YesNo question="האם רופא אמר לך שיש לך בעיה בלב או ביתר לחץ דם?" value={sc.parqHeart} onChange={(v) => setSc('parqHeart', v)} />
           <YesNo question="האם יש לך כאבים בחזה במנוחה או במאמץ?" value={sc.parqChestPain} onChange={(v) => setSc('parqChestPain', v)} />
           <YesNo question="האם קרה לך שאיבדת שיווי משקל מסחרחורת או איבדת הכרה בשנה האחרונה?" value={sc.parqDizziness} onChange={(v) => setSc('parqDizziness', v)} />
-          <YesNo question="האם אתה נוטל תרופות ללחץ דם או ללב?" value={sc.parqBloodPressureMeds} onChange={(v) => setSc('parqBloodPressureMeds', v)} />
+          <YesNo question={gx(d.sex, 'האם אתה נוטל תרופות ללחץ דם או ללב?', 'האם את נוטלת תרופות ללחץ דם או ללב?')} value={sc.parqBloodPressureMeds} onChange={(v) => setSc('parqBloodPressureMeds', v)} />
           <YesNo question="האם יש לך בעיה בעצמות או במפרקים שעלולה להחמיר במאמץ?" value={sc.parqJointProblem} onChange={(v) => setSc('parqJointProblem', v)} />
           <h3 className="sub">מצב רפואי</h3>
           {d.sex === 'female' && <YesNo question="האם את בהריון או מניקה?" why="בהריון ובהנקה לא בונים גירעון קלורי." value={sc.pregnantOrBreastfeeding} onChange={(v) => setSc('pregnantOrBreastfeeding', v)} />}
@@ -298,10 +303,10 @@ export function Onboarding() {
           <YesNo question="מחלת בלוטת התריס או מחלת מעי דלקתית?" value={sc.thyroid || sc.ibd} onChange={(v) => up({ screening: { ...sc, thyroid: v, ibd: v } })} />
           <h3 className="sub">הרגלי אכילה</h3>
           <p className="fineprint">חמש שאלות קצרות (שאלון SCOFF). הן עוזרות לנו לוודא שמעקב קלוריות יתאים לך.</p>
-          <YesNo question="האם קורה שאתה גורם לעצמך להקיא כי אתה מרגיש מלא מדי?" value={sc.scoffSick} onChange={(v) => setSc('scoffSick', v)} />
-          <YesNo question="האם אתה חושש שאיבדת שליטה על כמה שאתה אוכל?" value={sc.scoffControl} onChange={(v) => setSc('scoffControl', v)} />
+          <YesNo question={gx(d.sex, 'האם קורה שאתה גורם לעצמך להקיא כי אתה מרגיש מלא מדי?', 'האם קורה שאת גורמת לעצמך להקיא כי את מרגישה מלאה מדי?')} value={sc.scoffSick} onChange={(v) => setSc('scoffSick', v)} />
+          <YesNo question={gx(d.sex, 'האם אתה חושש שאיבדת שליטה על כמה שאתה אוכל?', 'האם את חוששת שאיבדת שליטה על כמה שאת אוכלת?')} value={sc.scoffControl} onChange={(v) => setSc('scoffControl', v)} />
           <YesNo question='האם ירדת לאחרונה יותר מ-6 ק"ג בתוך 3 חודשים?' value={sc.scoffLost6kg} onChange={(v) => setSc('scoffLost6kg', v)} />
-          <YesNo question="האם אתה מרגיש שמן כשאחרים אומרים שאתה רזה מדי?" value={sc.scoffBelieveFat} onChange={(v) => setSc('scoffBelieveFat', v)} />
+          <YesNo question={gx(d.sex, 'האם אתה מרגיש שמן כשאחרים אומרים שאתה רזה מדי?', 'האם את מרגישה שמנה כשאחרים אומרים שאת רזה מדי?')} value={sc.scoffBelieveFat} onChange={(v) => setSc('scoffBelieveFat', v)} />
           <YesNo question="האם אוכל שולט בחיים שלך?" value={sc.scoffFoodDominates} onChange={(v) => setSc('scoffFoodDominates', v)} />
           {safety && safety.reasons.length > 0 && (
             <Banner kind="safety">
@@ -320,7 +325,7 @@ export function Onboarding() {
         <>
           <h1>אימונים ושגרה</h1>
           <p className="lead">מהתשובות כאן נבנה תוכנית אימונים, והתפריט יתאים את עצמו אליה: מה אוכלים לפני אימון, מה אחריו, וכמה פחמימה בימי אימון ומנוחה.</p>
-          <h3 className="sub">כמה פעמים בשבוע תתאמן?</h3>
+          <h3 className="sub">כמה אימוני כוח בשבוע?</h3>
           <Segmented
             label="אימוני כוח בשבוע"
             value={String(d.tDays ?? 3) as '3'}
@@ -397,7 +402,7 @@ export function Onboarding() {
                 })}
               </div>
               <label className="field">
-                <span className="field-label">באיזו שעה אתה בדרך כלל מתאמן?</span>
+                <span className="field-label">באיזו שעה האימון בדרך כלל?</span>
                 <span className="field-input">
                   <input type="time" value={d.tTime ?? '18:00'} onChange={(e) => e.target.value && up({ tTime: e.target.value })} />
                 </span>
@@ -452,11 +457,11 @@ export function Onboarding() {
             })}
           </div>
           <label className="field">
-            <span className="field-label">מאכלים שאתה לא אוהב (מופרדים בפסיק)</span>
-            <input value={(d.dislikes ?? []).join(', ')} onChange={(e) => up({ dislikes: e.target.value.split(',').map((x) => x.trim()) })} placeholder="למשל: טונה, חציל" />
+            <span className="field-label">מאכלים שלא יופיעו בתפריט (מופרדים בפסיק)</span>
+            <input value={d.dislikesText ?? (d.dislikes ?? []).join(', ')} onChange={(e) => up({ dislikesText: e.target.value, dislikes: e.target.value.split(/[,،;\n]/).map((x) => x.trim()).filter(Boolean) })} placeholder="למשל: טונה, חציל, חזה עוף" />
           </label>
           <h3 className="sub">תוספי תזונה</h3>
-          <p className="fineprint">אילו תוספים אתה לוקח, או מתכנן לקחת? אבקת חלבון, חטיפי חלבון וגיינר נספרים בתפריט. לכל השאר נוסיף תזכורת.</p>
+          <p className="fineprint">אילו תוספים כבר בשימוש, או מתוכננים? אבקת חלבון, חטיפי חלבון וגיינר נספרים בתפריט. לכל השאר נוסיף תזכורת.</p>
           <SupplementPicker value={d.supplements ?? []} onChange={(supplements) => up({ supplements })} vegan={d.diet === 'vegan'} />
         </>
       )}
@@ -464,10 +469,10 @@ export function Onboarding() {
       {step === 6 && profile && (
         <>
           <h1>משקל יעד</h1>
-          <p className="lead">לאיזה משקל תרצה להגיע? אם יש תאריך שחשוב לך, נבדוק אם אפשר להגיע אליו בקצב בטוח, ונבנה את הקצב לפיו.</p>
+          <p className="lead">מה משקל היעד? אם יש תאריך שחשוב לך, נבדוק אם אפשר להגיע אליו בקצב בטוח, ונבנה את הקצב לפיו.</p>
           <NumberField label="משקל יעד" value={d.targetWeightKg} onChange={(v) => up({ targetWeightKg: v ?? undefined })} unit='ק"ג' min={35} max={250} step={0.5} hint={`היום: ${fmt(profile.weightKg, 1)} ק"ג`} />
           {d.targetWeightKg !== undefined && d.targetWeightKg < minHealthyWeight(profile.heightCm) && (
-            <Banner kind="safety">המשקל הזה נמוך מהטווח הבריא לגובה שלך (BMI 18.5, כ-{fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג). בחר יעד של {fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג ומעלה.</Banner>
+            <Banner kind="safety">המשקל הזה נמוך מהטווח הבריא לגובה שלך (BMI 18.5, כ-{fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג). אפשר לבחור יעד של {fmt(minHealthyWeight(profile.heightCm), 1)} ק"ג ומעלה.</Banner>
           )}
           <Toggle label="יש לי תאריך יעד" desc="למשל חתונה, תחרות או חופשה" checked={!!d.targetDate} onChange={(on) => up({ targetDate: on ? isoIn(12) : undefined })} />
           {d.targetDate && (
@@ -491,14 +496,14 @@ export function Onboarding() {
                 </span>
                 {targets.goalPlan.etaISO && (
                   <span>
-                    יעד: <b>{new Date(targets.goalPlan.etaISO).toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })}</b>
+                    יעד: <b>{new Date(targets.goalPlan.etaISO + 'T12:00:00').toLocaleDateString('he-IL', { day: 'numeric', month: 'short', year: 'numeric' })}</b>
                   </span>
                 )}
               </div>
               {targets.floorApplied && <p className="fineprint">היעד הקלורי נעצר ברצפה הבטוחה, ולכן ההתקדמות תהיה מעט איטית יותר מהחישוב.</p>}
             </div>
           ) : (
-            <p className="fineprint">אפשר גם בלי משקל יעד: נבחר קצב לפי המטרה שלך, ותוכל להוסיף יעד בפרופיל.</p>
+            <p className="fineprint">אפשר גם בלי משקל יעד: נבחר קצב לפי המטרה שלך, ואפשר להוסיף יעד בפרופיל בכל רגע.</p>
           )}
         </>
       )}
@@ -631,7 +636,7 @@ export function Onboarding() {
         )}
         {step < STEPS.length - 1 ? (
           <Button onClick={() => go(step + 1)} disabled={!canNext[step]}>
-            {step === 0 ? 'בוא נתחיל' : step === 6 && d.targetWeightKg === undefined ? 'דלג' : 'המשך'}
+            {step === 0 ? 'מתחילים' : step === 6 && d.targetWeightKg === undefined ? 'דילוג' : 'המשך'}
           </Button>
         ) : (
           <Button onClick={finish}>יאללה, מתחילים</Button>

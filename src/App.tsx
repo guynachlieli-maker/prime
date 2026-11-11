@@ -1,17 +1,40 @@
-import { useEffect, useState } from 'react';
+import { Suspense, lazy, useEffect, useState } from 'react';
+import { onNav, pushNav, replaceNav } from './ui/nav';
 import { WhyProvider } from './ui/kit';
 import { Tour, MAIN_TOUR } from './ui/Tour';
 import { recomputeTargets, setState, useStore } from './state/store';
-import { Onboarding } from './screens/Onboarding';
 import { Today } from './screens/Today';
 import { Menu } from './screens/Menu';
-import { Capture } from './screens/Capture';
-import { Progress } from './screens/Progress';
-import { Programs } from './screens/Programs';
-import { Training } from './screens/Training';
-import { Profile } from './screens/Profile';
-import { Devices } from './screens/Devices';
-import { Reminders } from './screens/Reminders';
+
+// The first screen loads at once; the rest arrive in the background and are ready before the first tap.
+const load = {
+  onboarding: () => import('./screens/Onboarding'),
+  camera: () => import('./screens/Capture'),
+  progress: () => import('./screens/Progress'),
+  programs: () => import('./screens/Programs'),
+  training: () => import('./screens/Training'),
+  profile: () => import('./screens/Profile'),
+  devices: () => import('./screens/Devices'),
+  reminders: () => import('./screens/Reminders'),
+};
+const Onboarding = lazy(() => load.onboarding().then((m) => ({ default: m.Onboarding })));
+const Capture = lazy(() => load.camera().then((m) => ({ default: m.Capture })));
+const Progress = lazy(() => load.progress().then((m) => ({ default: m.Progress })));
+const Programs = lazy(() => load.programs().then((m) => ({ default: m.Programs })));
+const Training = lazy(() => load.training().then((m) => ({ default: m.Training })));
+const Profile = lazy(() => load.profile().then((m) => ({ default: m.Profile })));
+const Devices = lazy(() => load.devices().then((m) => ({ default: m.Devices })));
+const Reminders = lazy(() => load.reminders().then((m) => ({ default: m.Reminders })));
+
+function Loading() {
+  return (
+    <div className="screen loading-screen" aria-busy="true" aria-label="טוען">
+      <div className="skeleton tall" />
+      <div className="skeleton" />
+      <div className="skeleton" />
+    </div>
+  );
+}
 import { onToast, startReminders } from './state/notify';
 import { restoreMyProducts } from './engine/barcode';
 
@@ -74,15 +97,36 @@ export function App() {
   }, [done, tourDone]);
 
   const go = (t: Tab) => {
+    if (t !== tab) pushNav({ tab: t, sheet: undefined });
     setTab(t);
     window.scrollTo({ top: 0 });
   };
+
+  // back button: previous tab
+  useEffect(() => {
+    replaceNav({ tab: 'today' });
+    return onNav((st) => {
+      setTab((st.tab as Tab) ?? 'today');
+      window.scrollTo({ top: 0 });
+    });
+  }, []);
+
+  // fetch the other screens while the first one is on screen
+  useEffect(() => {
+    const idle = (window as unknown as { requestIdleCallback?: (f: () => void) => number }).requestIdleCallback ?? ((f: () => void) => window.setTimeout(f, 600));
+    idle(() => {
+      const order: (() => Promise<unknown>)[] = done ? [load.camera, load.training, load.progress, load.profile, load.programs, load.reminders, load.devices] : [load.onboarding];
+      void order.reduce<Promise<void>>((p, f) => p.then(() => f()).then(() => undefined, () => undefined), Promise.resolve());
+    });
+  }, [done]);
 
   if (!done)
     return (
       <WhyProvider>
         <main className="app">
-          <Onboarding />
+          <Suspense fallback={<Loading />}>
+            <Onboarding />
+          </Suspense>
         </main>
       </WhyProvider>
     );
@@ -99,6 +143,7 @@ export function App() {
           </button>
         </header>
         <main key={tab} className="view">
+          <Suspense fallback={<Loading />}>
           {tab === 'today' && <Today go={go} />}
           {tab === 'menu' && <Menu go={go} />}
           {tab === 'camera' && <Capture go={go} />}
@@ -116,6 +161,7 @@ export function App() {
           )}
           {tab === 'devices' && <Devices back={() => go('profile')} />}
           {tab === 'reminders' && <Reminders back={() => go('profile')} />}
+          </Suspense>
         </main>
         <nav className="tabbar" aria-label="ניווט ראשי">
           {TABS.map((t) => (

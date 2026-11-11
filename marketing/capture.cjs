@@ -21,7 +21,7 @@ const PLATE = path.join(__dirname, 'pasta.jpg'); // Unsplash photo KvOvh3ooWjI (
   // ---------- onboarding: goal + target ----------
   await page.goto('http://localhost:4173');
   await page.fill('input', 'גיא');
-  await click('בוא נתחיל');
+  await click('מתחילים');
   await shot('01-goal');
   await page.getByText('ירידה בשומן').first().click();
   await click('המשך');

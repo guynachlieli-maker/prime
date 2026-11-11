@@ -24,6 +24,8 @@ import type { Nutrients, Profile } from './types';
 
 export interface PlannedMeal {
   slot: Slot;
+  /** Position of the meal in the day (0 = first). Meal times and workout roles are looked up by it. */
+  slotIndex: number;
   /** Meal around a workout (training days only). */
   role?: 'pre' | 'post';
   recipeId: string;
@@ -202,6 +204,9 @@ function hash(s: string): number {
   return h >>> 0;
 }
 
+/** Meals a dish can be borrowed from when nothing fits a slot. */
+const NEAR: Record<Slot, Slot[]> = { breakfast: ['snack', 'dinner'], lunch: ['dinner'], dinner: ['lunch'], snack: ['breakfast'] };
+
 type PlanArgs = Parameters<typeof planDayOnce>[0];
 
 export function planDay(args: PlanArgs): DayPlan {
@@ -227,6 +232,7 @@ function planDayOnce(args: {
 }, variety: 0 | 1 | 2): DayPlan {
   const slots = slotsFor(args.profile.mealsPerDay);
   const pool = eligibleRecipes(args.profile);
+  const anyPrep = eligibleRecipes({ ...args.profile, maxPrepMinutes: Infinity });
   const seed = hash(args.date + '|' + (args.seed ?? ''));
   const perSlot = slotTargets(slots, args.target, args.workout);
   const used = new Set<string>();
@@ -237,6 +243,11 @@ function planDayOnce(args: {
     const forced = args.fixed?.[idx];
     let candidates = forced ? RECIPES.filter((r) => r.id === forced) : pool.filter((r) => r.slots.includes(slot) && !used.has(r.id));
     if (!candidates.length) candidates = pool.filter((r) => r.slots.includes(slot));
+    // Nothing fits this meal: preparation time is a preference, so it gives way first; then a dish from a
+    // similar meal is borrowed. Diet, kosher and allergies are never relaxed.
+    if (!candidates.length) candidates = anyPrep.filter((r) => r.slots.includes(slot) && !used.has(r.id));
+    if (!candidates.length) candidates = anyPrep.filter((r) => r.slots.some((x) => NEAR[slot].includes(x)) && !used.has(r.id));
+    if (!candidates.length) candidates = anyPrep.filter((r) => r.slots.includes(slot) || r.slots.some((x) => NEAR[slot].includes(x)));
     if (!candidates.length) return;
     // remaining-day correction: steer each meal toward what is still needed
     const done = sumNutrients(meals.map((m) => m.nutrients));
@@ -263,7 +274,7 @@ function planDayOnce(args: {
     const pick = forced ? scored[0] : good.length ? good[(seed + idx * 7) % Math.min(good.length, size)] : (liked[0] ?? scored[0]);
     used.add(pick.r.id);
     const role = args.workout?.pre === idx ? 'pre' : args.workout?.post === idx ? 'post' : undefined;
-    meals.push({ slot, recipeId: pick.r.id, items: pick.fit.items, nutrients: pick.fit.nutrients, ...(role ? { role } : {}) });
+    meals.push({ slot, slotIndex: idx, recipeId: pick.r.id, items: pick.fit.items, nutrients: pick.fit.nutrients, ...(role ? { role } : {}) });
   });
 
   // day-level pass: fine-tune every ingredient of every meal together against the day's targets

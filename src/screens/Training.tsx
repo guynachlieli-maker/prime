@@ -1,19 +1,41 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Banner, Button, Card, ChoiceCards, Segmented, Sheet, WhyContent, fmt } from '../ui/kit';
+import { Banner, Button, Card, ChoiceCards, NumInput, Segmented, Sheet, WhyContent, fmt } from '../ui/kit';
+import { GOAL_HE } from '../engine/targets';
 import { saveProfile, todayISO, useStore } from '../state/store';
 import { CORE_BY_ID, CORE_BY_REF, MUSCLE_HE, type Limit } from '../training/exercises';
 import { useExerciseImages } from '../training/images';
 import { MuscleMap } from '../training/MuscleMap';
-import { CARDIO, GOAL_LABEL, e1rm, kcalForCardio, planWeek, suggestNext, weeklyVolume, type CardioType, type ExerciseLog, type PlannedExercise, type TrainingPrefs, type WorkoutDay } from '../training/plan';
-import { createPlan, currentPhase, saveSession, EMPTY_TRAINING } from '../training/state';
+import { CARDIO, GOAL_LABEL, WEEKDAY, e1rm, kcalForCardio, planWeek, suggestNext, weeklyVolume, type CardioType, type ExerciseLog, type PlannedExercise, type TrainingPrefs, type WorkoutDay } from '../training/plan';
+import { createPlan, currentPhase, loadSessionDraft, phaseMismatch, rememberSwap, saveSession, saveSessionDraft, EMPTY_TRAINING, type SessionDraft } from '../training/state';
 import { loadLibrary, searchLibrary, type LibExercise, type Library } from '../training/library';
 import { TRAINING_ARTICLES } from '../training/articles';
 import type { Article } from '../data/articles';
 import { planFor } from '../state/derived';
 import { RECIPES } from '../data/recipes';
 
-export const WEEKDAY = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
 type View = 'plan' | 'library' | 'progress' | 'learn';
+
+/** End of rest: a short vibration and a soft beep (both optional, both silent when unsupported). */
+function restDone() {
+  try {
+    navigator.vibrate?.(200);
+    const AC = window.AudioContext ?? (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
+    if (!AC) return;
+    const ctx = new AC();
+    const o = ctx.createOscillator();
+    const g = ctx.createGain();
+    o.frequency.value = 880;
+    g.gain.setValueAtTime(0.0001, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + 0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.35);
+    o.connect(g).connect(ctx.destination);
+    o.start();
+    o.stop(ctx.currentTime + 0.4);
+    o.onended = () => ctx.close();
+  } catch {
+    /* ignore */
+  }
+}
 
 const repsText = (e: PlannedExercise) => (e.unit === 'sec' ? `${e.reps[0]}-${e.reps[1]} שניות` : `${e.reps[0]}-${e.reps[1]} חזרות`);
 
@@ -23,7 +45,11 @@ export function Training() {
   const [view, setView] = useState<View>('plan');
   const [editing, setEditing] = useState(false);
   const [openDay, setOpenDay] = useState<WorkoutDay | null>(null);
-  const [session, setSession] = useState<WorkoutDay | null>(null);
+  // a workout that was left in the middle (another tab, the app closed) opens where it stopped
+  const [session, setSession] = useState<WorkoutDay | null>(() => {
+    const d = loadSessionDraft(t.plan?.id);
+    return (d && t.plan?.days.find((x) => x.id === d.dayId)) || null;
+  });
   const [detail, setDetail] = useState<string | null>(null);
 
   if (session) return <SessionView day={session} onClose={() => setSession(null)} onInfo={setDetail} detail={detail} closeDetail={() => setDetail(null)} />;
@@ -126,7 +152,7 @@ function Setup({ initial, onDone, onCancel }: { initial?: TrainingPrefs; onDone:
             { value: 'lots', label: 'הרבה' },
           ]}
         />
-        <p className="fineprint">איזה אירובי אתה אוהב?</p>
+        <p className="fineprint">איזה אירובי מתאים לך?</p>
         <div className="chips">
           {(Object.keys(CARDIO) as CardioType[]).map((c) => {
             const on = p.cardioTypes.includes(c);
@@ -206,8 +232,7 @@ function PlanView({ onOpen, onStart, onEdit }: { onOpen: (d: WorkoutDay) => void
   const todayDay = plan.days.find((d) => d.weekday === today && !doneToday.includes(d.id));
   const nextDay = todayDay ?? [...plan.days].sort((a, b) => ((a.weekday - today + 7) % 7) - ((b.weekday - today + 7) % 7)).find((d) => d.weekday !== today) ?? plan.days[0];
   const ph = currentPhase(t);
-  const nutritionGoal = ph?.phase.nutritionGoal;
-  const goalLabel: Record<string, string> = { fat_loss: 'ירידה בשומן', muscle_gain: 'בניית שריר', bulk: 'מסה', performance: 'תחזוקה' };
+  const mismatch = phaseMismatch(s);
   const vol = weeklyVolume(plan);
   const weekCardio = plan.days.reduce((a, d) => a + (d.cardio?.minutes ?? 0), 0) + plan.cardioDays.reduce((a, c) => a + c.block.minutes, 0);
 
@@ -282,6 +307,15 @@ function PlanView({ onOpen, onStart, onEdit }: { onOpen: (d: WorkoutDay) => void
                     <small>
                       {c.block.minutes} דק׳ · {c.block.intensity === 'intervals' ? 'אינטרוולים' : c.block.intensity === 'easy' ? 'קל' : 'בינוני'} · כ-{kcalForCardio(c.block, s.profile?.weightKg ?? 75)} קק"ל
                     </small>
+                    <small>{c.block.note}</small>
+                    {isToday &&
+                      (doneToday.includes(`cardio-${w}`) ? (
+                        <span className="done-tag">✓ בוצע</span>
+                      ) : (
+                        <button className="link" onClick={() => saveSession({ date: todayISO(), dayId: `cardio-${w}`, planId: plan.id, exercises: [], cardio: { type: c.block.type, minutes: c.block.minutes, intensity: c.block.intensity }, minutes: c.block.minutes })}>
+                          סימון כבוצע
+                        </button>
+                      ))}
                   </span>
                 ) : (
                   <span className="wl-main rest">
@@ -311,16 +345,16 @@ function PlanView({ onOpen, onStart, onEdit }: { onOpen: (d: WorkoutDay) => void
           <p className="muted">
             עכשיו: <b>{ph.phase.title}</b>, שבוע {ph.weekIn} מתוך {ph.phase.weeks}. {ph.phase.why}
           </p>
-          {s.profile && nutritionGoal && s.profile.goal !== nutritionGoal && (
+          {s.profile && mismatch && (
             <Banner
               kind="info"
               action={
-                <Button kind="secondary" onClick={() => saveProfile({ ...s.profile!, goal: nutritionGoal, targetWeightKg: undefined, targetDate: undefined })}>
-                  לעדכן תזונה
+                <Button kind="secondary" onClick={() => saveProfile({ ...s.profile!, goal: mismatch.goal, targetWeightKg: undefined, targetDate: undefined })}>
+                  לעדכן את היעדים
                 </Button>
               }
             >
-              היעד התזונתי שלך ({goalLabel[s.profile.goal] ?? s.profile.goal}) לא מתאים לשלב הנוכחי ({goalLabel[nutritionGoal]}).
+              היעד התזונתי שלך ({GOAL_HE[s.profile.goal]}) עדיין לא עודכן לשלב הנוכחי ({GOAL_HE[mismatch.goal]}).
             </Banner>
           )}
         </Card>
@@ -398,18 +432,54 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
   const t = s.training ?? EMPTY_TRAINING;
   const plan = t.plan!;
   const { deload } = planWeek(plan);
-  const [list, setList] = useState<PlannedExercise[]>(() => day.exercises.map((e) => ({ ...e, exId: t.swaps?.[e.exId] ?? e.exId, sets: deload ? Math.max(1, Math.round(e.sets * 0.6)) : e.sets })));
-  const [logs, setLogs] = useState<ExerciseLog[]>(() =>
-    list.map((e) => {
-      const sug = suggestNext(e.exId, e, t.sessions);
-      return { exId: e.exId, sets: Array.from({ length: e.sets }, () => ({ kg: sug.kg ?? 0, reps: e.reps[1], done: false })) };
-    }),
+  const [draft] = useState<SessionDraft | null>(() => {
+    const d = loadSessionDraft(plan.id);
+    return d && d.dayId === day.id ? d : null;
+  });
+  const [list, setList] = useState<PlannedExercise[]>(
+    () =>
+      draft?.list ??
+      day.exercises.map((e) => {
+        const swapped = t.swaps?.[e.exId];
+        return { ...e, exId: swapped && CORE_BY_ID[swapped] ? swapped : e.exId, sets: deload ? Math.max(1, Math.round(e.sets * 0.6)) : e.sets };
+      }),
   );
+  const [logs, setLogs] = useState<ExerciseLog[]>(
+    () =>
+      draft?.logs ??
+      list.map((e) => {
+        const sug = suggestNext(e.exId, e, t.sessions);
+        return { exId: e.exId, sets: Array.from({ length: e.sets }, () => ({ kg: sug.kg ?? 0, reps: e.reps[1], done: false })) };
+      }),
+  );
+  const [leaving, setLeaving] = useState(false);
   const [rest, setRest] = useState<{ until: number; total: number } | null>(null);
   const [now, setNow] = useState(Date.now());
   const [swap, setSwap] = useState<number | null>(null);
-  const started = useRef(Date.now());
-  const [cardioDone, setCardioDone] = useState(false);
+  const started = useRef(draft?.started ?? Date.now());
+  const [cardioDone, setCardioDone] = useState(draft?.cardioDone ?? false);
+
+  // keep the workout on the device after every change
+  useEffect(() => {
+    saveSessionDraft({ date: todayISO(), planId: plan.id, dayId: day.id, started: started.current, list, logs, cardioDone });
+  }, [list, logs, cardioDone, plan.id, day.id]);
+
+  const finish = () => {
+    saveSession({
+      date: todayISO(),
+      dayId: day.id,
+      planId: plan.id,
+      exercises: logs.map((l) => ({ ...l, sets: l.sets.filter((x) => x.done) })).filter((l) => l.sets.length),
+      cardio: cardioDone && day.cardio ? { type: day.cardio.type, minutes: day.cardio.minutes, intensity: day.cardio.intensity } : undefined,
+      minutes: Math.max(1, Math.round((Date.now() - started.current) / 60000)),
+    });
+    saveSessionDraft(null);
+    onClose();
+  };
+  const discard = () => {
+    saveSessionDraft(null);
+    onClose();
+  };
 
   useEffect(() => {
     if (!rest) return;
@@ -417,11 +487,7 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
       setNow(Date.now());
       if (Date.now() >= rest.until) {
         setRest(null);
-        try {
-          navigator.vibrate?.(200);
-        } catch {
-          /* ignore */
-        }
+        restDone();
       }
     }, 250);
     return () => window.clearInterval(id);
@@ -435,7 +501,7 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
   return (
     <div className="screen session">
       <header className="session-head">
-        <button className="link" onClick={onClose}>
+        <button className="link" onClick={() => (doneSets === 0 && !cardioDone ? discard() : setLeaving(true))}>
           יציאה
         </button>
         <div>
@@ -450,14 +516,36 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
         <i style={{ width: `${(doneSets / Math.max(1, totalSets)) * 100}%` }} />
       </div>
 
+      {leaving && (
+        <Banner
+          kind="warn"
+          action={
+            <div className="row wrap">
+              <Button onClick={finish}>לשמור ולסיים</Button>
+              <Button kind="secondary" onClick={() => setLeaving(false)}>
+                להמשיך באימון
+              </Button>
+              <Button kind="danger" onClick={discard}>
+                למחוק
+              </Button>
+            </div>
+          }
+        >
+          סימנת {doneSets} סטים. מה לעשות עם האימון?
+        </Banner>
+      )}
+
       {rest && (
-        <div className="rest-timer" role="timer" aria-live="polite">
+        <div className="rest-timer" role="timer" aria-live="off">
           <span>מנוחה</span>
           <b>{Math.max(0, Math.ceil((rest.until - now) / 1000))}</b>
           <span>שניות</span>
           <div className="rt-track">
             <i style={{ width: `${Math.max(0, ((rest.until - now) / 1000 / rest.total) * 100)}%` }} />
           </div>
+          <button className="link" onClick={() => setRest({ until: rest.until + 30e3, total: rest.total + 30 })}>
+            +30 שנ׳
+          </button>
           <button className="link" onClick={() => setRest(null)}>
             דילוג
           </button>
@@ -495,7 +583,8 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
                     key={a}
                     className="chip"
                     onClick={() => {
-                      setList((L) => L.map((x, k) => (k === i ? { ...x, exId: a } : x)));
+                      rememberSwap(day.exercises[i].exId, a); // next time this exercise comes first
+                      setList((L) => L.map((x, k) => (k === i ? { ...x, exId: a, alternatives: [...new Set([x.exId, ...x.alternatives.filter((y) => y !== a)])] } : x)));
                       setLogs((L) => L.map((x, k) => (k === i ? { exId: a, sets: x.sets.map((y) => ({ ...y, kg: 0, done: false })) } : x)));
                       setSwap(null);
                     }}
@@ -522,10 +611,10 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
                   <tr key={j} className={x.done ? 'done' : ''}>
                     <td>{j + 1}</td>
                     <td>
-                      <input inputMode="decimal" dir="ltr" value={x.kg || ''} placeholder="0" onChange={(ev) => setField(i, j, { kg: Number(ev.target.value) || 0 })} aria-label={`משקל סט ${j + 1}`} />
+                      <NumInput value={x.kg} blankZero placeholder="0" onChange={(kg) => setField(i, j, { kg })} aria-label={`משקל סט ${j + 1}`} />
                     </td>
                     <td>
-                      <input inputMode="numeric" dir="ltr" value={x.reps || ''} onChange={(ev) => setField(i, j, { reps: Number(ev.target.value) || 0 })} aria-label={`חזרות סט ${j + 1}`} />
+                      <NumInput integer value={x.reps} blankZero onChange={(reps) => setField(i, j, { reps })} aria-label={`${e.unit === 'sec' ? 'שניות' : 'חזרות'} סט ${j + 1}`} />
                     </td>
                     <td>
                       <button
@@ -564,21 +653,7 @@ function SessionView({ day, onClose, onInfo, detail, closeDetail }: { day: Worko
         </Card>
       )}
 
-      <Button
-        full
-        disabled={doneSets === 0}
-        onClick={() => {
-          saveSession({
-            date: todayISO(),
-            dayId: day.id,
-            planId: plan.id,
-            exercises: logs.map((l) => ({ ...l, sets: l.sets.filter((x) => x.done) })).filter((l) => l.sets.length),
-            cardio: cardioDone && day.cardio ? { type: day.cardio.type, minutes: day.cardio.minutes, intensity: day.cardio.intensity } : undefined,
-            minutes: Math.round((Date.now() - started.current) / 60000),
-          });
-          onClose();
-        }}
-      >
+      <Button full disabled={doneSets === 0 && !cardioDone} onClick={finish}>
         סיום ושמירה
       </Button>
       <ExerciseSheet id={detail} onClose={closeDetail} />
@@ -782,18 +857,19 @@ function TrainingProgress() {
         if (!best[e.exId] || v > best[e.exId].e) best[e.exId] = { kg: x.kg, reps: x.reps, e: v, date: ses.date };
       }
   const cardioMin = week.reduce((a, x) => a + (x.cardio?.minutes ?? 0), 0);
+  const lifts = (list: typeof week) => list.filter((x) => x.exercises.length > 0).length;
   const plan = t.plan!;
   return (
     <>
       <div className="stat-row">
         <div className="stat">
-          <b>{week.length}</b>
-          <span>אימונים השבוע</span>
+          <b>{lifts(week)}</b>
+          <span>אימוני כוח השבוע</span>
           <small>מתוך {plan.days.length}</small>
         </div>
         <div className="stat">
-          <b>{t.sessions.length}</b>
-          <span>אימונים בסך הכול</span>
+          <b>{lifts(t.sessions)}</b>
+          <span>אימוני כוח בסך הכול</span>
         </div>
         <div className="stat">
           <b>{cardioMin}</b>
@@ -827,7 +903,7 @@ function TrainingProgress() {
       </Card>
       <Card title="השיאים שלך">
         {Object.keys(best).length === 0 ? (
-          <p className="muted">השיאים יופיעו כאן אחרי שתרשום משקלים באימון.</p>
+          <p className="muted">השיאים יופיעו כאן אחרי רישום משקלים באימון.</p>
         ) : (
           <ul className="prs">
             {Object.entries(best)

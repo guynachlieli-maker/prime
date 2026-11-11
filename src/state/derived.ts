@@ -5,7 +5,7 @@ import { supplementNutrients } from '../data/supplements';
 import { estimateTdee } from '../engine/adaptive';
 import { detectBehavior } from '../engine/safety';
 import { SAFETY_CONFIG, evaluateSafety } from '../engine/safety';
-import { useStore, todayISO, type State } from './store';
+import { useStore, todayISO, type MealLog, type State } from './store';
 import type { Nutrients } from '../engine/types';
 import { preferences } from '../engine/learning';
 import { dayLink, periodize } from './daylink';
@@ -30,7 +30,48 @@ export function dayTargets(s: State, date: string): MenuTargets | null {
   return periodize(base, dayLink(s, date), s.profile.weightKg);
 }
 
+/** The whole day's targets (supplements included), with carbohydrate matched to the training load. */
+export function fullDayTargets(s: State, date: string): MenuTargets | null {
+  if (!s.profile || !s.targets) return null;
+  const t = s.targets;
+  return periodize({ kcal: t.kcal.value, protein: t.proteinG.value, fat: t.fatG.value, carbs: t.carbsG.value }, dayLink(s, date), s.profile.weightKg);
+}
+
+/**
+ * Which planned meals were already eaten: a log of the planned dish itself, or any other food
+ * logged for that meal (photo, barcode, search…). Supplements never count as a meal.
+ */
+export function mealsDone(plan: DayPlan, logs: MealLog[]): boolean[] {
+  const day = logs.filter((l) => l.date === plan.date && l.method !== 'supplement');
+  const planned = new Set(plan.meals.map((m) => m.recipeId));
+  const eatenRecipes = new Map<string, number>();
+  const otherBySlot = new Map<string, number>();
+  for (const l of day) {
+    const id = l.items[0]?.foodId;
+    if (l.method === 'plan' && id && planned.has(id)) eatenRecipes.set(id, (eatenRecipes.get(id) ?? 0) + 1);
+    else otherBySlot.set(l.slot, (otherBySlot.get(l.slot) ?? 0) + 1);
+  }
+  return plan.meals.map((m) => {
+    const r = eatenRecipes.get(m.recipeId) ?? 0;
+    if (r > 0) {
+      eatenRecipes.set(m.recipeId, r - 1);
+      return true;
+    }
+    const o = otherBySlot.get(m.slot) ?? 0;
+    if (o > 0) {
+      otherBySlot.set(m.slot, o - 1);
+      return true;
+    }
+    return false;
+  });
+}
+
 const cache = new Map<string, DayPlan>();
+const remember = (k: string, p: DayPlan) => {
+  if (cache.size > 400) cache.clear(); // a long session never grows without bound
+  cache.set(k, p);
+  return p;
+};
 
 export function planFor(s: State, date: string): DayPlan | null {
   const base = menuTargets(s);
@@ -52,17 +93,15 @@ export function planFor(s: State, date: string): DayPlan | null {
     avoid.push(...prev.meals.map((m) => m.recipeId));
   }
   const plan = planDay({ date, profile: s.profile, target: t, avoid, fixed: s.planFixed[date], preferences: prefs, seed, workout });
-  cache.set(key, plan);
-  return plan;
+  return remember(key, plan);
 }
 
 function planDayNoCache(s: State, date: string, t: MenuTargets, seed: string): DayPlan {
-  const k = `nc|${date}|${seed}|${JSON.stringify(t)}|${s.profile!.diet}|${s.profile!.mealsPerDay}|${s.profile!.allergies}|${s.profile!.kosher}`;
+  const k = `nc|${date}|${seed}|${JSON.stringify(t)}|${s.profile!.diet}|${s.profile!.mealsPerDay}|${s.profile!.allergies}|${s.profile!.kosher}|${s.profile!.maxPrepMinutes}|${s.profile!.dislikes}|${JSON.stringify(s.planFixed[date] ?? {})}`;
   const hit = cache.get(k);
   if (hit) return hit;
   const p = planDay({ date, profile: s.profile!, target: t, fixed: s.planFixed[date], preferences: preferences(s.learning), seed });
-  cache.set(k, p);
-  return p;
+  return remember(k, p);
 }
 
 export function usePlan(date: string) {
@@ -88,7 +127,7 @@ export function useAlerts() {
     const intake = dailyIntake(s).filter((d) => d.date < today);
     const floor = Math.max(s.targets.bmr.value, SAFETY_CONFIG.absoluteKcalFloor[s.profile.sex]);
     const weighInsToday = s.weighIns.filter((w) => w.date === today).length;
-    const week = s.weighIns.filter((w) => w.date >= todayISO(new Date(Date.now() - 7 * 864e5)));
+    const week = s.weighIns.filter((w) => w.date >= todayISO(new Date(Date.now() - 7 * 864e5))).sort((a, b) => a.date.localeCompare(b.date));
     const weeklyLossPct = week.length >= 2 ? ((week[0].kg - week[week.length - 1].kg) / week[0].kg) * 100 : null;
     return detectBehavior({ dailyKcal: intake, floorKcal: floor, weighInsToday, weeklyLossPct });
   }, [s]);

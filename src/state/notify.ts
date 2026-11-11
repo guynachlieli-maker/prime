@@ -73,12 +73,12 @@ export function motivationNow(s: State = getState()): { title: string; body: str
     kcalTarget: t?.kcal.value ?? 0,
     proteinToday: eaten.protein,
     proteinTarget: t?.proteinG.value ?? 0,
-    loggedDaysLast7: new Set(s.logs.filter((l) => l.date >= since).map((l) => l.date)).size,
+    loggedDaysLast7: new Set(s.logs.filter((l) => l.date >= since && l.method !== 'supplement').map((l) => l.date)).size,
     trendChangeKg: change,
     goalLosing: (t?.weeklyChangeKg.value ?? -1) < 0,
     kgToGoal,
     weeksToGoal: kgToGoal !== null && t && Math.abs(t.weeklyChangeKg.value) > 0.01 ? Math.ceil(kgToGoal / Math.abs(t.weeklyChangeKg.value)) : null,
-    loggedToday: s.logs.some((l) => l.date === today),
+    loggedToday: s.logs.some((l) => l.date === today && l.method !== 'supplement'),
   });
 }
 
@@ -145,7 +145,7 @@ export function startReminders(): () => void {
       for (const d of due.reverse()) {
         if (seen.has(d.r.id)) continue;
         seen.add(d.r.id);
-        if (d.r.kind === 'meal' && d.r.slot && s.logs.some((l) => l.date === todayISO() && l.slot === d.r.slot)) continue; // already logged
+        if (d.r.kind === 'meal' && d.r.slot && s.logs.some((l) => l.date === todayISO() && l.slot === d.r.slot && l.method !== 'supplement')) continue; // already logged
         if (d.r.kind === 'weigh' && s.weighIns.some((w) => w.date === todayISO())) continue;
         void show(d.r);
       }

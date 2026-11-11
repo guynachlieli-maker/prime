@@ -68,6 +68,8 @@ export interface TrainingPlan {
   notes: string[];
 }
 
+export const WEEKDAY = ['ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת'];
+
 export const GOAL_LABEL: Record<TrainingGoal, string> = {
   cut: 'חיטוב (ירידה בשומן)',
   muscle: 'הגדלת שריר (מסה נקייה)',
@@ -342,7 +344,7 @@ export interface Phase {
   title: string;
   weeks: number;
   why: string;
-  nutritionGoal: 'fat_loss' | 'muscle_gain' | 'bulk' | 'performance';
+  nutritionGoal: 'fat_loss' | 'muscle_gain' | 'bulk' | 'recomp' | 'performance';
 }
 
 /**
@@ -367,6 +369,6 @@ export function phasePlan(args: { goal: TrainingGoal; sex: 'male' | 'female'; bo
     return bf >= high ? [cutFirst(cutWeeks), maintain(2), gain, miniCut, maintain()] : [gain, miniCut, maintain()];
   }
   if (goal === 'cut') return [{ kind: 'cut', title: 'חיטוב', weeks: Math.max(8, cutWeeks), why: 'גירעון מתון עם אימוני כוח כבדים, כדי שרוב הירידה תהיה שומן.', nutritionGoal: 'fat_loss' }, maintain(4)];
-  if (goal === 'recomp') return [{ kind: 'maintain', title: 'ריקומפוזיציה', weeks: 16, why: 'גירעון קטן מאוד וחלבון גבוה: בונים שריר ומורידים שומן במקביל. מתאים בעיקר למתחילים ולחוזרים לאימונים.', nutritionGoal: 'fat_loss' }];
+  if (goal === 'recomp') return [{ kind: 'maintain', title: 'ריקומפוזיציה', weeks: 16, why: 'גירעון קטן מאוד וחלבון גבוה: בונים שריר ומורידים שומן במקביל. מתאים בעיקר למתחילים ולחוזרים לאימונים.', nutritionGoal: 'recomp' }];
   return [{ kind: 'maintain', title: goal === 'strength' ? 'בניית כוח' : 'כושר כללי', weeks: 12, why: 'באיזון קלורי, כדי שיהיה מספיק דלק לאימונים.', nutritionGoal: 'performance' }];
 }

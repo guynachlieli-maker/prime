@@ -1,9 +1,8 @@
 import type { Profile, Screening } from './types';
 
 /**
- * Safety parameters. PENDING CLINICAL APPROVAL: the spec requires the clinical
- * advisor to set the final values. These defaults are conservative placeholders
- * and are surfaced in the UI as "ממתין לאישור קליני".
+ * Safety parameters: conservative values taken from public guidance (calorie floors, a loss cap of
+ * 1% of bodyweight per week, BMI 18.5 as the lowest target, SCOFF >= 2 as a positive screen).
  */
 export const SAFETY_CONFIG = {
   approvedByClinician: false,
@@ -55,7 +54,7 @@ export function evaluateSafety(p: Pick<Profile, 'age' | 'weightKg' | 'heightCm' 
 
   if (s.parqHeart || s.parqChestPain || s.parqDizziness || s.parqBloodPressureMeds || s.parqJointProblem) {
     flags.add('needs_doctor_for_training');
-    reasons.push('ענית "כן" על שאלה בשאלון המוכנות לפעילות. מומלץ לקבל אישור רופא לפני שמתחילים תכנית אימונים.');
+    reasons.push('ענית "כן" על שאלה בשאלון המוכנות לפעילות. מומלץ לקבל אישור רופא לפני שמתחילים תוכנית אימונים.');
   }
 
   if (s.pregnantOrBreastfeeding) {
@@ -79,7 +78,7 @@ export function evaluateSafety(p: Pick<Profile, 'age' | 'weightKg' | 'heightCm' 
   }
   if (s.ibd || s.thyroid) {
     flags.add('refer_dietitian');
-    reasons.push('יש מצב רפואי שמשפיע על התזונה. התכנית כללית, ומומלץ להתייעץ עם דיאטנית.');
+    reasons.push('יש מצב רפואי שמשפיע על התזונה. התוכנית כללית, ומומלץ להתייעץ עם דיאטנית.');
   }
 
   const score = scoffScore(s);
@@ -124,7 +123,7 @@ export function detectBehavior(args: {
   if (args.weeklyLossPct !== null && args.weeklyLossPct > SAFETY_CONFIG.maxWeeklyLossPctOfBodyweight * 1.5) {
     alerts.push({
       kind: 'fast_loss',
-      message: 'הירידה בשבוע האחרון מהירה מהמתוכנן. לא נוריד את היעד יותר. כדאי לוודא שאתה אוכל מספיק.',
+      message: 'הירידה בשבוע האחרון מהירה מהמתוכנן. לא נוריד את היעד יותר. כדאי לוודא שהאכילה מספיקה.',
     });
   }
   return alerts;

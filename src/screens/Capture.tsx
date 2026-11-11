@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Banner, Button, Card, Empty, Segmented, fmt } from '../ui/kit';
+import { Banner, Button, Card, Empty, NumInput, Segmented, fmt } from '../ui/kit';
 import { FOOD_BY_ID, loadFullDb, nutrientsFor, searchAll, sumNutrients, type Food } from '../data/foods';
 import { addLog, learn, markHint, nowTime, setState, todayISO, useStore, uid, type LogItem, type LogMethod } from '../state/store';
 import type { Recognition } from '../engine/vision';
@@ -24,17 +24,25 @@ function hourSlot(): Slot {
   return 'dinner';
 }
 
+/** The meal being built survives a visit to another tab (it is cleared once it is logged). */
+const kept: { basket: BasketItem[]; method: LogMethod; photo?: string; preview?: string; estimateKcal: number | null } = { basket: [], method: 'search', estimateKcal: null };
+
 type Speech = { lang: string; interimResults: boolean; start: () => void; onresult: (e: { results: { 0: { transcript: string } }[] }) => void; onerror: () => void; onend: () => void };
 
 export function Capture({ go }: { go: (t: Tab) => void }) {
   const s = useStore((x) => x);
   const [mode, setMode] = useState<Mode>('photo');
   const [slot, setSlot] = useState<Slot>(() => likelySlot(s.learning) ?? hourSlot());
-  const [basket, setBasket] = useState<BasketItem[]>([]);
-  const [method, setMethod] = useState<LogMethod>('search');
-  const [photo, setPhoto] = useState<string | undefined>();
-  const [preview, setPreview] = useState<string | undefined>();
-  const [estimateKcal, setEstimateKcal] = useState<number | null>(null);
+  const [basket, setBasket] = useState<BasketItem[]>(kept.basket);
+  const [method, setMethod] = useState<LogMethod>(kept.method);
+  const [photo, setPhoto] = useState<string | undefined>(kept.photo);
+  const [preview, setPreview] = useState<string | undefined>(kept.preview);
+  const [estimateKcal, setEstimateKcal] = useState<number | null>(kept.estimateKcal);
+  const [favName, setFavName] = useState<string | null>(null);
+  const basketRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    Object.assign(kept, { basket, method, photo, preview, estimateKcal });
+  }, [basket, method, photo, preview, estimateKcal]);
   const [busy, setBusy] = useState<string | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [info, setInfo] = useState<string | null>(null);
@@ -178,9 +186,15 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     if (!file) return;
     reset();
     setBusy('קורא את הברקוד…');
-    const { scanImage } = await import('../engine/barcode');
-    const c = await scanImage(file);
-    setBusy(null);
+    let c: string | null = null;
+    try {
+      const { scanImage } = await import('../engine/barcode');
+      c = await scanImage(file);
+    } catch {
+      c = null;
+    } finally {
+      setBusy(null);
+    }
     if (c) handleCode(c);
     else setErr('לא נמצא ברקוד בתמונה. נסו צילום קרוב וחד יותר, או הקלידו את המספר.');
   };
@@ -237,6 +251,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     setEstimateKcal(null);
     setRec(null);
     setInfo(null);
+    setFavName(null);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -309,11 +324,11 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
         <Card>
           <div className="camera-box">
             {photo ? <img src={preview ?? photo} alt="התמונה שצילמת" className="preview" /> : <div className="frame-guide">צלחת שלמה בתוך המסגרת · מלמעלה · באור טוב</div>}
-            <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
+            <input ref={fileRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void onPhoto(f); }} />
             <Button full onClick={() => fileRef.current?.click()} disabled={!!busy}>
               {photo ? 'לצלם שוב' : 'לצלם ארוחה'}
             </Button>
-            <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(e) => onPhoto(e.target.files?.[0])} />
+            <input ref={galleryRef} type="file" accept="image/*" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void onPhoto(f); }} />
             <Button full kind="secondary" onClick={() => galleryRef.current?.click()} disabled={!!busy}>
               בחירת תמונה מהגלריה
             </Button>
@@ -368,7 +383,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                 עצירה
               </Button>
             )}
-            <input ref={barcodeRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onBarcodeImage(e.target.files?.[0])} />
+            <input ref={barcodeRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void onBarcodeImage(f); }} />
             <Button kind="secondary" onClick={() => barcodeRef.current?.click()} disabled={!!busy}>
               תמונה של ברקוד
             </Button>
@@ -415,7 +430,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                   <strong>הברקוד {missingCode} לא נמצא במאגרים.</strong> צלמו פעם אחת את התווית התזונתית שעל האריזה. נקרא ממנה את הערכים, והמוצר יישמר לסריקות הבאות.
                 </>
               )}
-              <input ref={labelRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => onLabel(e.target.files?.[0])} />
+              <input ref={labelRef} type="file" accept="image/*" capture="environment" hidden onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ''; void onLabel(f); }} />
               <div className="row wrap" style={{ marginTop: 8 }}>
                 <Button onClick={() => labelRef.current?.click()}>צילום התווית</Button>
                 <Button kind="ghost" onClick={() => setMode('search')}>
@@ -498,6 +513,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       )}
 
       {basket.length > 0 && (
+        <div ref={basketRef} className="basket-anchor">
         <Card title="אישור הארוחה" className="basket">
           <ul className="basket-list">
             {basket.map((i, idx) => {
@@ -554,7 +570,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
                   )}
                   <div className="b-amount">
                     <input type="range" min={5} max={Math.max(600, i.grams * 2)} step={5} value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Number(e.target.value) } : x)))} aria-label={`כמות ${f.name} בגרמים`} />
-                    <input className="qty" inputMode="numeric" dir="ltr" value={i.grams} onChange={(e) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: Math.max(0, Number(e.target.value) || 0) } : x)))} aria-label={`גרמים של ${f.name}`} />
+                    <NumInput className="qty" integer value={i.grams} onChange={(g) => setBasket((b) => b.map((x, j) => (j === idx ? { ...x, grams: g } : x)))} aria-label={`גרמים של ${f.name}`} />
                     <span className="unit">ג׳</span>
                   </div>
                   <div className="muted">
@@ -582,17 +598,36 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
             <Button onClick={confirm} disabled={total.kcal <= 0}>
               אישור ורישום
             </Button>
-            <Button
-              kind="ghost"
-              onClick={() => {
-                const name = prompt('שם לארוחה הקבועה:', basket.map((b) => b.name).join(' + ').slice(0, 40));
-                if (name) setState((x) => ({ favorites: [...x.favorites, { id: uid(), name, items: basket.map(({ foodId, name: n, grams }) => ({ foodId, name: n, grams })) }] }));
-              }}
-            >
+            <Button kind="ghost" onClick={() => setFavName(basket.map((b) => b.name).join(' + ').slice(0, 40))}>
               שמירה כקבועה
             </Button>
           </div>
+          {favName !== null && (
+            <div className="row" style={{ marginTop: 8 }}>
+              <input className="search" value={favName} onChange={(e) => setFavName(e.target.value.slice(0, 40))} aria-label="שם לארוחה הקבועה" autoFocus />
+              <Button
+                kind="secondary"
+                disabled={!favName.trim()}
+                onClick={() => {
+                  setState((x) => ({ favorites: [...x.favorites, { id: uid(), name: favName.trim(), items: basket.map(({ foodId, name: n, grams }) => ({ foodId, name: n, grams })) }] }));
+                  setFavName(null);
+                  setInfo('נשמרה בארוחות הקבועות.');
+                }}
+              >
+                שמירה
+              </Button>
+            </div>
+          )}
         </Card>
+        </div>
+      )}
+      {basket.length > 0 && (mode === 'search' || mode === 'text' || mode === 'favorites') && (
+        <button className="basket-bar" onClick={() => basketRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' })}>
+          <span>
+            {basket.length} {basket.length === 1 ? 'פריט' : 'פריטים'} · {fmt(total.kcal)} קק"ל
+          </span>
+          <b>לאישור הארוחה ↓</b>
+        </button>
       )}
     </div>
   );
@@ -619,7 +654,7 @@ function FoodRow({ food, onAdd }: { food: Food; onAdd: (grams: number) => void }
         </div>
       </div>
       <div className="row">
-        <input className="qty" inputMode="decimal" dir="ltr" value={qty} onChange={(e) => setQty(Number(e.target.value) || 0)} aria-label={`כמות של ${food.name}`} />
+        <NumInput className="qty" value={qty} onChange={setQty} aria-label={`כמות של ${food.name}`} />
         <select
           value={unit.label}
           onChange={(e) => {
