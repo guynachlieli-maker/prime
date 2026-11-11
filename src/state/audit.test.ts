@@ -215,3 +215,13 @@ describe('aerobic work is spread over the week', () => {
       }
   });
 });
+
+describe('meal title', () => {
+  it('names a meal from its foods', async () => {
+    const { mealTitle } = await import('../engine/mealtitle');
+    expect(mealTitle(['ביצה', 'לחם מחיטה מלאה', 'פיתה'])).toBe('ביצה, לחם מחיטה מלאה ופיתה');
+    expect(mealTitle(["גבינת קוטג' 5%, שטראוס"])).toBe("גבינת קוטג' 5%");
+    expect(mealTitle(['א', 'ב', 'ג', 'ד', 'ה', 'ו'])).toBe('א, ב, ג, ד ועוד 2');
+    expect(mealTitle([])).toBe('ארוחה');
+  });
+});

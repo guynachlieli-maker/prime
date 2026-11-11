@@ -793,3 +793,12 @@ h2.section { font-family: 'Frank Ruhl Libre', serif; font-weight: 700; font-size
 /* a set that is not done yet shows only a faint tick, so done sets stand out */
 .set-check:not(.on):not(.wide) { color: color-mix(in srgb, var(--muted) 30%, transparent); }
 .sheet { max-height: 88dvh; overscroll-behavior: contain; }
+
+/* what was eaten today (separate from the day timeline) */
+.eaten-list { list-style: none; margin: 0; padding: 0; }
+.eaten-list li { display: flex; gap: 12px; align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line); }
+.eaten-list li:last-child { border-bottom: 0; }
+.eaten-list .tl-body { flex: 1; min-width: 0; }
+.eaten-list .tl-top strong { display: block; font-size: 15px; overflow-wrap: anywhere; }
+.eaten-list .icon-btn { flex: none; }
+.meal-pick { display: grid; gap: 6px; margin: 4px 0 10px; }

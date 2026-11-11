@@ -231,13 +231,13 @@ export function Today({ go }: { go: (t: Tab) => void }) {
         {logsToday.length === 0 ? (
           <Empty title="עוד לא נרשם כלום" text="צלמו את הארוחה הראשונה, או סמנו ארוחה מהתפריט." action={<Button onClick={() => go('camera')}>לצלם ארוחה</Button>} />
         ) : (
-          <ul className="timeline">
+          <ul className="eaten-list">
             {logsToday.map((l) => (
               <li key={l.id}>
                 {l.photo ? <img src={l.photo} alt="" className="thumb" /> : <span className="thumb ph">{SLOT_LABEL[l.slot][0]}</span>}
                 <div className="tl-body">
                   <div className="tl-top">
-                    <strong>{l.items.map((i) => (i.grams ? `${FOOD_BY_ID[i.foodId]?.name ?? i.name} ${Math.round(i.grams)} ג׳` : i.name)).join(' · ')}</strong>
+                    <strong>{l.title || l.items.map((i) => (i.grams ? `${FOOD_BY_ID[i.foodId]?.name ?? i.name} ${Math.round(i.grams)} ג׳` : i.name)).join(' · ')}</strong>
                   </div>
                   <div className="muted">
                     {l.time} · {l.method === 'supplement' ? 'תוסף' : SLOT_LABEL[l.slot]} · {fmt(l.nutrients.kcal)} קק"ל · {fmt(l.nutrients.protein)} ג׳ חלבון

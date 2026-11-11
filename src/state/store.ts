@@ -21,6 +21,8 @@ export interface MealLog {
   time: string;
   slot: Slot;
   items: LogItem[];
+  /** the name the meal is shown under (typed by the user or suggested from its foods) */
+  title?: string;
   method: LogMethod;
   nutrients: Nutrients;
   photo?: string; // small data URL thumbnail, kept on this device only

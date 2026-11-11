@@ -5,6 +5,7 @@ import { addLog, learn, markHint, nowTime, setState, todayISO, useStore, uid, ty
 import type { Recognition } from '../engine/vision';
 import { parseFoodText } from '../engine/textparse';
 import { SLOT_LABEL } from '../engine/menu';
+import { mealTitle } from '../engine/mealtitle';
 import { likelySlot, photoFactor, recordPhotoCorrection } from '../engine/learning';
 import type { Slot } from '../data/recipes';
 import type { Tab } from '../App';
@@ -39,6 +40,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   const [preview, setPreview] = useState<string | undefined>(kept.preview);
   const [estimateKcal, setEstimateKcal] = useState<number | null>(kept.estimateKcal);
   const [favName, setFavName] = useState<string | null>(null);
+  const [titleEdit, setTitleEdit] = useState<string | null>(null); // null = use the suggested title
   const basketRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     Object.assign(kept, { basket, method, photo, preview, estimateKcal });
@@ -242,7 +244,8 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
   };
 
   const confirm = () => {
-    addLog({ date: todayISO(), time: nowTime(), slot, items: basket.map(({ foodId, name, grams }) => ({ foodId, name, grams })), method, nutrients: total, photo, aiEstimate: estimateKcal ? { ...total, kcal: estimateKcal } : undefined });
+    const title = (titleEdit ?? mealTitle(basket.map((b) => b.name))).trim() || mealTitle(basket.map((b) => b.name));
+    addLog({ date: todayISO(), time: nowTime(), slot, title, items: basket.map(({ foodId, name, grams }) => ({ foodId, name, grams })), method, nutrients: total, photo, aiEstimate: estimateKcal ? { ...total, kcal: estimateKcal } : undefined });
     if (method === 'photo' && estimateKcal) learn((l) => recordPhotoCorrection(l, estimateKcal / factor, total.kcal));
     markHint('first-log');
     setBasket([]);
@@ -252,6 +255,7 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
     setRec(null);
     setInfo(null);
     setFavName(null);
+    setTitleEdit(null);
     setSaved(true);
     setTimeout(() => setSaved(false), 2500);
   };
@@ -278,17 +282,6 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
           { value: 'favorites', label: 'קבועות' },
         ]}
       />
-      <label className="field inline">
-        <span className="field-label">לאיזו ארוחה?</span>
-        <select value={slot} onChange={(e) => setSlot(e.target.value as Slot)}>
-          {(Object.keys(SLOT_LABEL) as Slot[]).map((k) => (
-            <option key={k} value={k}>
-              {SLOT_LABEL[k]}
-            </option>
-          ))}
-        </select>
-      </label>
-
       {embedded && (mode === 'photo' || mode === 'barcode') && (
         <Banner kind="info">
           המצלמה לא נפתחת כאן?{' '}
@@ -515,6 +508,20 @@ export function Capture({ go }: { go: (t: Tab) => void }) {
       {basket.length > 0 && (
         <div ref={basketRef} className="basket-anchor">
         <Card title="אישור הארוחה" className="basket">
+          <label className="field">
+            <span className="field-label">שם הארוחה</span>
+            <input value={titleEdit ?? mealTitle(basket.map((b) => b.name))} onChange={(e) => setTitleEdit(e.target.value.slice(0, 60))} aria-label="שם הארוחה" />
+          </label>
+          <div className="meal-pick" role="radiogroup" aria-label="איזו ארוחה זו">
+            <span className="field-label">איזו ארוחה זו בשבילך?</span>
+            <div className="segmented">
+              {(['breakfast', 'lunch', 'snack', 'dinner'] as Slot[]).map((k) => (
+                <button key={k} role="radio" aria-checked={slot === k} className={slot === k ? 'on' : ''} onClick={() => setSlot(k)}>
+                  {SLOT_LABEL[k].replace('ארוחת ', '')}
+                </button>
+              ))}
+            </div>
+          </div>
           <ul className="basket-list">
             {basket.map((i, idx) => {
               const f = FOOD_BY_ID[i.foodId];
