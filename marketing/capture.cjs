@@ -121,6 +121,7 @@ const PLATE = path.join(__dirname, 'pasta.jpg'); // Unsplash photo KvOvh3ooWjI (
   await shot('43-exercise');
   await page.keyboard.press('Escape');
   await click('יציאה');
+  await click('למחוק'); // a workout with done sets asks what to do
   await page.getByRole('radio', { name: 'תרגילים' }).click();
   await page.waitForTimeout(2500);
   await shot('44-library', { wait: 1500 });

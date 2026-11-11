@@ -140,3 +140,22 @@ tests/e2e/    בדיקות דפדפן
 - **One questionnaire**: onboarding step 5 ("אימונים ושגרה") asks the training questions; on finish both the menu targets and the training plan are built (`createPlan`). One goal for the whole app (`toTrainingGoal`); the nutrition goal follows the current long-term phase (e.g. a cut before a bulk). Changing the goal in Profile rebuilds the program; changing it in the training setup updates nutrition.
 - **Workout-aware menu** (`src/state/daylink.ts`, `slotTargets` in menu.ts): meals before (1-4 h) and after (≤3 h) training are found from meal times and training time; pre-workout meal gets more carbohydrate and less fat, post-workout more protein and carbohydrate (ISSN nutrient timing, Kerksick 2017; Schoenfeld & Aragon 2018). Day totals unchanged. Carbohydrate follows load: +10% on lifting days, +5% cardio days, −8% rest days, fat balances (floor 0.6 g/kg), calories equal (ACSM/AND/DC 2016).
 - **UI**: Today "היום שלך" timeline (meals + workout in time order), menu training-day banner and pre/post tags with times, training hero shows today's pre/post meals, weekly report includes workouts, new article "מה לאכול לפני ואחרי אימון", tour rewritten (9 steps across both halves).
+
+## Update 8 — full audit pass (bugs, gaps, speed) and promo v2
+
+Found by reading every module, by fuzz tests over thousands of profiles, and by driving the app with real keystrokes.
+
+- **Fixed (user-visible)**
+  - Sheets stole focus on every keystroke, so the weigh-in field could not be typed (`ui/kit.tsx` Sheet).
+  - Sheets and the meal summary bar rendered under the top/tab bars (fixed layers inside the animated `.view`); they now use a portal to `document.body`.
+  - Numeric fields dropped the decimal point (62.5 kg became 625; 1.5 units became 15): new `NumInput`, `parseNum` (also accepts a decimal comma).
+  - A supplement marked the snack as eaten and silenced its reminder: supplement logs have `method: 'supplement'` (old data migrated in `migrate()`); `mealsDone()` in `state/derived.ts` is the single source of truth for "eaten".
+  - Recomposition silently became a fat-loss diet once a training plan existed (`phasePlan` nutrition goal).
+  - Underweight users (BMI < 18.5) who wanted to gain got a maintenance plan; a target below the healthy minimum was reported unclamped (`targets.ts`, `pace.ts`).
+  - A meal disappeared (and meal times shifted) when diet + allergy + short prep time left no dish for a slot: prep time gives way first, then a dish is borrowed from a near slot; `PlannedMeal.slotIndex` drives times, roles and swaps.
+  - A workout in progress was lost when switching tabs: it is kept in `prime.session`, resumes automatically, and "exit" asks whether to save, continue or discard. Chosen exercise swaps are remembered.
+  - Weekly report said "loss is faster than planned" to people who are gaining; cardio days could not be logged; one cardio day got 80 minutes (now spread evenly).
+- **Added**: backup restore (Profile), storage-full handling (oldest meal photos are dropped first), back button support (`ui/nav.ts`: tabs and sheets), lazy-loaded screens with idle preload (main chunk 748 → 537 kB), phase-change banner on the home screen, day targets on the home screen follow the training day, an explanation of supplement calories in the menu, gender-correct Hebrew (`ui/he.ts`), concise Hebrew instructions for all 799 non-core exercises (`scripts/exercise-steps-he-*.json`, applied by `scripts/apply-exercise-steps-he.py`; `exercises.json` 801 → 469 kB).
+- **Tests**: `src/state/audit.test.ts` (17 regression and fuzz tests; 74 unit tests in total). e2e suites unchanged in scope; `marketing/capture.cjs` updated for the new flows.
+- **Promo v2** (`marketing/promo`): screens recaptured from this build, brighter and larger phone screens, first frame is no longer black, moving glass highlight, stronger push-in on the body scene, neutral headline in the scan scene, music ducked deeper under the voice, "היעד" pronounced correctly (niqqud in `say`), `srt.py` generates the subtitle file, `tts_one.py` re-records a single line. The final mix transcribes word for word (Whisper turbo).
+- **Still open**: testing on a physical phone, a server (accounts, payments, an AI proxy so users need no access code), narrator licence for paid ads (Azure Speech or a human voice).

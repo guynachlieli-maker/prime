@@ -745,8 +745,8 @@ function ExerciseSheet({ id, onClose }: { id: string | null; onClose: () => void
             e && (
               <>
                 <h3 className="sub">איך מבצעים</h3>
-                <p className="fineprint">ההוראות לתרגיל הזה מגיעות מהמאגר הבינלאומי, ומוצגות באנגלית.</p>
-                <ol className="steps" dir="ltr">
+                {!e.stepsHe && <p className="fineprint">ההוראות לתרגיל הזה מגיעות מהמאגר הבינלאומי, ומוצגות באנגלית.</p>}
+                <ol className="steps" dir={e.stepsHe ? undefined : 'ltr'}>
                   {e.steps.map((x) => (
                     <li key={x}>{x}</li>
                   ))}
@@ -819,7 +819,7 @@ function LibraryView({ onOpen }: { onOpen: (id: string) => void }) {
                 <b>{e.he}</b>
                 <small>
                   {e.primary.map((m) => lib.muscles[m] ?? m).join(', ')} · {lib.equipment[e.equipment] ?? e.equipment}
-                  {CORE_BY_REF[e.id] && <span className="badge">הסבר מלא בעברית</span>}
+                  {CORE_BY_REF[e.id] && <span className="badge">הסבר מורחב</span>}
                 </small>
               </span>
             </button>

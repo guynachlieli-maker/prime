@@ -13,6 +13,8 @@ export interface LibExercise {
   mechanic: string | null;
   force: string | null;
   steps: string[];
+  /** true when the instructions are in Hebrew */
+  stepsHe: boolean;
   images: string[];
 }
 
@@ -28,7 +30,7 @@ export interface Library {
 let lib: Library | null = null;
 let loading: Promise<Library> | null = null;
 
-type Row = [string, string, string, number, Muscle[], Muscle[], string | null, string, string, string | null, string | null, string[], string[]];
+type Row = [string, string, string, number, Muscle[], Muscle[], string | null, string, string, string | null, string | null, string[], string[], number?];
 
 export function loadLibrary(): Promise<Library> {
   if (lib) return Promise.resolve(lib);
@@ -39,7 +41,7 @@ export function loadLibrary(): Promise<Library> {
       return r.json() as Promise<{ exercises: Row[]; muscles: Record<string, string>; equipment: Record<string, string>; categories: Record<string, string>; levels: Record<string, string> }>;
     })
     .then((d) => {
-      const exercises = d.exercises.map(([id, he, en, , primary, secondary, equipment, level, category, mechanic, force, steps, images]) => ({ id, he: he || en, en, primary, secondary, equipment: equipment ?? 'none', level, category, mechanic, force, steps, images }));
+      const exercises = d.exercises.map(([id, he, en, , primary, secondary, equipment, level, category, mechanic, force, steps, images, heSteps]) => ({ id, he: he || en, en, primary, secondary, equipment: equipment ?? 'none', level, category, mechanic, force, steps, stepsHe: !!heSteps, images }));
       lib = { exercises, byId: Object.fromEntries(exercises.map((e) => [e.id, e])), muscles: d.muscles, equipment: d.equipment, categories: d.categories, levels: d.levels };
       return lib;
     })

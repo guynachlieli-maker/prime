@@ -1,5 +1,5 @@
 // Offline shell: cache the app files on first visit, serve them when offline.
-const CACHE = 'prime-v2';
+const CACHE = 'prime-v3';
 self.addEventListener('install', (e) => self.skipWaiting());
 self.addEventListener('activate', (e) => e.waitUntil(self.clients.claim()));
 self.addEventListener('fetch', (e) => {
