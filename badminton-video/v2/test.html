@@ -1,0 +1,20 @@
+<!doctype html><html><body style="margin:0;background:#000"><canvas id="c" width="1500" height="560"></canvas>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+import { loadXbot, makeAthlete, poseAthlete, makeShuttleHQ } from '/v2/lib2.js';
+import { smashSpec, readySpec } from '/v2/poses.js';
+const r=new THREE.WebGLRenderer({canvas:document.getElementById('c'),antialias:true,preserveDrawingBuffer:true});r.setSize(1500,560,false);r.toneMapping=THREE.ACESFilmicToneMapping;r.shadowMap.enabled=true;
+const s=new THREE.Scene();s.background=new THREE.Color(0x0a1230);
+const pm=new THREE.PMREMGenerator(r);s.environment=pm.fromScene(new RoomEnvironment(),.04).texture;
+const k=new THREE.DirectionalLight(0xffd0a0,2.5);k.position.set(3,6,4);k.castShadow=true;s.add(k);
+const fl=new THREE.Mesh(new THREE.PlaneGeometry(40,40),new THREE.MeshStandardMaterial({color:0x10193a,roughness:.3}));fl.rotation.x=-Math.PI/2;fl.receiveShadow=true;s.add(fl);
+await loadXbot();
+const times=[0.0,1.5,2.4,2.75,3.0,3.35];
+const groups=[];
+times.forEach((a,i)=>{const A=makeAthlete();A.root.position.x=(i-2.5)*1.25;A.root.rotation.y=0;s.add(A.root);s.add(A.racket);poseAthlete(A,smashSpec(a));groups.push(A)});
+const sh=makeShuttleHQ();sh.scale.setScalar(10);sh.position.set(-3.8,.3,0.0);s.add(sh);
+const cam=new THREE.PerspectiveCamera(32,1500/560,.1,50);cam.position.set(0.5,1.6,9.5);cam.lookAt(0,1.5,0);
+r.render(s,cam);window.ready=true;
+</script></body></html>

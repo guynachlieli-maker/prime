@@ -5,3 +5,9 @@ build/preview/
 build/*.wav
 build/render.log
 build/gltest.*
+v2/build/frames/
+v2/build/frames60/
+v2/build/preview/
+v2/build/*.wav
+v2/build/render.log
+v2/pose_test.png

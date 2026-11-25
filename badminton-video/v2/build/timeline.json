@@ -1,0 +1,1512 @@
+{
+ "fps": 30,
+ "scenes": {
+  "hook": {
+   "start": 0.0,
+   "end": 5.790875
+  },
+  "caveat": {
+   "start": 5.790875,
+   "end": 10.852125000000001
+  },
+  "rank": {
+   "start": 10.852125000000001,
+   "end": 20.258375
+  },
+  "history": {
+   "start": 20.258375,
+   "end": 34.03933333333333
+  },
+  "shuttle": {
+   "start": 34.03933333333333,
+   "end": 39.03933333333333
+  },
+  "why": {
+   "start": 39.03933333333333,
+   "end": 44.176625
+  },
+  "close": {
+   "start": 44.176625,
+   "end": 47.860875
+  },
+  "endcard": {
+   "start": 47.860875,
+   "end": 50.360875
+  }
+ },
+ "lines": {
+  "k1": {
+   "text": "Five sixty-five kilometers per hour.",
+   "start": 1.3,
+   "end": 3.4843333333333337,
+   "scene": "hook",
+   "cap": "565 km/h.",
+   "numAt": 1.3,
+   "words": [
+    {
+     "w": "565",
+     "start": 1.3,
+     "end": 2.174
+    },
+    {
+     "w": "km/h.",
+     "start": 2.174,
+     "end": 3.484
+    }
+   ],
+   "chunks": [
+    {
+     "text": "565 km/h.",
+     "start": 1.3,
+     "end": 3.484
+    }
+   ]
+  },
+  "k2": {
+   "text": "The fastest hit ever recorded.",
+   "start": 3.7043333333333335,
+   "end": 5.440875,
+   "scene": "hook",
+   "cap": "The fastest hit ever recorded.",
+   "numAt": 3.7043333333333335,
+   "words": [
+    {
+     "w": "The",
+     "start": 3.704,
+     "end": 3.928
+    },
+    {
+     "w": "fastest",
+     "start": 3.928,
+     "end": 4.377
+    },
+    {
+     "w": "hit",
+     "start": 4.377,
+     "end": 4.601
+    },
+    {
+     "w": "ever",
+     "start": 4.601,
+     "end": 4.881
+    },
+    {
+     "w": "recorded.",
+     "start": 4.881,
+     "end": 5.441
+    }
+   ],
+   "chunks": [
+    {
+     "text": "The fastest hit",
+     "start": 3.704,
+     "end": 4.603
+    },
+    {
+     "text": "ever recorded.",
+     "start": 4.603,
+     "end": 5.441
+    }
+   ]
+  },
+  "v1": {
+   "text": "But that was a lab test.",
+   "start": 6.240875,
+   "end": 7.648125,
+   "scene": "caveat",
+   "cap": "But that was a lab test.",
+   "numAt": 6.240875,
+   "words": [
+    {
+     "w": "But",
+     "start": 6.241,
+     "end": 6.466
+    },
+    {
+     "w": "that",
+     "start": 6.466,
+     "end": 6.747
+    },
+    {
+     "w": "was",
+     "start": 6.747,
+     "end": 6.973
+    },
+    {
+     "w": "a",
+     "start": 6.973,
+     "end": 7.085
+    },
+    {
+     "w": "lab",
+     "start": 7.085,
+     "end": 7.31
+    },
+    {
+     "w": "test.",
+     "start": 7.31,
+     "end": 7.648
+    }
+   ],
+   "chunks": [
+    {
+     "text": "But that was",
+     "start": 6.241,
+     "end": 6.975
+    },
+    {
+     "text": "a lab test.",
+     "start": 6.975,
+     "end": 7.648
+    }
+   ]
+  },
+  "v2": {
+   "text": "In a real match, the record is four twenty-six.",
+   "start": 7.948125,
+   "end": 10.502125,
+   "scene": "caveat",
+   "cap": "In a real match, the record is 426.",
+   "numAt": 9.632678191489362,
+   "words": [
+    {
+     "w": "In",
+     "start": 7.948,
+     "end": 8.161
+    },
+    {
+     "w": "a",
+     "start": 8.161,
+     "end": 8.303
+    },
+    {
+     "w": "real",
+     "start": 8.303,
+     "end": 8.658
+    },
+    {
+     "w": "match,",
+     "start": 8.658,
+     "end": 9.154
+    },
+    {
+     "w": "the",
+     "start": 9.154,
+     "end": 9.438
+    },
+    {
+     "w": "record",
+     "start": 9.438,
+     "end": 9.935
+    },
+    {
+     "w": "is",
+     "start": 9.935,
+     "end": 10.147
+    },
+    {
+     "w": "426.",
+     "start": 10.147,
+     "end": 10.502
+    }
+   ],
+   "chunks": [
+    {
+     "text": "In a real match,",
+     "start": 7.948,
+     "end": 9.15
+    },
+    {
+     "text": "the record is 426.",
+     "start": 9.15,
+     "end": 10.502
+    }
+   ]
+  },
+  "r1": {
+   "text": "That still beats a Formula 1 car, at three seventy-two point six.",
+   "start": 11.302125,
+   "end": 15.445458333333335,
+   "scene": "rank",
+   "cap": "That still beats a Formula 1 car, at 372.6.",
+   "numAt": 13.660637820512822,
+   "words": [
+    {
+     "w": "That",
+     "start": 11.302,
+     "end": 11.773
+    },
+    {
+     "w": "still",
+     "start": 11.773,
+     "end": 12.338
+    },
+    {
+     "w": "beats",
+     "start": 12.338,
+     "end": 12.903
+    },
+    {
+     "w": "a",
+     "start": 12.903,
+     "end": 13.091
+    },
+    {
+     "w": "Formula",
+     "start": 13.091,
+     "end": 13.845
+    },
+    {
+     "w": "1",
+     "start": 13.845,
+     "end": 14.033
+    },
+    {
+     "w": "car,",
+     "start": 14.033,
+     "end": 14.504
+    },
+    {
+     "w": "at",
+     "start": 14.504,
+     "end": 14.786
+    },
+    {
+     "w": "372.6.",
+     "start": 14.786,
+     "end": 15.445
+    }
+   ],
+   "chunks": [
+    {
+     "text": "That still beats",
+     "start": 11.302,
+     "end": 12.919
+    },
+    {
+     "text": "a Formula 1",
+     "start": 12.919,
+     "end": 14.031
+    },
+    {
+     "text": "car, at 372.6.",
+     "start": 14.031,
+     "end": 15.445
+    }
+   ]
+  },
+  "r2": {
+   "text": "And tennis's fastest recorded serve, at two sixty-three point four.",
+   "start": 15.795458333333332,
+   "end": 19.908375,
+   "scene": "rank",
+   "cap": "And tennis's fastest recorded serve, at 263.4.",
+   "numAt": 18.250930970149252,
+   "words": [
+    {
+     "w": "And",
+     "start": 15.795,
+     "end": 16.145
+    },
+    {
+     "w": "tennis's",
+     "start": 16.145,
+     "end": 16.933
+    },
+    {
+     "w": "fastest",
+     "start": 16.933,
+     "end": 17.633
+    },
+    {
+     "w": "recorded",
+     "start": 17.633,
+     "end": 18.421
+    },
+    {
+     "w": "serve,",
+     "start": 18.421,
+     "end": 19.033
+    },
+    {
+     "w": "at",
+     "start": 19.033,
+     "end": 19.296
+    },
+    {
+     "w": "263.4.",
+     "start": 19.296,
+     "end": 19.908
+    }
+   ],
+   "chunks": [
+    {
+     "text": "And tennis's fastest recorded",
+     "start": 15.795,
+     "end": 18.446
+    },
+    {
+     "text": "serve, at 263.4.",
+     "start": 18.446,
+     "end": 19.908
+    }
+   ]
+  },
+  "y1": {
+   "text": "Its ancestors go back two thousand years.",
+   "start": 20.708375,
+   "end": 23.135916666666667,
+   "scene": "history",
+   "cap": "Its ancestors go back 2,000 years.",
+   "numAt": 22.010958333333335,
+   "words": [
+    {
+     "w": "Its",
+     "start": 20.708,
+     "end": 20.986
+    },
+    {
+     "w": "ancestors",
+     "start": 20.986,
+     "end": 21.679
+    },
+    {
+     "w": "go",
+     "start": 21.679,
+     "end": 21.887
+    },
+    {
+     "w": "back",
+     "start": 21.887,
+     "end": 22.234
+    },
+    {
+     "w": "2,000",
+     "start": 22.234,
+     "end": 22.65
+    },
+    {
+     "w": "years.",
+     "start": 22.65,
+     "end": 23.136
+    }
+   ],
+   "chunks": [
+    {
+     "text": "Its ancestors go",
+     "start": 20.708,
+     "end": 21.885
+    },
+    {
+     "text": "back 2,000 years.",
+     "start": 21.885,
+     "end": 23.136
+    }
+   ]
+  },
+  "y2": {
+   "text": "British officers in India added a net in the eighteen sixties.",
+   "start": 23.435916666666667,
+   "end": 27.258791666666667,
+   "scene": "history",
+   "cap": "British officers in India added a net in the 1860s.",
+   "numAt": 26.210584005376344,
+   "words": [
+    {
+     "w": "British",
+     "start": 23.436,
+     "end": 24.024
+    },
+    {
+     "w": "officers",
+     "start": 24.024,
+     "end": 24.686
+    },
+    {
+     "w": "in",
+     "start": 24.686,
+     "end": 24.906
+    },
+    {
+     "w": "India",
+     "start": 24.906,
+     "end": 25.347
+    },
+    {
+     "w": "added",
+     "start": 25.347,
+     "end": 25.788
+    },
+    {
+     "w": "a",
+     "start": 25.788,
+     "end": 25.935
+    },
+    {
+     "w": "net",
+     "start": 25.935,
+     "end": 26.23
+    },
+    {
+     "w": "in",
+     "start": 26.23,
+     "end": 26.45
+    },
+    {
+     "w": "the",
+     "start": 26.45,
+     "end": 26.744
+    },
+    {
+     "w": "1860s.",
+     "start": 26.744,
+     "end": 27.259
+    }
+   ],
+   "chunks": [
+    {
+     "text": "British officers in India",
+     "start": 23.436,
+     "end": 25.386
+    },
+    {
+     "text": "added a net in",
+     "start": 25.386,
+     "end": 26.479
+    },
+    {
+     "text": "the 1860s.",
+     "start": 26.479,
+     "end": 27.259
+    }
+   ]
+  },
+  "y3": {
+   "text": "A party at Badminton House named it, in eighteen seventy-three.",
+   "start": 27.558791666666668,
+   "end": 31.301250000000003,
+   "scene": "history",
+   "cap": "A party at Badminton House named it, in 1873.",
+   "numAt": 29.93495568783069,
+   "words": [
+    {
+     "w": "A",
+     "start": 27.559,
+     "end": 27.722
+    },
+    {
+     "w": "party",
+     "start": 27.722,
+     "end": 28.21
+    },
+    {
+     "w": "at",
+     "start": 28.21,
+     "end": 28.454
+    },
+    {
+     "w": "Badminton",
+     "start": 28.454,
+     "end": 29.267
+    },
+    {
+     "w": "House",
+     "start": 29.267,
+     "end": 29.755
+    },
+    {
+     "w": "named",
+     "start": 29.755,
+     "end": 30.244
+    },
+    {
+     "w": "it,",
+     "start": 30.244,
+     "end": 30.569
+    },
+    {
+     "w": "in",
+     "start": 30.569,
+     "end": 30.813
+    },
+    {
+     "w": "1873.",
+     "start": 30.813,
+     "end": 31.301
+    }
+   ],
+   "chunks": [
+    {
+     "text": "A party at",
+     "start": 27.559,
+     "end": 28.429
+    },
+    {
+     "text": "Badminton House named",
+     "start": 28.429,
+     "end": 30.257
+    },
+    {
+     "text": "it, in 1873.",
+     "start": 30.257,
+     "end": 31.301
+    }
+   ]
+  },
+  "y4": {
+   "text": "The Olympics came in nineteen ninety-two.",
+   "start": 31.60125,
+   "end": 33.68933333333334,
+   "scene": "history",
+   "cap": "The Olympics came in 1992.",
+   "numAt": 32.670756097560975,
+   "words": [
+    {
+     "w": "The",
+     "start": 31.601,
+     "end": 31.911
+    },
+    {
+     "w": "Olympics",
+     "start": 31.911,
+     "end": 32.607
+    },
+    {
+     "w": "came",
+     "start": 32.607,
+     "end": 32.993
+    },
+    {
+     "w": "in",
+     "start": 32.993,
+     "end": 33.225
+    },
+    {
+     "w": "1992.",
+     "start": 33.225,
+     "end": 33.689
+    }
+   ],
+   "chunks": [
+    {
+     "text": "The Olympics came",
+     "start": 31.601,
+     "end": 33.021
+    },
+    {
+     "text": "in 1992.",
+     "start": 33.021,
+     "end": 33.689
+    }
+   ]
+  },
+  "s1": {
+   "text": "Every shuttle is sixteen feathers in a cork base,",
+   "start": 34.43933333333334,
+   "end": 36.98800000000001,
+   "scene": "shuttle",
+   "cap": "Every shuttle is 16 feathers in a cork base,",
+   "numAt": 35.323564625850345,
+   "words": [
+    {
+     "w": "Every",
+     "start": 34.439,
+     "end": 34.779
+    },
+    {
+     "w": "shuttle",
+     "start": 34.779,
+     "end": 35.232
+    },
+    {
+     "w": "is",
+     "start": 35.232,
+     "end": 35.402
+    },
+    {
+     "w": "16",
+     "start": 35.402,
+     "end": 35.572
+    },
+    {
+     "w": "feathers",
+     "start": 35.572,
+     "end": 36.082
+    },
+    {
+     "w": "in",
+     "start": 36.082,
+     "end": 36.252
+    },
+    {
+     "w": "a",
+     "start": 36.252,
+     "end": 36.365
+    },
+    {
+     "w": "cork",
+     "start": 36.365,
+     "end": 36.648
+    },
+    {
+     "w": "base,",
+     "start": 36.648,
+     "end": 36.988
+    }
+   ],
+   "chunks": [
+    {
+     "text": "Every shuttle is",
+     "start": 34.439,
+     "end": 35.41
+    },
+    {
+     "text": "16 feathers in",
+     "start": 35.41,
+     "end": 36.26
+    },
+    {
+     "text": "a cork base,",
+     "start": 36.26,
+     "end": 36.988
+    }
+   ]
+  },
+  "s2": {
+   "text": "weighing about five grams.",
+   "start": 37.138,
+   "end": 38.57333333333333,
+   "scene": "shuttle",
+   "cap": "weighing about 5 grams.",
+   "numAt": 37.96607692307692,
+   "words": [
+    {
+     "w": "weighing",
+     "start": 37.138,
+     "end": 37.676
+    },
+    {
+     "w": "about",
+     "start": 37.676,
+     "end": 38.035
+    },
+    {
+     "w": "5",
+     "start": 38.035,
+     "end": 38.155
+    },
+    {
+     "w": "grams.",
+     "start": 38.155,
+     "end": 38.573
+    }
+   ],
+   "chunks": [
+    {
+     "text": "weighing about 5 grams.",
+     "start": 37.138,
+     "end": 38.573
+    }
+   ]
+  },
+  "w1": {
+   "text": "A shuttle slows down fast, so these speeds aren't directly comparable.",
+   "start": 39.53933333333333,
+   "end": 43.826625,
+   "scene": "why",
+   "cap": "A shuttle slows down fast, so these speeds aren't directly comparable.",
+   "numAt": 39.53933333333333,
+   "words": [
+    {
+     "w": "A",
+     "start": 39.539,
+     "end": 39.66
+    },
+    {
+     "w": "shuttle",
+     "start": 39.66,
+     "end": 40.143
+    },
+    {
+     "w": "slows",
+     "start": 40.143,
+     "end": 40.505
+    },
+    {
+     "w": "down",
+     "start": 40.505,
+     "end": 40.807
+    },
+    {
+     "w": "fast,",
+     "start": 40.807,
+     "end": 41.17
+    },
+    {
+     "w": "so",
+     "start": 41.17,
+     "end": 41.351
+    },
+    {
+     "w": "these",
+     "start": 41.351,
+     "end": 41.713
+    },
+    {
+     "w": "speeds",
+     "start": 41.713,
+     "end": 42.136
+    },
+    {
+     "w": "aren't",
+     "start": 42.136,
+     "end": 42.559
+    },
+    {
+     "w": "directly",
+     "start": 42.559,
+     "end": 43.102
+    },
+    {
+     "w": "comparable.",
+     "start": 43.102,
+     "end": 43.827
+    }
+   ],
+   "chunks": [
+    {
+     "text": "A shuttle slows down",
+     "start": 39.539,
+     "end": 40.8
+    },
+    {
+     "text": "fast, so these speeds",
+     "start": 40.8,
+     "end": 42.124
+    },
+    {
+     "text": "aren't directly comparable.",
+     "start": 42.124,
+     "end": 43.827
+    }
+   ]
+  },
+  "z1": {
+   "text": "So which sport is faster?",
+   "start": 44.726625000000006,
+   "end": 46.256708333333336,
+   "scene": "close",
+   "cap": "So which sport is faster?",
+   "numAt": 44.726625000000006,
+   "words": [
+    {
+     "w": "So",
+     "start": 44.727,
+     "end": 44.903
+    },
+    {
+     "w": "which",
+     "start": 44.903,
+     "end": 45.256
+    },
+    {
+     "w": "sport",
+     "start": 45.256,
+     "end": 45.609
+    },
+    {
+     "w": "is",
+     "start": 45.609,
+     "end": 45.786
+    },
+    {
+     "w": "faster?",
+     "start": 45.786,
+     "end": 46.257
+    }
+   ],
+   "chunks": [
+    {
+     "text": "So which sport",
+     "start": 44.727,
+     "end": 45.619
+    },
+    {
+     "text": "is faster?",
+     "start": 45.619,
+     "end": 46.257
+    }
+   ]
+  },
+  "z2": {
+   "text": "Comment below.",
+   "start": 46.506708333333336,
+   "end": 47.510875000000006,
+   "scene": "close",
+   "cap": "Comment below.",
+   "numAt": 46.506708333333336,
+   "words": [
+    {
+     "w": "Comment",
+     "start": 46.507,
+     "end": 47.042
+    },
+    {
+     "w": "below.",
+     "start": 47.042,
+     "end": 47.511
+    }
+   ],
+   "chunks": [
+    {
+     "text": "Comment below.",
+     "start": 46.507,
+     "end": 47.511
+    }
+   ]
+  }
+ },
+ "marks": {
+  "contact": 0.8,
+  "reveal565": 0.9,
+  "stamp": 6.190875,
+  "reveal426": 9.132678191489362,
+  "bar426": 11.102125000000001,
+  "bar372": 13.110637820512821,
+  "bar263": 17.70093097014925,
+  "hy": [
+   20.708375,
+   23.435916666666667,
+   27.558791666666668,
+   31.60125
+  ],
+  "feathers": 34.723564625850344,
+  "g5": 37.46607692307692,
+  "launch": 39.38933333333333,
+  "lbl1": 40.03933333333333,
+  "lbl2": 41.03933333333333,
+  "comment": 44.726625000000006,
+  "hit": 47.760875,
+  "lastDrop": 48.010875
+ },
+ "order": [
+  "hook",
+  "caveat",
+  "rank",
+  "history",
+  "shuttle",
+  "why",
+  "close",
+  "endcard"
+ ],
+ "cuts": [
+  {
+   "t": 5.790875,
+   "kind": "whip",
+   "dir": [
+    1,
+    0
+   ]
+  },
+  {
+   "t": 10.852125000000001,
+   "kind": "zoom",
+   "dir": [
+    0,
+    0
+   ]
+  },
+  {
+   "t": 20.258375,
+   "kind": "whip",
+   "dir": [
+    0,
+    1
+   ]
+  },
+  {
+   "t": 34.03933333333333,
+   "kind": "glitch",
+   "dir": [
+    1,
+    0
+   ]
+  },
+  {
+   "t": 39.03933333333333,
+   "kind": "whip",
+   "dir": [
+    -1,
+    0
+   ]
+  },
+  {
+   "t": 44.176625,
+   "kind": "flash",
+   "dir": [
+    0,
+    0
+   ]
+  },
+  {
+   "t": 47.860875,
+   "kind": "fade",
+   "dir": [
+    0,
+    0
+   ]
+  }
+ ],
+ "total": 50.360875,
+ "events": [
+  {
+   "t": 0.3,
+   "type": "whoosh",
+   "gain": 0.5,
+   "dur": 0.6
+  },
+  {
+   "t": 0.8,
+   "type": "crack"
+  },
+  {
+   "t": 0.8,
+   "type": "shake",
+   "amp": 0.14
+  },
+  {
+   "t": 0.9,
+   "type": "bass"
+  },
+  {
+   "t": 0.9,
+   "type": "punch"
+  },
+  {
+   "t": 0.93,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.0,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.07,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.14,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.21,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.28,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 1.35,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 5.651,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 5.791,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 6.191,
+   "type": "thud",
+   "gain": 0.9
+  },
+  {
+   "t": 6.191,
+   "type": "shake",
+   "amp": 0.06
+  },
+  {
+   "t": 6.191,
+   "type": "punch"
+  },
+  {
+   "t": 9.133,
+   "type": "thud",
+   "gain": 0.8
+  },
+  {
+   "t": 9.133,
+   "type": "punch"
+  },
+  {
+   "t": 9.163,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.233,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.303,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.373,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.443,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.513,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.583,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 10.712,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 10.852,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 11.102,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 11.102,
+   "type": "whoosh",
+   "gain": 0.3,
+   "dur": 0.4
+  },
+  {
+   "t": 11.152,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.222,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.292,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.362,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.432,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.502,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 11.572,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.111,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 13.111,
+   "type": "whoosh",
+   "gain": 0.3,
+   "dur": 0.4
+  },
+  {
+   "t": 13.111,
+   "type": "punch"
+  },
+  {
+   "t": 13.161,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.231,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.301,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.371,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.441,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.511,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 13.581,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 17.701,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 17.701,
+   "type": "whoosh",
+   "gain": 0.3,
+   "dur": 0.4
+  },
+  {
+   "t": 17.701,
+   "type": "punch"
+  },
+  {
+   "t": 17.751,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 17.821,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 17.891,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 17.961,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 18.031,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 18.101,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 18.171,
+   "type": "tick",
+   "gain": 0.35
+  },
+  {
+   "t": 20.118,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 20.258,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 20.658,
+   "type": "blip",
+   "f": 440,
+   "gain": 0.7
+  },
+  {
+   "t": 20.658,
+   "type": "punch"
+  },
+  {
+   "t": 20.708,
+   "type": "whoosh",
+   "gain": 0.4,
+   "dur": 0.7
+  },
+  {
+   "t": 23.386,
+   "type": "blip",
+   "f": 560,
+   "gain": 0.7
+  },
+  {
+   "t": 23.386,
+   "type": "punch"
+  },
+  {
+   "t": 27.509,
+   "type": "blip",
+   "f": 660,
+   "gain": 0.7
+  },
+  {
+   "t": 27.509,
+   "type": "punch"
+  },
+  {
+   "t": 27.559,
+   "type": "whoosh",
+   "gain": 0.4,
+   "dur": 0.6
+  },
+  {
+   "t": 31.551,
+   "type": "blip",
+   "f": 880,
+   "gain": 0.7
+  },
+  {
+   "t": 31.551,
+   "type": "punch"
+  },
+  {
+   "t": 33.899,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 33.989,
+   "type": "sting",
+   "gain": 0.5
+  },
+  {
+   "t": 34.039,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 34.724,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 34.769,
+   "type": "tick",
+   "gain": 0.47000000000000003
+  },
+  {
+   "t": 34.814,
+   "type": "tick",
+   "gain": 0.49
+  },
+  {
+   "t": 34.859,
+   "type": "tick",
+   "gain": 0.51
+  },
+  {
+   "t": 34.904,
+   "type": "tick",
+   "gain": 0.53
+  },
+  {
+   "t": 34.949,
+   "type": "tick",
+   "gain": 0.55
+  },
+  {
+   "t": 34.994,
+   "type": "tick",
+   "gain": 0.5700000000000001
+  },
+  {
+   "t": 35.039,
+   "type": "tick",
+   "gain": 0.5900000000000001
+  },
+  {
+   "t": 35.084,
+   "type": "tick",
+   "gain": 0.61
+  },
+  {
+   "t": 35.129,
+   "type": "tick",
+   "gain": 0.63
+  },
+  {
+   "t": 35.174,
+   "type": "tick",
+   "gain": 0.65
+  },
+  {
+   "t": 35.219,
+   "type": "tick",
+   "gain": 0.67
+  },
+  {
+   "t": 35.264,
+   "type": "tick",
+   "gain": 0.69
+  },
+  {
+   "t": 35.309,
+   "type": "tick",
+   "gain": 0.71
+  },
+  {
+   "t": 35.354,
+   "type": "tick",
+   "gain": 0.73
+  },
+  {
+   "t": 35.399,
+   "type": "tick",
+   "gain": 0.75
+  },
+  {
+   "t": 37.466,
+   "type": "thud",
+   "gain": 0.7
+  },
+  {
+   "t": 37.466,
+   "type": "punch"
+  },
+  {
+   "t": 37.496,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.566,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.636,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.706,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.776,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.846,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.916,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.899,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 39.039,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 39.389,
+   "type": "whoosh",
+   "gain": 0.6,
+   "dur": 0.7
+  },
+  {
+   "t": 40.039,
+   "type": "blip",
+   "f": 520
+  },
+  {
+   "t": 41.039,
+   "type": "blip",
+   "f": 700
+  },
+  {
+   "t": 44.037,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 44.177,
+   "type": "thud",
+   "gain": 0.55
+  },
+  {
+   "t": 44.727,
+   "type": "punch"
+  },
+  {
+   "t": 44.727,
+   "type": "blip",
+   "f": 880
+  },
+  {
+   "t": 47.721,
+   "type": "whoosh",
+   "gain": 0.85,
+   "dur": 0.45
+  },
+  {
+   "t": 47.761,
+   "type": "bass"
+  },
+  {
+   "t": 47.761,
+   "type": "thud",
+   "gain": 0.9
+  }
+ ]
+}

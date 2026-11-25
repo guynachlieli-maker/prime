@@ -1,0 +1,41 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Anton';font-weight:400;src:url('/node_modules/@fontsource/anton/files/anton-latin-400-normal.woff2') format('woff2');}
+@font-face{font-family:'Oswald';font-weight:700;src:url('/node_modules/@fontsource/oswald/files/oswald-latin-700-normal.woff2') format('woff2');}
+@font-face{font-family:'Oswald';font-weight:500;src:url('/node_modules/@fontsource/oswald/files/oswald-latin-500-normal.woff2') format('woff2');}
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#05081a}
+#gl,#globe,#fxc{position:absolute;left:0;top:0;width:1080px;height:1920px}
+.layer{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+#svg{position:absolute;left:0;top:0}
+#blk{background:#000;opacity:1}
+.t{position:absolute;left:0;top:0;color:#fff;white-space:nowrap;line-height:1;opacity:0;will-change:transform,opacity;text-transform:uppercase}
+.disp{font-family:'Anton',Impact,sans-serif;font-weight:400;letter-spacing:.012em;-webkit-text-stroke:0;paint-order:stroke fill;
+  text-shadow:0 7px 0 rgba(6,10,30,.95),0 0 38px rgba(0,0,0,.55)}
+.osw{font-family:'Oswald',sans-serif;font-weight:700;letter-spacing:.03em;text-shadow:0 4px 18px rgba(0,0,0,.7)}
+.or{color:#ff7a1f}.tl{color:#2fd3d0}.gr{color:#39ff14}
+.u{font-family:'Oswald',sans-serif;font-weight:700;font-size:.3em;margin-left:.14em;color:#ff8a2a;letter-spacing:.05em;text-shadow:0 4px 14px rgba(0,0,0,.7)}
+#cap{font-family:'Oswald',sans-serif;font-weight:700;font-size:66px;letter-spacing:.02em;text-shadow:none;-webkit-text-stroke:11px #060a1e;paint-order:stroke fill;filter:drop-shadow(0 5px 10px rgba(0,0,0,.55))}
+#cap span{display:inline-block;margin:0 .22em}
+#cap span.on{color:#ff8a2a}
+.tape{background:repeating-linear-gradient(-45deg,#ff6a13 0 38px,#0a0d1c 38px 76px);padding:14px 0;box-shadow:0 10px 40px rgba(0,0,0,.6)}
+.tape .in{background:#0a0d1c;color:#fff;padding:12px 40px 6px;display:inline-block;margin:0 auto}
+.row{position:absolute;left:0;top:0;opacity:0}
+.bar{position:absolute;height:92px;border-radius:10px}
+.pill{font-family:'Oswald',sans-serif;font-weight:700;border:5px solid #ff6a13;color:#ff8a2a;padding:.2em .55em .1em;border-radius:12px;background:rgba(8,12,32,.72)}
+.co{font-family:'Oswald',sans-serif;font-weight:700;font-size:44px;background:rgba(5,8,24,.8);padding:10px 22px 6px;border-radius:8px;border:3px solid #2fd3d0;letter-spacing:.08em}
+</style></head>
+<body><div id="stage">
+<canvas id="gl" width="1080" height="1920"></canvas>
+<canvas id="globe" width="1080" height="1920"></canvas>
+<canvas id="fxc" width="1080" height="1920"></canvas>
+<svg class="layer" id="svg" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+<div class="layer" id="hud"></div>
+<div class="layer" id="blk"></div>
+</div>
+<script src="/node_modules/d3/dist/d3.min.js"></script>
+<script src="/node_modules/topojson-client/dist/topojson-client.min.js"></script>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js","three/addons/":"/node_modules/three/examples/jsm/"}}</script>
+<script type="module" src="/v2/scene.js"></script>
+</body></html>
