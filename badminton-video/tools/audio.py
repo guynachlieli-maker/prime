@@ -4,6 +4,7 @@ import json, os
 import numpy as np
 import soundfile as sf
 from scipy.signal import butter, sosfilt, resample_poly
+from scipy.ndimage import uniform_filter1d
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 B = os.path.join(ROOT, "build")
@@ -34,7 +35,7 @@ def whoosh(dur=.6, gain=.8):
     out = np.zeros(n); blocks = 24; bl = n // blocks
     for i in range(blocks):
         c = 350 * (14 ** (i / blocks)); s = max(0, i * bl); e = n if i == blocks - 1 else s + bl
-        out[s:e] = bp(x, c * .7, min(c * 1.5, 20000), 2)[s:e]
+        out[s:e] = bp(x[s:e], c * .7, min(c * 1.5, 20000), 2)
     env = np.sin(np.pi * np.clip(t / dur, 0, 1)) ** 1.6
     return out * env * gain * 1.6
 def crack(gain=1.0):
@@ -92,7 +93,7 @@ inten = pts_env([
 # 0.5 s total drop before the 565 reveal, returns with the bass hit
 gate = np.ones(N)
 gate[(t >= M['musicDrop']) & (t < M['reveal565'])] = 0
-gate = np.convolve(gate, np.ones(int(.01 * SR)) / int(.01 * SR), mode='same')
+gate = uniform_filter1d(gate, int(.01 * SR))
 # kick/pulse
 pulse = np.zeros(N)
 k = int(.35 * SR); tk = tt(k)
@@ -123,7 +124,7 @@ mus[why] = (mus * 0.8 + 0)[why]
 add(mus, bass(1.0) * .9, M['hit'], 1.0)
 # end card fade out
 mus *= np.clip((tl["total"] + .6 - t) / .8, 0, 1)
-mus *= 10 ** (-17 / 20) / max(np.sqrt(np.mean(mus[:int(tl['total'] * SR)] ** 2)), 1e-6) * .9
+mus *= 10 ** (-24 / 20) / max(np.sqrt(np.mean(mus[:int(tl['total'] * SR)] ** 2)), 1e-6) * .9
 
 # ------------------------------------------------------------------ narration to 48k
 nar, sr = sf.read(os.path.join(B, "narration_24k.wav"))
@@ -131,8 +132,8 @@ nar = resample_poly(nar, SR // sr, 1)
 narr = np.zeros(N); narr[:min(N, len(nar))] = nar[:N]
 # sidechain duck: smoothed narration envelope
 e = np.abs(narr); w = int(.12 * SR)
-env = np.convolve(e, np.ones(w) / w, mode='same'); env = np.clip(env / .06, 0, 1)
-env = np.convolve(env, np.ones(int(.25 * SR)) / int(.25 * SR), mode='same')
+env = uniform_filter1d(e, w); env = np.clip(env / .06, 0, 1)
+env = uniform_filter1d(env, int(.25 * SR))
 mus *= 1 - .5 * env
 sfx *= 10 ** (-9 / 20)
 
