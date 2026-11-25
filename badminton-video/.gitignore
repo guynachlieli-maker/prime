@@ -1,0 +1,7 @@
+node_modules/
+build/frames/
+build/frames60/
+build/preview/
+build/*.wav
+build/render.log
+build/gltest.*

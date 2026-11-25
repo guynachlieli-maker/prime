@@ -1,0 +1,1011 @@
+{
+ "fps": 30,
+ "scenes": {
+  "cold": {
+   "start": 0.0,
+   "end": 7.167541666666667
+  },
+  "f1": {
+   "start": 7.167541666666667,
+   "end": 13.642375
+  },
+  "shuttle": {
+   "start": 13.642375,
+   "end": 22.642375
+  },
+  "smash": {
+   "start": 22.642375,
+   "end": 31.642375
+  },
+  "records": {
+   "start": 31.642375,
+   "end": 44.57287499999999
+  },
+  "honest": {
+   "start": 44.57287499999999,
+   "end": 57.57287499999999
+  },
+  "tennis": {
+   "start": 57.57287499999999,
+   "end": 70.07287499999998
+  },
+  "why": {
+   "start": 70.07287499999998,
+   "end": 79.57287499999998
+  },
+  "close": {
+   "start": 79.57287499999998,
+   "end": 85.17287499999998
+  },
+  "endcard": {
+   "start": 85.17287499999998,
+   "end": 88.17287499999998
+  }
+ },
+ "lines": {
+  "c1": {
+   "text": "This is the fastest hit ever recorded in badminton.",
+   "start": 0.35,
+   "end": 3.5132083333333335,
+   "scene": "cold",
+   "cap": "This is the fastest hit ever recorded in badminton.",
+   "chunks": [
+    {
+     "text": "This is the fastest hit",
+     "start": 0.35,
+     "end": 1.805
+    },
+    {
+     "text": "ever recorded in badminton.",
+     "start": 1.805,
+     "end": 3.513
+    }
+   ]
+  },
+  "c2": {
+   "text": "Five sixty-five kilometers per hour.",
+   "start": 4.563208333333334,
+   "end": 6.747541666666667,
+   "scene": "cold",
+   "cap": "565 km/h.",
+   "chunks": [
+    {
+     "text": "565 km/h.",
+     "start": 4.563,
+     "end": 6.748
+    }
+   ]
+  },
+  "f1a": {
+   "text": "That's faster than a Formula 1 car.",
+   "start": 7.367541666666667,
+   "end": 9.504583333333333,
+   "scene": "f1",
+   "cap": "That's faster than a Formula 1 car.",
+   "chunks": [
+    {
+     "text": "That's faster than a",
+     "start": 7.368,
+     "end": 8.625
+    },
+    {
+     "text": "Formula 1 car.",
+     "start": 8.625,
+     "end": 9.505
+    }
+   ]
+  },
+  "f1b": {
+   "text": "Three hundred seventy-two point six kilometers per hour.",
+   "start": 10.024583333333332,
+   "end": 13.222375,
+   "scene": "f1",
+   "cap": "372.6 km/h.",
+   "chunks": [
+    {
+     "text": "372.6 km/h.",
+     "start": 10.025,
+     "end": 13.222
+    }
+   ]
+  },
+  "s1": {
+   "text": "A shuttlecock weighs about five grams.",
+   "start": 13.842374999999999,
+   "end": 16.012749999999997,
+   "scene": "shuttle",
+   "cap": "A shuttlecock weighs about 5 grams.",
+   "chunks": [
+    {
+     "text": "A shuttlecock weighs about 5 grams.",
+     "start": 13.842,
+     "end": 16.013
+    }
+   ]
+  },
+  "s2": {
+   "text": "It's light, which helps it launch this fast.",
+   "start": 16.23275,
+   "end": 18.3455,
+   "scene": "shuttle",
+   "cap": "It's light, which helps it launch this fast.",
+   "chunks": [
+    {
+     "text": "It's light, which helps",
+     "start": 16.233,
+     "end": 17.363
+    },
+    {
+     "text": "it launch this fast.",
+     "start": 17.363,
+     "end": 18.346
+    }
+   ]
+  },
+  "m1": {
+   "text": "A smash starts with the whole body, not just the arm.",
+   "start": 23.342375,
+   "end": 26.328583333333334,
+   "scene": "smash",
+   "cap": "A smash starts with the whole body, not just the arm.",
+   "chunks": [
+    {
+     "text": "A smash starts with the whole",
+     "start": 23.342,
+     "end": 25.008
+    },
+    {
+     "text": "body, not just the arm.",
+     "start": 25.008,
+     "end": 26.329
+    }
+   ]
+  },
+  "r1": {
+   "text": "In 2013, a Malaysian player hit four ninety-three.",
+   "start": 31.842375,
+   "end": 35.6665,
+   "scene": "records",
+   "cap": "In 2013, a Malaysian player hit 493 km/h.",
+   "chunks": [
+    {
+     "text": "In 2013, a Malaysian",
+     "start": 31.842,
+     "end": 33.754
+    },
+    {
+     "text": "player hit 493 km/h.",
+     "start": 33.754,
+     "end": 35.666
+    }
+   ]
+  },
+  "r2": {
+   "text": "In 2023, an Indian player hit five sixty-five.",
+   "start": 36.0365,
+   "end": 40.12183333333333,
+   "scene": "records",
+   "cap": "In 2023, an Indian player hit 565.",
+   "chunks": [
+    {
+     "text": "In 2023, an Indian",
+     "start": 36.036,
+     "end": 38.265
+    },
+    {
+     "text": "player hit 565.",
+     "start": 38.265,
+     "end": 40.122
+    }
+   ]
+  },
+  "r3": {
+   "text": "The women's record is four thirty-eight, set by a Malaysian player.",
+   "start": 40.491833333333325,
+   "end": 44.152874999999995,
+   "scene": "records",
+   "cap": "The women's record is 438, set by a Malaysian player.",
+   "chunks": [
+    {
+     "text": "The women's record is 438,",
+     "start": 40.492,
+     "end": 42.322
+    },
+    {
+     "text": "set by a Malaysian player.",
+     "start": 42.322,
+     "end": 44.153
+    }
+   ]
+  },
+  "h1": {
+   "text": "Honest caveat: the five sixty-five came from a controlled test, not a match.",
+   "start": 45.27287499999999,
+   "end": 51.94691666666666,
+   "scene": "honest",
+   "cap": "Honest caveat: the 565 came from a controlled test, not a match.",
+   "chunks": [
+    {
+     "text": "Honest caveat: the 565 came from",
+     "start": 45.273,
+     "end": 48.663
+    },
+    {
+     "text": "a controlled test, not a match.",
+     "start": 48.663,
+     "end": 51.947
+    }
+   ]
+  },
+  "h2": {
+   "text": "In a real match, the record is four twenty-six.",
+   "start": 52.56691666666666,
+   "end": 56.132166666666656,
+   "scene": "honest",
+   "cap": "In a real match, the record is 426.",
+   "chunks": [
+    {
+     "text": "In a real match,",
+     "start": 52.567,
+     "end": 54.245
+    },
+    {
+     "text": "the record is 426.",
+     "start": 54.245,
+     "end": 56.132
+    }
+   ]
+  },
+  "t1": {
+   "text": "Tennis's fastest recorded serve is two sixty-three point four kilometers per hour.",
+   "start": 58.27287499999999,
+   "end": 63.477124999999994,
+   "scene": "tennis",
+   "cap": "Tennis's fastest recorded serve is 263.4 km/h.",
+   "chunks": [
+    {
+     "text": "Tennis's fastest recorded serve",
+     "start": 58.273,
+     "end": 61.858
+    },
+    {
+     "text": "is 263.4 km/h.",
+     "start": 61.858,
+     "end": 63.477
+    }
+   ]
+  },
+  "t2": {
+   "text": "It was recorded at a Challenger event, not a top-tier tour match.",
+   "start": 63.84712499999999,
+   "end": 67.77795833333333,
+   "scene": "tennis",
+   "cap": "It was recorded at a Challenger event, not a top-tier tour match.",
+   "chunks": [
+    {
+     "text": "It was recorded at a Challenger",
+     "start": 63.847,
+     "end": 65.751
+    },
+    {
+     "text": "event, not a top-tier tour match.",
+     "start": 65.751,
+     "end": 67.778
+    }
+   ]
+  },
+  "w1": {
+   "text": "A shuttle loses speed fast.",
+   "start": 70.57287499999998,
+   "end": 72.18812499999999,
+   "scene": "why",
+   "cap": "A shuttle loses speed fast.",
+   "chunks": [
+    {
+     "text": "A shuttle loses speed fast.",
+     "start": 70.573,
+     "end": 72.188
+    }
+   ]
+  },
+  "w2": {
+   "text": "A tennis ball doesn't lose it the same way.",
+   "start": 72.50812499999999,
+   "end": 74.77058333333332,
+   "scene": "why",
+   "cap": "A tennis ball doesn't lose it the same way.",
+   "chunks": [
+    {
+     "text": "A tennis ball doesn't lose",
+     "start": 72.508,
+     "end": 73.909
+    },
+    {
+     "text": "it the same way.",
+     "start": 73.909,
+     "end": 74.771
+    }
+   ]
+  },
+  "w3": {
+   "text": "That's why the numbers aren't directly comparable.",
+   "start": 75.09058333333333,
+   "end": 77.90666666666667,
+   "scene": "why",
+   "cap": "That's why the numbers aren't directly comparable.",
+   "chunks": [
+    {
+     "text": "That's why the numbers",
+     "start": 75.091,
+     "end": 76.355
+    },
+    {
+     "text": "aren't directly comparable.",
+     "start": 76.355,
+     "end": 77.907
+    }
+   ]
+  },
+  "z1": {
+   "text": "So which sport is faster?",
+   "start": 80.27287499999998,
+   "end": 82.04087499999999,
+   "scene": "close",
+   "cap": "So which sport is faster?",
+   "chunks": [
+    {
+     "text": "So which sport is faster?",
+     "start": 80.273,
+     "end": 82.041
+    }
+   ]
+  },
+  "z2": {
+   "text": "Tell me in the comments.",
+   "start": 82.41087499999999,
+   "end": 83.87412499999999,
+   "scene": "close",
+   "cap": "Tell me in the comments.",
+   "chunks": [
+    {
+     "text": "Tell me in the comments.",
+     "start": 82.411,
+     "end": 83.874
+    }
+   ]
+  }
+ },
+ "marks": {
+  "musicDrop": 3.5632083333333333,
+  "reveal565": 4.063208333333334,
+  "snap": 1.9,
+  "launch565": 5.847541666666666,
+  "shuttlePass": 9.524583333333332,
+  "revealF1": 9.574583333333333,
+  "g5": 14.592374999999999,
+  "gFeather": 16.43275,
+  "gBase": 17.93275,
+  "slowA": 25.342375,
+  "contact": 26.542375,
+  "slowB": 27.542375,
+  "rec": [
+   {
+    "slide": 32.989815,
+    "count": 33.789815
+   },
+   {
+    "slide": 37.40084782608695,
+    "count": 38.20084782608695
+   },
+   {
+    "slide": 40.491833333333325,
+    "count": 41.19396641791044
+   }
+  ],
+  "black": 44.57287499999999,
+  "stamp565": 44.82287499999999,
+  "tag": 45.32287499999999,
+  "split": 52.26691666666666,
+  "reveal426": 54.41846453900708,
+  "serve": 59.77287499999999,
+  "launch": 70.57287499999998,
+  "lbl1": 70.67287499999998,
+  "lbl2": 72.708125,
+  "comment": 80.27287499999998,
+  "hit": 85.05287499999997,
+  "lastDrop": 85.37287499999998
+ },
+ "order": [
+  "cold",
+  "f1",
+  "shuttle",
+  "smash",
+  "records",
+  "honest",
+  "tennis",
+  "why",
+  "close",
+  "endcard"
+ ],
+ "total": 88.17287499999998,
+ "events": [
+  {
+   "t": 0.25,
+   "type": "whoosh",
+   "gain": 0.55,
+   "dur": 0.6
+  },
+  {
+   "t": 1.9,
+   "type": "thud",
+   "gain": 0.5
+  },
+  {
+   "t": 1.9,
+   "type": "shake",
+   "amp": 0.05
+  },
+  {
+   "t": 4.063,
+   "type": "bass"
+  },
+  {
+   "t": 4.063,
+   "type": "punch"
+  },
+  {
+   "t": 4.063,
+   "type": "shake",
+   "amp": 0.07
+  },
+  {
+   "t": 4.063,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.133,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.203,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.273,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.343,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.413,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 4.483,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 5.848,
+   "type": "whoosh",
+   "gain": 0.8,
+   "dur": 0.7
+  },
+  {
+   "t": 7.168,
+   "type": "engine",
+   "dur": 2.8570416666666656
+  },
+  {
+   "t": 9.525,
+   "type": "whoosh",
+   "gain": 0.9,
+   "dur": 0.6
+  },
+  {
+   "t": 9.525,
+   "type": "punch"
+  },
+  {
+   "t": 9.525,
+   "type": "shake",
+   "amp": 0.05
+  },
+  {
+   "t": 9.575,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.645,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.715,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.785,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.855,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.925,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 9.995,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.592,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.592,
+   "type": "punch"
+  },
+  {
+   "t": 14.592,
+   "type": "thud",
+   "gain": 0.5
+  },
+  {
+   "t": 14.662,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.732,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.802,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.872,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 14.942,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 15.012,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 16.433,
+   "type": "tick",
+   "gain": 0.8
+  },
+  {
+   "t": 17.933,
+   "type": "tick",
+   "gain": 0.8
+  },
+  {
+   "t": 22.642,
+   "type": "thud",
+   "gain": 0.7
+  },
+  {
+   "t": 22.642,
+   "type": "whoosh",
+   "gain": 0.5,
+   "dur": 0.5
+  },
+  {
+   "t": 25.342,
+   "type": "whoosh",
+   "gain": 0.35,
+   "dur": 1.0
+  },
+  {
+   "t": 26.542,
+   "type": "crack"
+  },
+  {
+   "t": 26.542,
+   "type": "shake",
+   "amp": 0.12
+  },
+  {
+   "t": 26.562,
+   "type": "whoosh",
+   "gain": 0.9,
+   "dur": 0.7
+  },
+  {
+   "t": 26.642,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 26.712,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 26.782,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 26.852,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 26.922,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 26.992,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 27.062,
+   "type": "tick",
+   "gain": 0.45
+  },
+  {
+   "t": 31.242,
+   "type": "whoosh",
+   "gain": 0.6,
+   "dur": 0.8
+  },
+  {
+   "t": 32.99,
+   "type": "punch"
+  },
+  {
+   "t": 32.99,
+   "type": "whoosh",
+   "gain": 0.35,
+   "dur": 0.35
+  },
+  {
+   "t": 33.79,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 33.86,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 33.93,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 34.0,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 34.07,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 34.14,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 34.21,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 37.401,
+   "type": "punch"
+  },
+  {
+   "t": 37.401,
+   "type": "whoosh",
+   "gain": 0.35,
+   "dur": 0.35
+  },
+  {
+   "t": 38.201,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.271,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.341,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.411,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.481,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.551,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 38.621,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 40.492,
+   "type": "punch"
+  },
+  {
+   "t": 40.492,
+   "type": "whoosh",
+   "gain": 0.35,
+   "dur": 0.35
+  },
+  {
+   "t": 41.194,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.264,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.334,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.404,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.474,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.544,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 41.614,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 44.823,
+   "type": "thud",
+   "gain": 0.8
+  },
+  {
+   "t": 44.823,
+   "type": "punch"
+  },
+  {
+   "t": 45.323,
+   "type": "thud",
+   "gain": 0.7
+  },
+  {
+   "t": 45.323,
+   "type": "shake",
+   "amp": 0.05
+  },
+  {
+   "t": 52.267,
+   "type": "whoosh",
+   "gain": 0.5,
+   "dur": 0.5
+  },
+  {
+   "t": 54.418,
+   "type": "thud",
+   "gain": 0.7
+  },
+  {
+   "t": 54.418,
+   "type": "punch"
+  },
+  {
+   "t": 54.418,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.488,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.558,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.628,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.698,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.768,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 54.838,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 57.573,
+   "type": "sting"
+  },
+  {
+   "t": 57.573,
+   "type": "whoosh",
+   "gain": 0.6,
+   "dur": 0.6
+  },
+  {
+   "t": 59.773,
+   "type": "crack"
+  },
+  {
+   "t": 59.773,
+   "type": "shake",
+   "amp": 0.08
+  },
+  {
+   "t": 59.773,
+   "type": "punch"
+  },
+  {
+   "t": 59.783,
+   "type": "crack",
+   "gain": 0.8
+  },
+  {
+   "t": 59.793,
+   "type": "whoosh",
+   "gain": 0.9,
+   "dur": 0.6
+  },
+  {
+   "t": 59.823,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 59.893,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 59.963,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 60.033,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 60.103,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 60.173,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 60.243,
+   "type": "tick",
+   "gain": 0.5
+  },
+  {
+   "t": 70.573,
+   "type": "whoosh",
+   "gain": 0.5,
+   "dur": 0.7
+  },
+  {
+   "t": 70.673,
+   "type": "blip",
+   "f": 520
+  },
+  {
+   "t": 70.673,
+   "type": "punch"
+  },
+  {
+   "t": 72.708,
+   "type": "blip",
+   "f": 700
+  },
+  {
+   "t": 72.708,
+   "type": "punch"
+  },
+  {
+   "t": 80.273,
+   "type": "punch"
+  },
+  {
+   "t": 80.273,
+   "type": "blip",
+   "f": 880
+  },
+  {
+   "t": 85.053,
+   "type": "bass"
+  },
+  {
+   "t": 85.053,
+   "type": "thud",
+   "gain": 0.9
+  },
+  {
+   "t": 85.373,
+   "type": "whoosh",
+   "gain": 0.3,
+   "dur": 0.6
+  },
+  {
+   "t": 85.993,
+   "type": "tick",
+   "gain": 1.0
+  }
+ ]
+}

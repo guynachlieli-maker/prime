@@ -1,0 +1,38 @@
+<!doctype html>
+<html><head><meta charset="utf-8">
+<style>
+@font-face{font-family:'Oswald';font-weight:700;src:url('/node_modules/@fontsource/oswald/files/oswald-latin-700-normal.woff2') format('woff2');}
+@font-face{font-family:'Oswald';font-weight:500;src:url('/node_modules/@fontsource/oswald/files/oswald-latin-500-normal.woff2') format('woff2');}
+html,body{margin:0;background:#000;overflow:hidden}
+#stage{position:relative;width:1080px;height:1920px;overflow:hidden;background:#05081a}
+#gl{position:absolute;left:0;top:0;width:1080px;height:1920px;filter:contrast(1.10) saturate(1.14)}
+.layer{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+#grade1{background:linear-gradient(180deg,rgba(20,190,205,.55) 0%,rgba(20,190,205,0) 48%,rgba(255,110,20,.50) 100%);mix-blend-mode:soft-light}
+#grade2{background:radial-gradient(ellipse at 50% 46%,rgba(0,0,0,0) 48%,rgba(2,4,14,.62) 100%)}
+#dim{background:#02040d;opacity:0}
+#blk{background:#000;opacity:1}
+#svg{position:absolute;left:0;top:0}
+.t{position:absolute;left:0;top:0;font-family:'Oswald',sans-serif;font-weight:700;text-transform:uppercase;color:#fff;white-space:nowrap;line-height:1;
+   text-shadow:0 4px 22px rgba(0,0,0,.65);will-change:transform,opacity;opacity:0;letter-spacing:.015em}
+.t .u{font-size:.36em;margin-left:.18em;color:#ff7a1f;letter-spacing:.04em}
+.t .lb{display:block;font-size:.34em;color:#2fd3d0;letter-spacing:.12em;margin-bottom:.12em}
+.t.green .lb{color:#39ff14}.t.green .u{color:#39ff14}
+.t.org .lb{color:#ff8a2a}
+.tag{border:5px solid #ff6a13;color:#ff8a2a;padding:.18em .5em;border-radius:10px;background:rgba(10,14,34,.55)}
+#cap{font-weight:700;font-size:56px;color:#fff;background:rgba(4,7,22,.60);padding:14px 30px 12px;border-radius:16px;text-shadow:none;letter-spacing:.03em}
+.card{background:linear-gradient(90deg,rgba(255,106,19,.20),rgba(10,16,40,.70));border-left:8px solid #ff6a13;padding:14px 18px 12px 22px;border-radius:6px}
+.card.w{border-left-color:#2fd3d0;background:linear-gradient(90deg,rgba(47,211,208,.20),rgba(10,16,40,.70))}
+.co{font-size:40px;background:rgba(5,8,24,.72);padding:10px 20px 8px;border-radius:8px;border:3px solid #2fd3d0;letter-spacing:.08em}
+</style></head>
+<body><div id="stage">
+<canvas id="gl" width="1080" height="1920"></canvas>
+<div class="layer" id="dim"></div>
+<div class="layer" id="grade1"></div>
+<div class="layer" id="grade2"></div>
+<svg class="layer" id="svg" width="1080" height="1920" viewBox="0 0 1080 1920"></svg>
+<div class="layer" id="hud"></div>
+<div class="layer" id="blk"></div>
+</div>
+<script type="importmap">{"imports":{"three":"/node_modules/three/build/three.module.js"}}</script>
+<script type="module" src="/build/scene.js"></script>
+</body></html>

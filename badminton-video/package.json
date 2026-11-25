@@ -1,0 +1,1 @@
+{"name":"badminton-video","private":true,"version":"1.0.0","description":"Programmatic render of the fastest-sport explainer","dependencies":{"@fontsource/oswald":"^5.3.0","three":"^0.160.0"}}
